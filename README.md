@@ -97,7 +97,7 @@ Amazon verwendet nicht öffentlich stabil dokumentierte Web-Endpunkte. Nicht wie
 
 ### Danksagung (Credits)
 
-Ein großes Dankeschön geht an [PzocikErwin](https://github.com/PzocikErwin), der ganz zu Beginn herausgefunden hat, wie die versteckten Amazon-Schnittstellen funktionieren, und dieses Wissen mit der Community geteilt hat! Ohne seine Recherche wäre das Tool in dieser Form nicht möglich gewesen. Fair geht vor!
+Credits: [PzocikErwin](https://github.com/PzocikErwin) (Recherche der internen Amazon-Endpunkte)
 
 ### Hinweis
 
@@ -201,7 +201,7 @@ Amazon uses private web endpoints that are not publicly stable. Do not repeat ac
 
 ### Credits / Acknowledgments
 
-A huge thank you to [PzocikErwin](https://github.com/PzocikErwin), who initially researched how the hidden Amazon interfaces work and shared this knowledge with the community! Without his early groundwork, this tool wouldn't have been possible in its current form. Fair play!
+Credits: [PzocikErwin](https://github.com/PzocikErwin) (Research of internal Amazon endpoints)
 
 ### Notice
 
