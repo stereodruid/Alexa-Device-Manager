@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <style>
+    :root { color-scheme: dark; --bg:#101418; --panel:#171f29; --text:#f4f7fb; --muted:#a8b6c7; --accent:#0b76d1; --line:#344154; }
+    * { box-sizing:border-box; }
+    body { width: 330px; margin:0; background:var(--bg); color:var(--text); font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif; }
+    main { padding:16px; display:grid; gap:14px; }
+    h1 { font-size:18px; margin:0; }
+    p { margin:0; color:var(--muted); line-height:1.45; font-size:13px; }
+    button { width:100%; border:1px solid #2793ef; border-radius:14px; background:var(--accent); color:var(--text); padding:13px 14px; font-weight:800; cursor:pointer; font-size:15px; }
+    button:hover { background:#1688e6; }
+    .status { white-space:pre-wrap; font-family: ui-monospace, Consolas, monospace; font-size:12px; color:#c9d7e8; min-height:18px; }
+  </style>
+</head>
+<body>
+  <main>
+    <div>
+      <h1>Alexa Device Manager</h1>
+      <p>Ein Klick öffnet die Alexa-Geräteliste und startet den Manager automatisch.</p>
+    </div>
+    <button id="open">Manager öffnen</button>
+    <div id="status" class="status">Bereit.</div>
+  </main>
+  <script src="popup.js"></script>
+</body>
+</html>

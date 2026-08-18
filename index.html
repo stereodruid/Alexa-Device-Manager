@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Alexa Device Manager - Launcher</title>
+  <style>
+    :root { color-scheme: dark; --bg:#0e1217; --panel:#151c24; --text:#f3f7fb; --muted:#9caabd; --accent:#0b76d1; --line:#2f3a48; --danger:#b73340; }
+    * { box-sizing: border-box; }
+    body { margin:0; min-height:100vh; background: radial-gradient(circle at top left,#1e3246,#0e1217 42%); color:var(--text); font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif; }
+    main { max-width: 1050px; margin: 0 auto; padding: 42px 22px; }
+    h1 { margin:0 0 8px; font-size: clamp(30px, 5vw, 58px); letter-spacing:-.04em; }
+    p { color:var(--muted); line-height:1.55; }
+    .grid { display:grid; grid-template-columns: 1fr 1fr; gap:18px; margin-top:24px; }
+    .card { background:rgba(21,28,36,.86); border:1px solid var(--line); border-radius:22px; padding:20px; box-shadow: 0 20px 70px rgba(0,0,0,.25); }
+    .wide { grid-column: 1 / -1; }
+    button, a.button { display:inline-flex; align-items:center; justify-content:center; gap:8px; background:var(--accent); color:white; border:0; border-radius:12px; padding:12px 14px; font-weight:750; cursor:pointer; text-decoration:none; }
+    button.secondary { background:#263244; }
+    textarea { width:100%; min-height:340px; resize:vertical; background:#080c11; color:#d8e8ff; border:1px solid var(--line); border-radius:14px; padding:14px; font-family: ui-monospace, Consolas, monospace; font-size:12px; }
+    code { background:#0a0f15; padding:2px 6px; border-radius:7px; color:#d8e8ff; }
+    ol { color:#dce7f4; line-height:1.7; }
+    .danger { color:#ff9ca7; }
+    @media (max-width:800px) { .grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Alexa Device Manager</h1>
+  <p>Lokales Werkzeug zum Anzeigen, Filtern, Sichern und kontrollierten Löschen von Alexa-Smart-Home-Geräten. Es läuft direkt in deiner Amazon/Alexa-Browser-Session.</p>
+  <div class="grid">
+    <section class="card">
+      <h2>Start</h2>
+      <ol>
+        <li>Öffne <a href="https://alexa.amazon.de/api/behaviors/entities?skillId=amzn1.ask.1p.smarthome" target="_blank">alexa.amazon.de Geräte-JSON</a>.</li>
+        <li>Dort <code>F12</code> drücken und zur <code>Console</code> wechseln.</li>
+        <li>Unten den kompletten Code kopieren und in die Console einfügen.</li>
+        <li>Das Overlay lädt die Geräte automatisch.</li>
+      </ol>
+      <button onclick="copyCode()">Code kopieren</button>
+      <a class="button secondary" href="https://alexa.amazon.de/api/behaviors/entities?skillId=amzn1.ask.1p.smarthome" target="_blank">Alexa-API öffnen</a>
+    </section>
+    <section class="card">
+      <h2>Sicherheitslogik</h2>
+      <p>Standardmäßig geschützt:</p>
+      <ul>
+        <li>Echo-/Amazon-Geräte</li>
+        <li>Gruppen</li>
+      </ul>
+      <p class="danger">Löschen ist dauerhaft. Vorher immer JSON sichern.</p>
+    </section>
+    <section class="card wide">
+      <h2>Console-Code</h2>
+      <textarea id="code" spellcheck="false">(() =&gt; {
+  &#39;use strict&#39;;
+
+  const APP_ID = &#39;codex-alexa-device-manager&#39;;
+  const API_LIST = &#39;/api/behaviors/entities?skillId=amzn1.ask.1p.smarthome&#39;;
+  const API_DELETE = id =&gt; `/api/phoenix/appliance/${encodeURIComponent(id)}`;
+
+  const existing = document.getElementById(APP_ID);
+  if (existing) existing.remove();
+
+  const state = {
+    devices: [],
+    filtered: [],
+    selected: new Set(),
+    groups: [],
+    lastDeleted: [],
+    running: false,
+  };
+
+  const css = `
+    #${APP_ID} { position: fixed; inset: 20px; z-index: 2147483647; background: #101418; color: #f4f7fb; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif; border: 1px solid #39424e; box-shadow: 0 18px 80px rgba(0,0,0,.55); border-radius: 18px; overflow: hidden; display: grid; grid-template-rows: auto auto 1fr auto; }
+    #${APP_ID} * { box-sizing: border-box; }
+    #${APP_ID} .adm-header { display:flex; align-items:center; justify-content:space-between; gap: 16px; padding: 14px 18px; background: linear-gradient(135deg, #18202a, #101418); border-bottom: 1px solid #303946; }
+    #${APP_ID} .adm-title { font-size: 18px; font-weight: 750; letter-spacing: .2px; }
+    #${APP_ID} .adm-sub { color:#9fb0c2; font-size: 12px; margin-top: 2px; }
+    #${APP_ID} .adm-actions, #${APP_ID} .adm-controls { display:flex; gap: 8px; flex-wrap: wrap; align-items:center; }
+    #${APP_ID} button { background:#253142; color:#f4f7fb; border:1px solid #42506a; border-radius: 10px; padding: 8px 10px; cursor:pointer; font-weight: 650; }
+    #${APP_ID} button:hover { background:#314057; }
+    #${APP_ID} button.adm-primary { background:#0b76d1; border-color:#2793ef; }
+    #${APP_ID} button.adm-danger { background:#85222a; border-color:#c23a45; }
+    #${APP_ID} button:disabled { opacity:.45; cursor:not-allowed; }
+    #${APP_ID} input, #${APP_ID} select { background:#0b0f14; color:#f4f7fb; border:1px solid #3a4656; border-radius: 10px; padding: 8px 10px; }
+    #${APP_ID} label { display:flex; gap: 7px; align-items:center; color:#c6d2de; font-size: 13px; }
+    #${APP_ID} input[type=checkbox] { width: 16px; height: 16px; }
+    #${APP_ID} .adm-panel { padding: 12px 18px; border-bottom:1px solid #303946; background:#141a21; display:grid; gap:10px; }
+    #${APP_ID} .adm-stats { display:flex; gap: 10px; flex-wrap:wrap; }
+    #${APP_ID} .adm-stat { background:#0c1117; border:1px solid #2f3947; padding:8px 10px; border-radius:12px; min-width:110px; }
+    #${APP_ID} .adm-stat b { display:block; font-size:17px; }
+    #${APP_ID} .adm-stat span { color:#99a8b8; font-size:12px; }
+    #${APP_ID} .adm-body { overflow:auto; }
+    #${APP_ID} table { width:100%; border-collapse: collapse; font-size: 13px; }
+    #${APP_ID} th { position:sticky; top:0; background:#18202a; z-index:1; text-align:left; color:#b8c7d8; border-bottom:1px solid #334052; padding:9px 8px; }
+    #${APP_ID} td { padding:8px; border-bottom:1px solid #222b37; vertical-align:top; }
+    #${APP_ID} tr:hover td { background:#151d27; }
+    #${APP_ID} .adm-muted { color:#8fa0b2; }
+    #${APP_ID} .adm-pill { display:inline-block; padding:2px 7px; border-radius:999px; background:#263244; color:#c7d6e8; font-size:11px; margin:1px 4px 1px 0; }
+    #${APP_ID} .adm-pill.warn { background:#48351a; color:#ffd48c; }
+    #${APP_ID} .adm-pill.bad { background:#4a1e27; color:#ff9da9; }
+    #${APP_ID} .adm-footer { display:grid; grid-template-columns: 1fr auto; gap:12px; padding:12px 18px; border-top:1px solid #303946; background:#111820; align-items:center; }
+    #${APP_ID} .adm-log { white-space:pre-wrap; max-height:110px; overflow:auto; color:#b7c5d6; font-family: ui-monospace, Consolas, monospace; font-size:12px; background:#090d12; border:1px solid #263141; border-radius:10px; padding:8px; }
+    #${APP_ID} .adm-close { font-size:18px; padding:5px 10px; }
+    #${APP_ID} .adm-small { width: 92px; }
+  `;
+
+  const root = document.createElement(&#39;div&#39;);
+  root.id = APP_ID;
+  root.innerHTML = `
+    &lt;style&gt;${css}&lt;/style&gt;
+    &lt;div class=&quot;adm-header&quot;&gt;
+      &lt;div&gt;
+        &lt;div class=&quot;adm-title&quot;&gt;Alexa Device Manager&lt;/div&gt;
+        &lt;div class=&quot;adm-sub&quot;&gt;L&#228;uft lokal in deiner eingeloggten Amazon-Session. Kein Upload, keine externen Dienste.&lt;/div&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;adm-actions&quot;&gt;
+        &lt;button id=&quot;admReload&quot; class=&quot;adm-primary&quot;&gt;Ger&#228;te laden&lt;/button&gt;
+        &lt;button id=&quot;admExportJson&quot;&gt;JSON sichern&lt;/button&gt;
+        &lt;button id=&quot;admExportCsv&quot;&gt;CSV sichern&lt;/button&gt;
+        &lt;button id=&quot;admClose&quot; class=&quot;adm-close&quot;&gt;&#215;&lt;/button&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;adm-panel&quot;&gt;
+      &lt;div class=&quot;adm-stats&quot; id=&quot;admStats&quot;&gt;&lt;/div&gt;
+      &lt;div class=&quot;adm-controls&quot;&gt;
+        &lt;input id=&quot;admSearch&quot; placeholder=&quot;Suchen: Name, Beschreibung, Typ...&quot; style=&quot;min-width:320px; flex:1&quot; /&gt;
+        &lt;select id=&quot;admGroup&quot;&gt;&lt;option value=&quot;&quot;&gt;Gruppe w&#228;hlen&lt;/option&gt;&lt;/select&gt;
+        &lt;select id=&quot;admType&quot;&gt;&lt;option value=&quot;&quot;&gt;Alle Typen&lt;/option&gt;&lt;/select&gt;
+        &lt;label&gt;&lt;input id=&quot;admOnlyHA&quot; type=&quot;checkbox&quot;&gt; nur Home Assistant&lt;/label&gt;
+        &lt;label&gt;&lt;input id=&quot;admHideProtected&quot; type=&quot;checkbox&quot; checked&gt; gesch&#252;tzte ausblenden&lt;/label&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;adm-controls&quot;&gt;
+        &lt;button id=&quot;admSelectVisible&quot;&gt;Sichtbare ausw&#228;hlen&lt;/button&gt;
+        &lt;button id=&quot;admSelectGroup&quot;&gt;Gruppenmitglieder ausw&#228;hlen&lt;/button&gt;
+        &lt;button id=&quot;admSelectHA&quot;&gt;HA-Ger&#228;te ausw&#228;hlen&lt;/button&gt;
+        &lt;button id=&quot;admClear&quot;&gt;Auswahl leeren&lt;/button&gt;
+        &lt;label&gt;&lt;input id=&quot;admIncludeGroups&quot; type=&quot;checkbox&quot;&gt; Gruppen l&#246;schbar machen&lt;/label&gt;
+        &lt;label&gt;&lt;input id=&quot;admIncludeEcho&quot; type=&quot;checkbox&quot;&gt; Echo/Amazon-Ger&#228;te l&#246;schbar machen&lt;/label&gt;
+        &lt;label&gt;Pause ms &lt;input id=&quot;admDelay&quot; class=&quot;adm-small&quot; type=&quot;number&quot; min=&quot;100&quot; step=&quot;50&quot; value=&quot;300&quot;&gt;&lt;/label&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;adm-body&quot;&gt;
+      &lt;table&gt;
+        &lt;thead&gt;&lt;tr&gt;&lt;th style=&quot;width:38px&quot;&gt;&lt;/th&gt;&lt;th&gt;Name&lt;/th&gt;&lt;th&gt;Beschreibung&lt;/th&gt;&lt;th&gt;Typ&lt;/th&gt;&lt;th&gt;Status&lt;/th&gt;&lt;th&gt;ID&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;
+        &lt;tbody id=&quot;admRows&quot;&gt;&lt;tr&gt;&lt;td colspan=&quot;6&quot; class=&quot;adm-muted&quot;&gt;Noch keine Ger&#228;te geladen.&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;
+      &lt;/table&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;adm-footer&quot;&gt;
+      &lt;div class=&quot;adm-log&quot; id=&quot;admLog&quot;&gt;Bereit. Erst Ger&#228;te laden, dann filtern/ausw&#228;hlen. L&#246;schen ist dauerhaft.&lt;/div&gt;
+      &lt;div class=&quot;adm-actions&quot;&gt;
+        &lt;button id=&quot;admDryRun&quot;&gt;Trockenlauf&lt;/button&gt;
+        &lt;button id=&quot;admDelete&quot; class=&quot;adm-danger&quot;&gt;Auswahl l&#246;schen&lt;/button&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  `;
+  document.body.appendChild(root);
+
+  const $ = id =&gt; root.querySelector(`#${id}`);
+  const rows = $(&#39;admRows&#39;);
+  const logBox = $(&#39;admLog&#39;);
+
+  function log(msg) {
+    const stamp = new Date().toLocaleTimeString();
+    logBox.textContent += `\n[${stamp}] ${msg}`;
+    logBox.scrollTop = logBox.scrollHeight;
+  }
+
+  function isHA(d) { return String(d.description || &#39;&#39;).includes(&#39;via Home Assistant&#39;); }
+  function isGroup(d) { return d.providerData?.categoryType === &#39;GROUP&#39;; }
+  function isEcho(d) { return d.providerData?.deviceType === &#39;ALEXA_VOICE_ENABLED&#39; || String(d.description || &#39;&#39;).includes(&#39;Amazon intelligentes Ger&#228;t&#39;) || String(d.description || &#39;&#39;).includes(&#39;Amazon intelligentes Ger&#39;); }
+  function isProtected(d) { return (isGroup(d) &amp;&amp; !$(&#39;admIncludeGroups&#39;).checked) || (isEcho(d) &amp;&amp; !$(&#39;admIncludeEcho&#39;).checked); }
+  function deviceType(d) { return d.providerData?.deviceType || d.icon?.value || &#39;&#39;; }
+  function category(d) { return d.providerData?.categoryType || &#39;&#39;; }
+  function groups() { return state.devices.filter(isGroup); }
+  function activeGroupMembers() {
+    const groupId = $(&#39;admGroup&#39;).value;
+    const group = state.devices.find(d =&gt; d.id === groupId);
+    return new Set(group?.providerData?.groupMembers || []);
+  }
+
+  function download(name, content, type) {
+    const blob = new Blob([content], { type });
+    const a = document.createElement(&#39;a&#39;);
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    a.click();
+    setTimeout(() =&gt; URL.revokeObjectURL(a.href), 5000);
+  }
+
+  function csvEscape(v) {
+    return `&quot;${String(v ?? &#39;&#39;).replaceAll(&#39;&quot;&#39;, &#39;&quot;&quot;&#39;)}&quot;`;
+  }
+
+  function renderStats() {
+    const total = state.devices.length;
+    const ha = state.devices.filter(isHA).length;
+    const groupCount = state.devices.filter(isGroup).length;
+    const echo = state.devices.filter(isEcho).length;
+    const selected = state.selected.size;
+    $(&#39;admStats&#39;).innerHTML = [
+      [&#39;Gesamt&#39;, total], [&#39;Home Assistant&#39;, ha], [&#39;Gruppen&#39;, groupCount], [&#39;Echo/Amazon&#39;, echo], [&#39;Ausgew&#228;hlt&#39;, selected], [&#39;Sichtbar&#39;, state.filtered.length]
+    ].map(([label, value]) =&gt; `&lt;div class=&quot;adm-stat&quot;&gt;&lt;b&gt;${value}&lt;/b&gt;&lt;span&gt;${label}&lt;/span&gt;&lt;/div&gt;`).join(&#39;&#39;);
+  }
+
+  function fillFilters() {
+    const groupSelect = $(&#39;admGroup&#39;);
+    const prevGroup = groupSelect.value;
+    groupSelect.innerHTML = &#39;&lt;option value=&quot;&quot;&gt;Gruppe w&#228;hlen&lt;/option&gt;&#39; + groups().map(g =&gt; `&lt;option value=&quot;${g.id}&quot;&gt;${escapeHtml(g.displayName)} (${g.providerData?.groupMembers?.length || 0})&lt;/option&gt;`).join(&#39;&#39;);
+    if ([...groupSelect.options].some(o =&gt; o.value === prevGroup)) groupSelect.value = prevGroup;
+
+    const types = [...new Set(state.devices.map(deviceType).filter(Boolean))].sort();
+    const typeSelect = $(&#39;admType&#39;);
+    const prevType = typeSelect.value;
+    typeSelect.innerHTML = &#39;&lt;option value=&quot;&quot;&gt;Alle Typen&lt;/option&gt;&#39; + types.map(t =&gt; `&lt;option value=&quot;${escapeHtml(t)}&quot;&gt;${escapeHtml(t)}&lt;/option&gt;`).join(&#39;&#39;);
+    if (types.includes(prevType)) typeSelect.value = prevType;
+  }
+
+  function escapeHtml(s) {
+    return String(s ?? &#39;&#39;).replace(/[&amp;&lt;&gt;&quot;]/g, c =&gt; ({&#39;&amp;&#39;:&#39;&amp;amp;&#39;,&#39;&lt;&#39;:&#39;&amp;lt;&#39;,&#39;&gt;&#39;:&#39;&amp;gt;&#39;,&#39;&quot;&#39;:&#39;&amp;quot;&#39;}[c]));
+  }
+
+  function applyFilter() {
+    const q = $(&#39;admSearch&#39;).value.trim().toLowerCase();
+    const type = $(&#39;admType&#39;).value;
+    const members = activeGroupMembers();
+    const groupMode = $(&#39;admGroup&#39;).value;
+    state.filtered = state.devices.filter(d =&gt; {
+      if ($(&#39;admOnlyHA&#39;).checked &amp;&amp; !isHA(d)) return false;
+      if ($(&#39;admHideProtected&#39;).checked &amp;&amp; isProtected(d)) return false;
+      if (type &amp;&amp; deviceType(d) !== type) return false;
+      if (groupMode &amp;&amp; !members.has(d.id) &amp;&amp; d.id !== groupMode) return false;
+      if (q) {
+        const hay = `${d.displayName || &#39;&#39;} ${d.description || &#39;&#39;} ${deviceType(d)} ${category(d)} ${d.id || &#39;&#39;}`.toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    });
+    renderTable();
+    renderStats();
+  }
+
+  function renderTable() {
+    if (!state.filtered.length) {
+      rows.innerHTML = &#39;&lt;tr&gt;&lt;td colspan=&quot;6&quot; class=&quot;adm-muted&quot;&gt;Keine passenden Ger&#228;te.&lt;/td&gt;&lt;/tr&gt;&#39;;
+      return;
+    }
+    rows.innerHTML = state.filtered.map(d =&gt; {
+      const protectedNow = isProtected(d);
+      const checked = state.selected.has(d.id) ? &#39;checked&#39; : &#39;&#39;;
+      const disabled = protectedNow ? &#39;disabled&#39; : &#39;&#39;;
+      const pills = [category(d), deviceType(d)].filter(Boolean).map(x =&gt; `&lt;span class=&quot;adm-pill&quot;&gt;${escapeHtml(x)}&lt;/span&gt;`).join(&#39;&#39;);
+      const flags = [isHA(d) ? &#39;&lt;span class=&quot;adm-pill&quot;&gt;HA&lt;/span&gt;&#39; : &#39;&#39;, isGroup(d) ? &#39;&lt;span class=&quot;adm-pill warn&quot;&gt;GRUPPE&lt;/span&gt;&#39; : &#39;&#39;, isEcho(d) ? &#39;&lt;span class=&quot;adm-pill warn&quot;&gt;ECHO&lt;/span&gt;&#39; : &#39;&#39;, protectedNow ? &#39;&lt;span class=&quot;adm-pill bad&quot;&gt;GESCH&#220;TZT&lt;/span&gt;&#39; : &#39;&#39;].join(&#39;&#39;);
+      return `&lt;tr&gt;
+        &lt;td&gt;&lt;input class=&quot;adm-rowcheck&quot; data-id=&quot;${d.id}&quot; type=&quot;checkbox&quot; ${checked} ${disabled}&gt;&lt;/td&gt;
+        &lt;td&gt;&lt;b&gt;${escapeHtml(d.displayName)}&lt;/b&gt;&lt;div&gt;${flags}&lt;/div&gt;&lt;/td&gt;
+        &lt;td&gt;${escapeHtml(d.description)}&lt;/td&gt;
+        &lt;td&gt;${pills}&lt;/td&gt;
+        &lt;td&gt;${escapeHtml(d.availability || &#39;&#39;)}&lt;br&gt;&lt;span class=&quot;adm-muted&quot;&gt;enabled: ${escapeHtml(d.providerData?.enabled)}&lt;/span&gt;&lt;/td&gt;
+        &lt;td class=&quot;adm-muted&quot;&gt;${escapeHtml(d.id)}&lt;/td&gt;
+      &lt;/tr&gt;`;
+    }).join(&#39;&#39;);
+    rows.querySelectorAll(&#39;.adm-rowcheck&#39;).forEach(cb =&gt; cb.addEventListener(&#39;change&#39;, e =&gt; {
+      const id = e.target.dataset.id;
+      if (e.target.checked) state.selected.add(id); else state.selected.delete(id);
+      renderStats();
+    }));
+  }
+
+  async function loadDevices() {
+    state.selected.clear();
+    log(&#39;Lade Ger&#228;te von Alexa...&#39;);
+    const res = await fetch(API_LIST, { headers: { Accept: &#39;application/json&#39; }});
+    const text = await res.text();
+    if (!res.ok) throw new Error(`Liste fehlgeschlagen: ${res.status} ${res.statusText} ${text.slice(0, 300)}`);
+    let data;
+    try { data = JSON.parse(text); } catch (e) { throw new Error(`Antwort ist kein JSON: ${text.slice(0, 300)}`); }
+    if (!Array.isArray(data)) throw new Error(&#39;Alexa-Antwort ist kein Array. Endpoint/Region pr&#252;fen.&#39;);
+    state.devices = data;
+    fillFilters();
+    applyFilter();
+    log(`Geladen: ${data.length} Ger&#228;te, ${data.filter(isHA).length} davon Home Assistant.`);
+  }
+
+  function selectedDevices() {
+    return state.devices.filter(d =&gt; state.selected.has(d.id));
+  }
+
+  function selectWhere(fn) {
+    for (const d of state.devices) {
+      if (fn(d) &amp;&amp; !isProtected(d)) state.selected.add(d.id);
+    }
+    applyFilter();
+  }
+
+  function dryRun() {
+    const list = selectedDevices();
+    console.table(list.map(d =&gt; ({ name: d.displayName, description: d.description, type: deviceType(d), id: d.id })));
+    log(`Trockenlauf: ${list.length} Ger&#228;te ausgew&#228;hlt. Tabelle steht in der Browser-Konsole.`);
+  }
+
+  async function deleteSelected() {
+    if (state.running) return;
+    const list = selectedDevices().filter(d =&gt; !isProtected(d));
+    if (!list.length) { log(&#39;Keine l&#246;schbaren Ger&#228;te ausgew&#228;hlt.&#39;); return; }
+    const names = list.slice(0, 8).map(d =&gt; d.displayName).join(&#39;, &#39;) + (list.length &gt; 8 ? ` ... +${list.length - 8}` : &#39;&#39;);
+    const ok = confirm(`Dauerhaft aus Alexa l&#246;schen?\n\n${list.length} Ger&#228;te\n${names}\n\nVorher JSON sichern, falls noch nicht geschehen.`);
+    if (!ok) return;
+    const typed = prompt(&#39;Zur Best&#228;tigung DELETE eingeben:&#39;);
+    if (typed !== &#39;DELETE&#39;) { log(&#39;Abgebrochen: Best&#228;tigung fehlt.&#39;); return; }
+
+    state.running = true;
+    $(&#39;admDelete&#39;).disabled = true;
+    state.lastDeleted = [];
+    const delay = Math.max(100, Number($(&#39;admDelay&#39;).value || 300));
+    log(`Starte L&#246;schung von ${list.length} Ger&#228;ten mit ${delay} ms Pause...`);
+    for (const d of list) {
+      try {
+        const res = await fetch(API_DELETE(d.id), { method: &#39;DELETE&#39;, headers: { Accept: &#39;application/json&#39;, &#39;Content-Type&#39;: &#39;application/json&#39; }});
+        const body = await res.text().catch(() =&gt; &#39;&#39;);
+        log(`${res.status} ${res.statusText} - ${d.displayName}`);
+        state.lastDeleted.push({ id: d.id, name: d.displayName, status: res.status, statusText: res.statusText, body: body.slice(0, 500) });
+      } catch (e) {
+        log(`FEHLER - ${d.displayName}: ${e.message}`);
+        state.lastDeleted.push({ id: d.id, name: d.displayName, error: e.message });
+      }
+      await new Promise(resolve =&gt; setTimeout(resolve, delay));
+    }
+    state.running = false;
+    $(&#39;admDelete&#39;).disabled = false;
+    log(&#39;L&#246;schlauf fertig. Lade Ger&#228;te neu zur Kontrolle...&#39;);
+    await loadDevices().catch(e =&gt; log(`Reload-Fehler: ${e.message}`));
+  }
+
+  $(&#39;admReload&#39;).addEventListener(&#39;click&#39;, () =&gt; loadDevices().catch(e =&gt; log(`FEHLER: ${e.message}`)));
+  $(&#39;admClose&#39;).addEventListener(&#39;click&#39;, () =&gt; root.remove());
+  [&#39;admSearch&#39;,&#39;admGroup&#39;,&#39;admType&#39;,&#39;admOnlyHA&#39;,&#39;admHideProtected&#39;,&#39;admIncludeGroups&#39;,&#39;admIncludeEcho&#39;].forEach(id =&gt; $(id).addEventListener(&#39;input&#39;, applyFilter));
+  $(&#39;admSelectVisible&#39;).addEventListener(&#39;click&#39;, () =&gt; selectWhere(d =&gt; state.filtered.includes(d)));
+  $(&#39;admSelectGroup&#39;).addEventListener(&#39;click&#39;, () =&gt; { const m = activeGroupMembers(); selectWhere(d =&gt; m.has(d.id)); });
+  $(&#39;admSelectHA&#39;).addEventListener(&#39;click&#39;, () =&gt; selectWhere(isHA));
+  $(&#39;admClear&#39;).addEventListener(&#39;click&#39;, () =&gt; { state.selected.clear(); applyFilter(); });
+  $(&#39;admDryRun&#39;).addEventListener(&#39;click&#39;, dryRun);
+  $(&#39;admDelete&#39;).addEventListener(&#39;click&#39;, () =&gt; deleteSelected().catch(e =&gt; log(`FEHLER: ${e.message}`)));
+  $(&#39;admExportJson&#39;).addEventListener(&#39;click&#39;, () =&gt; download(`alexa-devices-${new Date().toISOString().replace(/[:.]/g,&#39;-&#39;)}.json`, JSON.stringify(state.devices, null, 2), &#39;application/json&#39;));
+  $(&#39;admExportCsv&#39;).addEventListener(&#39;click&#39;, () =&gt; {
+    const header = [&#39;id&#39;,&#39;displayName&#39;,&#39;description&#39;,&#39;categoryType&#39;,&#39;deviceType&#39;,&#39;availability&#39;,&#39;enabled&#39;];
+    const lines = [header.join(&#39;,&#39;)].concat(state.devices.map(d =&gt; [d.id,d.displayName,d.description,category(d),deviceType(d),d.availability,d.providerData?.enabled].map(csvEscape).join(&#39;,&#39;)));
+    download(`alexa-devices-${new Date().toISOString().replace(/[:.]/g,&#39;-&#39;)}.csv`, lines.join(&#39;\n&#39;), &#39;text/csv&#39;);
+  });
+
+  loadDevices().catch(e =&gt; log(`FEHLER: ${e.message}`));
+})();
+</textarea>
+    </section>
+  </div>
+</main>
+<script>
+function copyCode() {
+  const el = document.getElementById('code');
+  el.select();
+  document.execCommand('copy');
+  alert('Code kopiert. Jetzt in der Amazon/Alexa-Console einfügen.');
+}
+</script>
+</body>
+</html>

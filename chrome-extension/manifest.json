@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "Alexa Device Manager",
+  "version": "0.4.0",
+  "description": "Lokaler Manager fuer Alexa Smart-Home-Geraete mit Backup, Filtern und kontrolliertem Loeschen.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "tabs"
+  ],
+  "host_permissions": [
+    "https://alexa.amazon.de/*",
+    "https://alexa.amazon.com/*",
+    "https://pitangui.amazon.com/*",
+    "https://layla.amazon.com/*",
+    "https://alexa.amazon.co.jp/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Alexa Device Manager",
+    "default_popup": "popup.html"
+  }
+}
