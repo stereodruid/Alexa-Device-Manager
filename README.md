@@ -1,6 +1,6 @@
 # Alexa Device Manager
 
-[![Buy Me A Coffee](https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png)](https://www.buymeacoffee.com/DEIN_NAME)
+[![Buy Me A Coffee](https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png)](https://www.buymeacoffee.com/stereodruid)
 
 *🇬🇧 [English version below](#english-version)*
 

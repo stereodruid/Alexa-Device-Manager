@@ -141,7 +141,7 @@
         <div class="adm-sub" data-i18n="subtitle">Laeuft lokal in deiner eingeloggten Amazon-Session. Kein Upload, keine externen Dienste.</div>
       </div>
       <div class="adm-actions">
-        <a href="https://www.buymeacoffee.com/DEIN_NAME" target="_blank" style="text-decoration:none; background:#FFDD00; color:#000000; border-radius:10px; padding:8px 10px; font-weight:650; font-size:13px; margin-right:8px;">☕ Donate</a>
+        <a href="https://www.buymeacoffee.com/stereodruid" target="_blank" style="text-decoration:none; background:#FFDD00; color:#000000; border-radius:10px; padding:8px 10px; font-weight:650; font-size:13px; margin-right:8px;">☕ Donate</a>
         <select id="admLanguage" aria-label="Sprache / Language"><option value="de">Deutsch</option><option value="en">English</option></select>
         <button id="admReload" class="adm-primary" data-i18n="load">Geraete laden</button>
         <button id="admExportJson" data-i18n="exportJson">JSON sichern</button>
