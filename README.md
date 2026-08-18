@@ -1,4 +1,4 @@
-# Alexa Device Manager
+## Alexa Device Manager
 
 <p>
   <a href="https://www.buymeacoffee.com/stereodruid">
@@ -10,13 +10,13 @@
 
 *🇬🇧 [English version below](#english-version)*
 
-## 🇩🇪 Deutsch
+### 🇩🇪 Deutsch
 
 Lokaler, zweisprachiger Chrome-Manager für Alexa-Smart-Home-Geräte. Er arbeitet ausschließlich in der bereits angemeldeten Amazon-Sitzung im Browser. Es gibt keinen eigenen Server, keinen Upload und keine gespeicherten Zugangsdaten.
 
 ![Preview of the Alexa Device Manager](preview.png)
 
-### Installation
+#### Installation
 
 📥 **[Hier die aktuellste AlexaDeviceManager.zip herunterladen](https://github.com/stereodruid/Alexa-Device-Manager/releases/latest/download/AlexaDeviceManager.zip)** (oder auf der [Releases-Seite](https://github.com/stereodruid/Alexa-Device-Manager/releases) prüfen).
 
@@ -29,11 +29,11 @@ Lokaler, zweisprachiger Chrome-Manager für Alexa-Smart-Home-Geräte. Er arbeite
 
 Der Manager öffnet die normale Alexa-Webseite und blendet seine Bedienoberfläche darüber ein. F12, Copy/Paste und die rohe JSON-Ansicht sind nicht erforderlich.
 
-### Sprache
+#### Sprache
 
 Oben rechts im Manager befindet sich die Auswahl `Deutsch` / `English`. Die Wahl wird lokal im Browser für den nächsten Start gespeichert. Die Sprache ändert nur Texte und Dialoge, niemals die ausgewählten Geräte oder Alexa-Daten.
 
-### Sicherer Ablauf
+#### Sicherer Ablauf
 
 1. `Geräte laden` drücken.
 2. Sofort `JSON sichern` verwenden. Diese Datei ist die lokale Sicherung der sichtbaren Liste.
@@ -70,13 +70,13 @@ Die Quellenklassifikation ist eine Bedienhilfe. Alexa liefert kein verlässliche
 - Kann durch eine Hersteller-, ioBroker-, Homey- oder Home-Assistant-Integration erneut erscheinen, wenn diese Quelle das Gerät wieder meldet.
 - Erfordert die explizite Eingabe von `DELETE`.
 
-### Schutzregeln
+#### Schutzregeln
 
 Gruppen sowie Echo-/Amazon-Geräte sind standardmäßig geschützt. Die beiden Schutzschalter im Manager müssen bewusst aktiviert werden, bevor solche Einträge bearbeitbar sind.
 
 Geräte ohne verknüpfte moderne Alexa-Endpunkt-ID werden ebenfalls gesperrt. Das verhindert, dass ein falscher Identifier für eine Änderung verwendet wird.
 
-### Fehlerbehebung
+#### Fehlerbehebung
 
 **Der Manager zeigt nur JSON oder startet nicht**
 1. In `chrome://extensions/` die Erweiterung mit dem Neu-laden-Symbol aktualisieren.
@@ -97,7 +97,6 @@ Amazon verwendet nicht öffentlich stabil dokumentierte Web-Endpunkte. Nicht wie
 | `chrome-extension/` | Installierbare Chrome-Erweiterung |
 | `chrome-extension/content.js` | Interface, Übersetzung und Alexa-API-Aufrufe |
 | `chrome-extension/background.js` | Öffnet Alexa und injiziert den Manager |
-| `AGENTS.md` | Technische Übergabe für weitere KI-Agenten |
 
 ### Danksagung (Credits)
 
@@ -205,7 +204,6 @@ Amazon uses private web endpoints that are not publicly stable. Do not repeat ac
 | `chrome-extension/` | Installable Chrome extension |
 | `chrome-extension/content.js` | UI, translations, and Alexa API calls |
 | `chrome-extension/background.js` | Opens Alexa and injects the manager |
-| `AGENTS.md` | Technical handover for future agents |
 
 ### Credits / Acknowledgments
 
