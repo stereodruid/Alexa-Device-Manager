@@ -1,8 +1,12 @@
 # Alexa Device Manager
 
-[![Buy Me A Coffee](https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png)](https://www.buymeacoffee.com/stereodruid)
-<br><br>
-<img src="bmc_qr.png" width="100" alt="Buy Me A Coffee QR Code">
+<p>
+  <a href="https://www.buymeacoffee.com/stereodruid">
+    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" width="160" alt="Buy Me A Coffee" align="middle">
+  </a>
+  &nbsp;&nbsp;
+  <img src="bmc_qr.png" width="90" alt="QR Code" align="middle">
+</p>
 
 *🇬🇧 [English version below](#english-version)*
 
