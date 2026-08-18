@@ -2,10 +2,10 @@
 
 <p>
   <a href="https://www.buymeacoffee.com/stereodruid">
-    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" width="160" alt="Buy Me A Coffee" align="middle">
+    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" height="60" alt="Buy Me A Coffee" align="middle">
   </a>
   &nbsp;&nbsp;
-  <img src="bmc_qr.png" width="90" alt="QR Code" align="middle">
+  <img src="bmc_qr.png" height="60" alt="QR Code" align="middle">
 </p>
 
 *🇬🇧 [English version below](#english-version)*
@@ -107,6 +107,14 @@ Dieses Projekt greift auf private Amazon-Web-Endpunkte zu, die sich jederzeit ä
 
 <a name="english-version"></a>
 ## 🇬🇧 English
+
+<p>
+  <a href="https://www.buymeacoffee.com/stereodruid">
+    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" height="60" alt="Buy Me A Coffee" align="middle">
+  </a>
+  &nbsp;&nbsp;
+  <img src="bmc_qr.png" height="60" alt="QR Code" align="middle">
+</p>
 
 A local, bilingual Chrome manager for Alexa smart-home devices. It only uses the Amazon session already signed in to the browser. There is no separate server, upload, or stored credential.
 
