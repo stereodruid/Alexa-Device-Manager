@@ -16,12 +16,14 @@ Lokaler, zweisprachiger Chrome-Manager für Alexa-Smart-Home-Geräte. Er arbeite
 
 ### Installation
 
-1. Chrome öffnen und `chrome://extensions/` aufrufen.
-2. `Entwicklermodus` einschalten.
-3. `Entpackte Erweiterung laden` wählen.
-4. Den Ordner `chrome-extension` aus diesem Projekt auswählen.
-5. Das Erweiterungssymbol `Alexa Device Manager` anklicken.
-6. `Manager öffnen` drücken.
+📥 **[Hier die aktuellste AlexaDeviceManager.zip herunterladen](https://github.com/stereodruid/Alexa-Device-Manager/releases/latest/download/AlexaDeviceManager.zip)** (oder auf der [Releases-Seite](https://github.com/stereodruid/Alexa-Device-Manager/releases) prüfen).
+
+1. Lade die `.zip`-Datei herunter und entpacke sie auf deinem Computer (es entsteht ein Ordner `chrome-extension`).
+2. Chrome öffnen und `chrome://extensions/` aufrufen.
+3. Rechts oben den `Entwicklermodus` einschalten.
+4. `Entpackte Erweiterung laden` klicken.
+5. Den entpackten Ordner `chrome-extension` auswählen.
+6. Oben rechts in Chrome auf das Erweiterungssymbol `Alexa Device Manager` klicken und `Manager öffnen` wählen.
 
 Der Manager öffnet die normale Alexa-Webseite und blendet seine Bedienoberfläche darüber ein. F12, Copy/Paste und die rohe JSON-Ansicht sind nicht erforderlich.
 
@@ -120,12 +122,14 @@ A local, bilingual Chrome manager for Alexa smart-home devices. It only uses the
 
 ### Setup
 
-1. Open Chrome and navigate to `chrome://extensions/`.
-2. Enable `Developer mode`.
-3. Select `Load unpacked`.
-4. Choose the `chrome-extension` folder from this project.
-5. Click the `Alexa Device Manager` extension icon.
-6. Click `Open manager`.
+📥 **[Download the latest AlexaDeviceManager.zip here](https://github.com/stereodruid/Alexa-Device-Manager/releases/latest/download/AlexaDeviceManager.zip)** (or check the [Releases page](https://github.com/stereodruid/Alexa-Device-Manager/releases)).
+
+1. Download the `.zip` file and extract it on your computer (this creates a `chrome-extension` folder).
+2. Open Chrome and navigate to `chrome://extensions/`.
+3. Enable `Developer mode` in the top right.
+4. Click `Load unpacked`.
+5. Choose the extracted `chrome-extension` folder.
+6. Click the `Alexa Device Manager` extension icon in the top right of Chrome and select `Open manager`.
 
 The manager opens the normal Alexa website and overlays its interface. No developer tools, copy/paste, or raw JSON page are needed.
 
