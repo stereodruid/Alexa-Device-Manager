@@ -91,6 +91,10 @@ Amazon verwendet nicht öffentlich stabil dokumentierte Web-Endpunkte. Nicht wie
 | `chrome-extension/background.js` | Öffnet Alexa und injiziert den Manager |
 | `AGENTS.md` | Technische Übergabe für weitere KI-Agenten |
 
+### Danksagung (Credits)
+
+Ein großes Dankeschön geht an [PzocikErwin](https://github.com/PzocikErwin), der ganz zu Beginn die ursprünglichen Amazon-Web-Endpunkte für dieses Projekt analysiert und bereitgestellt hat! Ohne diese Vorarbeit wäre das Tool in dieser Form nicht möglich gewesen. Fair geht vor!
+
 ### Hinweis
 
 Dieses Projekt greift auf private Amazon-Web-Endpunkte zu, die sich jederzeit ändern können. Vor Änderungen an echten Alexa-Geräten immer eine Sicherung erstellen und nur die konkret gewünschte Auswahl bestätigen.
@@ -182,6 +186,10 @@ Amazon uses private web endpoints that are not publicly stable. Do not repeat ac
 | `chrome-extension/content.js` | UI, translations, and Alexa API calls |
 | `chrome-extension/background.js` | Opens Alexa and injects the manager |
 | `AGENTS.md` | Technical handover for future agents |
+
+### Credits / Acknowledgments
+
+A huge thank you to [PzocikErwin](https://github.com/PzocikErwin), who initially researched and provided the original Amazon web endpoints for this project! Without this early groundwork, this tool wouldn't have been possible in its current form. Fair play!
 
 ### Notice
 
