@@ -2,7 +2,7 @@
 
 [![Buy Me A Coffee](https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png)](https://www.buymeacoffee.com/stereodruid)
 <br><br>
-<img src="bmc_qr.png" width="50" alt="Buy Me A Coffee QR Code">
+<img src="bmc_qr.png" width="100" alt="Buy Me A Coffee QR Code">
 
 *🇬🇧 [English version below](#english-version)*
 
