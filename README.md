@@ -14,6 +14,8 @@
 
 Lokaler, zweisprachiger Chrome-Manager für Alexa-Smart-Home-Geräte. Er arbeitet ausschließlich in der bereits angemeldeten Amazon-Sitzung im Browser. Es gibt keinen eigenen Server, keinen Upload und keine gespeicherten Zugangsdaten.
 
+![Preview of the Alexa Device Manager](preview.png)
+
 ### Installation
 
 📥 **[Hier die aktuellste AlexaDeviceManager.zip herunterladen](https://github.com/stereodruid/Alexa-Device-Manager/releases/latest/download/AlexaDeviceManager.zip)** (oder auf der [Releases-Seite](https://github.com/stereodruid/Alexa-Device-Manager/releases) prüfen).
@@ -119,6 +121,8 @@ Dieses Projekt greift auf private Amazon-Web-Endpunkte zu, die sich jederzeit ä
 </p>
 
 A local, bilingual Chrome manager for Alexa smart-home devices. It only uses the Amazon session already signed in to the browser. There is no separate server, upload, or stored credential.
+
+![Preview of the Alexa Device Manager](preview.png)
 
 ### Setup
 
