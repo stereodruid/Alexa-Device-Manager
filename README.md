@@ -49,6 +49,8 @@ Der Manager lädt die Alexa-Liste nach jeder Änderung erneut und prüft den tat
 | Funktion | Beschreibung |
 | --- | --- |
 | **Filtern** | Name, Beschreibung, Alexa-Typ, Gruppe und vermutete Quelle |
+| **Sortierung & Layout** | Spalten per Klick sortieren und per Drag & Drop verschieben |
+| **Live Status** | Echtzeit-Gerätestatus (Online/Offline) direkt von Alexa abfragen |
 | **Quellen** | Home Assistant, ioBroker, Homey, Alexa/Amazon oder Andere |
 | **Sicherung** | JSON und CSV herunterladen |
 | **Trockenlauf** | Auswahl ohne Änderung prüfen |
@@ -156,6 +158,8 @@ After every change, the manager reloads the Alexa list and verifies the actual s
 | Feature | Description |
 | --- | --- |
 | **Filter** | Name, description, Alexa type, group, and inferred source |
+| **Sort & Order** | Click headers to sort data, drag & drop to reorder columns |
+| **Live Status** | Query real-time device reachability (Online/Offline) |
 | **Sources** | Home Assistant, ioBroker, Homey, Alexa/Amazon, or Other |
 | **Backup** | Download JSON and CSV |
 | **Dry run** | Check selection without making changes |

@@ -17,6 +17,9 @@
     lastDeleted: [],
     lastEnablement: [],
     running: false,
+    sortCol: 'name',
+    sortDir: 1,
+    columns: ['checkbox', 'name', 'description', 'type', 'status', 'id']
   };
 
   // Translation is deliberately separate from the Alexa API logic.
@@ -118,7 +121,11 @@
     #${APP_ID} .adm-stat span { color:#99a8b8; font-size:12px; }
     #${APP_ID} .adm-body { overflow:auto; }
     #${APP_ID} table { width:100%; border-collapse: collapse; font-size: 13px; }
-    #${APP_ID} th { position:sticky; top:0; background:#18202a; z-index:1; text-align:left; color:#b8c7d8; border-bottom:1px solid #334052; padding:9px 8px; }
+    #${APP_ID} th { position:sticky; top:0; background:#18202a; z-index:1; text-align:left; color:#b8c7d8; border-bottom:1px solid #334052; padding:9px 8px; transition: background 0.2s; }
+    #${APP_ID} th.adm-sortable { cursor: pointer; user-select: none; }
+    #${APP_ID} th.adm-sortable:hover { background: #222d3b; }
+    #${APP_ID} th.adm-dragover { background: #2d3b4d !important; border-left: 2px solid #38bdf8; }
+    #${APP_ID} th.adm-dragging { opacity: 0.4; }
     #${APP_ID} td { padding:8px; border-bottom:1px solid #222b37; vertical-align:top; color:#e8f0f8 !important; background:#101820; }
     #${APP_ID} tr:hover td { background:#172233 !important; color:#ffffff !important; }
     #${APP_ID} .adm-muted { color:#8fa0b2; }
@@ -171,7 +178,7 @@
     </div>
     <div class="adm-body">
       <table>
-        <thead><tr><th style="width:38px"></th><th data-i18n="name">Name</th><th data-i18n="description">Beschreibung</th><th data-i18n="type">Typ</th><th data-i18n="status">Status</th><th data-i18n="id">ID</th></tr></thead>
+        <thead id="admHead"></thead>
         <tbody id="admRows"><tr><td colspan="6" class="adm-muted" data-i18n="noDevices">Noch keine Geraete geladen.</td></tr></tbody>
       </table>
     </div>
@@ -197,7 +204,60 @@
     $('admLanguage').value = language;
     $('admClose').setAttribute('aria-label', language === 'de' ? 'Schliessen' : 'Close');
     fillFilters();
+    renderHeaders();
     applyFilter();
+  }
+
+  function renderHeaders() {
+    const thead = $('admHead');
+    if (!thead) return;
+    const colDefs = {
+      checkbox: { label: '', width: '38px', sortable: false },
+      name: { label: t('name'), sortable: true },
+      description: { label: t('description'), sortable: true },
+      type: { label: t('type'), sortable: true },
+      status: { label: t('status'), sortable: true },
+      id: { label: t('id'), sortable: true }
+    };
+    const tr = document.createElement('tr');
+    state.columns.forEach((colId, index) => {
+      const def = colDefs[colId];
+      const th = document.createElement('th');
+      if (def.width) th.style.width = def.width;
+      
+      th.draggable = true;
+      th.addEventListener('dragstart', e => { e.dataTransfer.setData('text/plain', index); th.classList.add('adm-dragging'); });
+      th.addEventListener('dragend', () => th.classList.remove('adm-dragging'));
+      th.addEventListener('dragover', e => { e.preventDefault(); th.classList.add('adm-dragover'); });
+      th.addEventListener('dragleave', () => th.classList.remove('adm-dragover'));
+      th.addEventListener('drop', e => {
+        e.preventDefault();
+        th.classList.remove('adm-dragover');
+        const fromIndex = parseInt(e.dataTransfer.getData('text/plain'), 10);
+        if (!isNaN(fromIndex) && fromIndex !== index) {
+          const moved = state.columns.splice(fromIndex, 1)[0];
+          state.columns.splice(index, 0, moved);
+          renderHeaders();
+          renderTable();
+        }
+      });
+      
+      let content = escapeHtml(def.label);
+      if (def.sortable) {
+        th.classList.add('adm-sortable');
+        if (state.sortCol === colId) content += state.sortDir === 1 ? ' &#9650;' : ' &#9660;';
+        th.addEventListener('click', () => {
+          if (state.sortCol === colId) state.sortDir *= -1;
+          else { state.sortCol = colId; state.sortDir = 1; }
+          renderHeaders();
+          applyFilter();
+        });
+      }
+      th.innerHTML = content;
+      tr.appendChild(th);
+    });
+    thead.innerHTML = '';
+    thead.appendChild(tr);
   }
 
   function log(msg) {
@@ -299,13 +359,26 @@
       }
       return true;
     });
+
+    state.filtered.sort((a, b) => {
+      let valA = "", valB = "";
+      if (state.sortCol === "name") { valA = (a.displayName || "").toLowerCase(); valB = (b.displayName || "").toLowerCase(); }
+      else if (state.sortCol === "description") { valA = (a.description || "").toLowerCase(); valB = (b.description || "").toLowerCase(); }
+      else if (state.sortCol === "type") { valA = deviceType(a).toLowerCase(); valB = deviceType(b).toLowerCase(); }
+      else if (state.sortCol === "status") { valA = (a._admReachability || a.availability || "").toLowerCase(); valB = (b._admReachability || b.availability || "").toLowerCase(); }
+      else if (state.sortCol === "id") { valA = (a.id || "").toLowerCase(); valB = (b.id || "").toLowerCase(); }
+      if (valA < valB) return -1 * state.sortDir;
+      if (valA > valB) return 1 * state.sortDir;
+      return 0;
+    });
+
     renderTable();
     renderStats();
   }
 
   function renderTable() {
     if (!state.filtered.length) {
-      rows.innerHTML = `<tr><td colspan="6" class="adm-muted">${escapeHtml(t('noMatches'))}</td></tr>`;
+      rows.innerHTML = `<tr><td colspan="${state.columns.length}" class="adm-muted">${escapeHtml(t('noMatches'))}</td></tr>`;
       return;
     }
     rows.innerHTML = state.filtered.map(d => {
@@ -316,14 +389,26 @@
       const disabled = protectedNow ? 'disabled' : '';
       const pills = [category(d), deviceType(d)].filter(Boolean).map(x => `<span class="adm-pill">${escapeHtml(x)}</span>`).join('');
       const flags = [isHA(d) ? '<span class="adm-pill">HA</span>' : '', `<span class="adm-pill">${escapeHtml(source(d))}</span>`, isGroup(d) ? `<span class="adm-pill warn">${t('group')}</span>` : '', isEcho(d) ? `<span class="adm-pill warn">${t('echo')}</span>` : '', !hasEndpointId(d) ? `<span class="adm-pill bad">${t('endpointMissing')}</span>` : '', isSpecialProtected(d) ? `<span class="adm-pill bad">${t('protected')}</span>` : ''].join('');
-      return `<tr>
-        <td><input class="adm-rowcheck" data-id="${d.id}" type="checkbox" ${checked} ${disabled}></td>
-        <td><b>${escapeHtml(d.displayName)}</b><div>${flags}</div></td>
-        <td>${escapeHtml(d.description)}</td>
-        <td>${pills}</td>
-        <td>${escapeHtml(d.availability || '')}<br><span class="adm-muted">${t('alexa')}: ${escapeHtml(d._admEnablement || t('unknown'))}</span></td>
-        <td class="adm-muted">${escapeHtml(d.id)}</td>
-      </tr>`;
+      
+      let reachHtml = '';
+      if (d._admReachability === 'OK') reachHtml = '<span style="color: #4ade80">🟢 Online</span>';
+      else if (d._admReachability === 'UNAVAILABLE') reachHtml = '<span style="color: #f87171">🔴 Offline</span>';
+      else if (d._admReachability) reachHtml = `<span style="color: #fbbf24">🟠 ${escapeHtml(d._admReachability)}</span>`;
+      else if (d.availability) reachHtml = `<span style="color: #9ca3af">⚪ ${escapeHtml(d.availability)}</span>`;
+
+      const statusCell = `${reachHtml}<br><span class="adm-muted">${t('alexa')}: ${escapeHtml(d._admEnablement || t('unknown'))}</span>`;
+      
+      const cellContents = {
+        checkbox: `<td><input class="adm-rowcheck" data-id="${d.id}" type="checkbox" ${checked} ${disabled}></td>`,
+        name: `<td><b>${escapeHtml(d.displayName)}</b><div>${flags}</div></td>`,
+        description: `<td>${escapeHtml(d.description)}</td>`,
+        type: `<td>${pills}</td>`,
+        status: `<td>${statusCell}</td>`,
+        id: `<td class="adm-muted">${escapeHtml(d.id)}</td>`
+      };
+
+      const trHtml = state.columns.map(col => cellContents[col]).join('');
+      return `<tr>${trHtml}</tr>`;
     }).join('');
     rows.querySelectorAll('.adm-rowcheck').forEach(cb => cb.addEventListener('change', e => {
       const id = e.target.dataset.id;
@@ -356,6 +441,13 @@
           enablement
           legacyAppliance { applianceId }
           legacyIdentifiers { chrsIdentifier { entityId } }
+          features {
+            name
+            properties {
+              name
+              ... on Reachability { reachabilityStatusValue }
+            }
+          }
         }
       }
     }`;
@@ -375,8 +467,16 @@
       const endpointId = endpoint?.endpointId;
       const applianceId = endpoint?.legacyAppliance?.applianceId;
       const entityId = endpoint?.legacyIdentifiers?.chrsIdentifier?.entityId;
+      let reachability = null;
+      if (Array.isArray(endpoint?.features)) {
+        const conn = endpoint.features.find(f => f.name === 'connectivity');
+        if (conn && Array.isArray(conn.properties)) {
+          const prop = conn.properties.find(p => p.reachabilityStatusValue || p.name === 'reachability');
+          if (prop) reachability = prop.reachabilityStatusValue;
+        }
+      }
       for (const key of [endpointId, entityId, String(endpointId || '').replace(/^amzn1\.alexa\.endpoint\./, '')]) {
-        if (key) endpointByEntityId.set(key, { endpointId, applianceId, enablement: endpoint?.enablement });
+        if (key) endpointByEntityId.set(key, { endpointId, applianceId, enablement: endpoint?.enablement, reachability });
       }
     }
 
@@ -385,6 +485,7 @@
       device._admApplianceId = endpoint?.applianceId || null;
       device._admEndpointId = endpoint?.endpointId || null;
       device._admEnablement = endpoint?.enablement || null;
+      device._admReachability = endpoint?.reachability || null;
     }
   }
 
@@ -527,7 +628,6 @@
     }).catch(e => log(t('reloadError', { error: e.message })));
   }
 
-  $('admLanguage').value = language;
   $('admLanguage').addEventListener('change', event => {
     language = event.target.value === 'en' ? 'en' : 'de';
     localStorage.setItem('admLanguage', language);
@@ -547,8 +647,8 @@
   $('admDelete').addEventListener('click', () => deleteSelected().catch(e => log(`${t('error')}: ${e.message}`)));
   $('admExportJson').addEventListener('click', () => download(`alexa-devices-${new Date().toISOString().replace(/[:.]/g,'-')}.json`, JSON.stringify(state.devices, null, 2), 'application/json'));
   $('admExportCsv').addEventListener('click', () => {
-    const header = ['id','endpointId','displayName','description','source','categoryType','deviceType','availability','enablement'];
-    const lines = [header.join(',')].concat(state.devices.map(d => [d.id,d._admEndpointId,d.displayName,d.description,source(d),category(d),deviceType(d),d.availability,d._admEnablement].map(csvEscape).join(',')));
+    const header = ['id','endpointId','displayName','description','source','categoryType','deviceType','availability','reachability','enablement'];
+    const lines = [header.join(',')].concat(state.devices.map(d => [d.id,d._admEndpointId,d.displayName,d.description,source(d),category(d),deviceType(d),d.availability,d._admReachability,d._admEnablement].map(csvEscape).join(',')));
     download(`alexa-devices-${new Date().toISOString().replace(/[:.]/g,'-')}.csv`, lines.join('\n'), 'text/csv');
   });
 
@@ -556,5 +656,3 @@
   logBox.textContent = t('ready');
   loadDevices().catch(e => log(`${t('error')}: ${e.message}`));
 })();
-
-
