@@ -48,6 +48,7 @@ Der Manager lädt die Alexa-Liste nach jeder Änderung erneut und prüft den tat
 
 | Funktion | Beschreibung |
 | --- | --- |
+| **Phantom-Sensoren** | Findet und löscht versteckte Skill-Geräte (z.B. OpenHAB), die in der Alexa-App hängen |
 | **Filtern** | Name, Beschreibung, Alexa-Typ, Gruppe und vermutete Quelle |
 | **Sortierung & Layout** | Spalten per Klick sortieren und per Drag & Drop verschieben |
 | **Live Status** | Echtzeit-Gerätestatus (Online/Offline) direkt von Alexa abfragen |
@@ -157,6 +158,7 @@ After every change, the manager reloads the Alexa list and verifies the actual s
 
 | Feature | Description |
 | --- | --- |
+| **Phantom Sensors** | Finds and deletes hidden skill devices (e.g., OpenHAB) stuck in the Alexa app |
 | **Filter** | Name, description, Alexa type, group, and inferred source |
 | **Sort & Order** | Click headers to sort data, drag & drop to reorder columns |
 | **Live Status** | Query real-time device reachability (Online/Offline) |
