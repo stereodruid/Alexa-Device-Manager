@@ -430,7 +430,7 @@
     await attachDeleteIds();
     fillFilters();
     applyFilter();
-    log(t('loaded', { total: data.length, ha: data.filter(isHA).length, deletable: data.filter(hasDeleteId).length }));
+    log(t('loaded', { total: state.devices.length, ha: state.devices.filter(isHA).length, deletable: state.devices.filter(hasDeleteId).length }));
   }
 
   async function attachDeleteIds() {
@@ -441,6 +441,9 @@
           enablement
           legacyAppliance { applianceId }
           legacyIdentifiers { chrsIdentifier { entityId } }
+          friendlyNameObject { value { text } }
+          manufacturer { value { text } }
+          displayCategories { primary { value } }
           features {
             name
             properties {
@@ -463,6 +466,7 @@
     }
 
     const endpointByEntityId = new Map();
+    const allGraphQLById = new Map();
     for (const endpoint of endpoints) {
       const endpointId = endpoint?.endpointId;
       const applianceId = endpoint?.legacyAppliance?.applianceId;
@@ -475,17 +479,48 @@
           if (prop) reachability = prop.reachabilityStatusValue;
         }
       }
+      const data = { endpointId, applianceId, enablement: endpoint?.enablement, reachability, raw: endpoint };
+      if (endpointId) allGraphQLById.set(endpointId, data);
       for (const key of [endpointId, entityId, String(endpointId || '').replace(/^amzn1\.alexa\.endpoint\./, '')]) {
-        if (key) endpointByEntityId.set(key, { endpointId, applianceId, enablement: endpoint?.enablement, reachability });
+        if (key) endpointByEntityId.set(key, data);
       }
     }
 
+    const matchedEndpointIds = new Set();
     for (const device of state.devices) {
       const endpoint = endpointByEntityId.get(device.id);
-      device._admApplianceId = endpoint?.applianceId || null;
-      device._admEndpointId = endpoint?.endpointId || null;
-      device._admEnablement = endpoint?.enablement || null;
-      device._admReachability = endpoint?.reachability || null;
+      if (endpoint) {
+        device._admApplianceId = endpoint.applianceId || null;
+        device._admEndpointId = endpoint.endpointId || null;
+        device._admEnablement = endpoint.enablement || null;
+        device._admReachability = endpoint.reachability || null;
+        if (endpoint.endpointId) matchedEndpointIds.add(endpoint.endpointId);
+      } else {
+        device._admApplianceId = null;
+        device._admEndpointId = null;
+        device._admEnablement = null;
+        device._admReachability = null;
+      }
+    }
+
+    for (const [endpointId, data] of allGraphQLById.entries()) {
+      if (!matchedEndpointIds.has(endpointId)) {
+        const ep = data.raw;
+        const cat = ep.displayCategories?.primary?.value || 'ENDPOINT';
+        const mfg = ep.manufacturer?.value?.text || '';
+        state.devices.push({
+          id: endpointId,
+          displayName: ep.friendlyNameObject?.value?.text || 'Unknown Endpoint',
+          description: 'GraphQL Skill Endpoint' + (mfg ? ` (${mfg})` : ''),
+          manufacturerName: mfg,
+          providerData: { categoryType: cat, deviceType: cat },
+          availability: 'UNKNOWN',
+          _admApplianceId: ep.legacyAppliance?.applianceId || null,
+          _admEndpointId: endpointId,
+          _admEnablement: ep.enablement || null,
+          _admReachability: data.reachability || null
+        });
+      }
     }
   }
 
