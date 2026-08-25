@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Alexa Device Manager",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Lokaler Manager fuer Alexa Smart-Home-Geraete mit Backup, Filtern und kontrolliertem Loeschen.",
   "permissions": [
     "activeTab",
