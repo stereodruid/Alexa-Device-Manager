@@ -104,10 +104,6 @@ Amazon verwendet nicht öffentlich stabil dokumentierte Web-Endpunkte. Nicht wie
 | `chrome-extension/content.js` | Interface, Übersetzung und Alexa-API-Aufrufe |
 | `chrome-extension/background.js` | Öffnet Alexa und injiziert den Manager |
 
-### Danksagung (Credits)
-
-Credits: [PzocikErwin](https://github.com/PzocikErwin) (Recherche der internen Amazon-Endpunkte)
-
 ### Hinweis
 
 Dieses Projekt greift auf private Amazon-Web-Endpunkte zu, die sich jederzeit ändern können. Vor Änderungen an echten Alexa-Geräten immer eine Sicherung erstellen und nur die konkret gewünschte Auswahl bestätigen.
@@ -216,10 +212,6 @@ Amazon uses private web endpoints that are not publicly stable. Do not repeat ac
 | `chrome-extension/` | Installable Chrome extension |
 | `chrome-extension/content.js` | UI, translations, and Alexa API calls |
 | `chrome-extension/background.js` | Opens Alexa and injects the manager |
-
-### Credits / Acknowledgments
-
-Credits: [PzocikErwin](https://github.com/PzocikErwin) (Research of internal Amazon endpoints)
 
 ### Notice
 
