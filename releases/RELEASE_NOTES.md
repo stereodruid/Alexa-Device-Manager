@@ -1,6 +1,6 @@
 # Alexa Device Manager v0.6.0
 
-![Release Preview](https://raw.githubusercontent.com/stereodruid/Alexa-Device-Manager/main/assets/preview_main.png)
+![Release Preview](https://raw.githubusercontent.com/stereodruid/Alexa-Device-Manager/main/assets/preview_popup.png)
 
 ## What's New 🚀
 - **Global Amazon Region Support:** The extension now dynamically detects your language settings and redirects you to your corresponding Amazon regional domain (e.g. mazon.com, mazon.de, mazon.co.uk, etc.).
