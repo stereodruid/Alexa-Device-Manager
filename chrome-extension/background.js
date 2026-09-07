@@ -1,9 +1,10 @@
-const ALEXA_MANAGER_URL = 'https://alexa.amazon.de/spa/index.html';
-
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message?.type !== 'OPEN_MANAGER') return;
 
-  chrome.tabs.create({ url: ALEXA_MANAGER_URL, active: true }, tab => {
+  const domain = message.domain || 'amazon.de';
+  const url = `https://alexa.${domain}/spa/index.html`;
+
+  chrome.tabs.create({ url: url, active: true }, tab => {
     if (chrome.runtime.lastError || !tab?.id) {
       sendResponse({ ok: false, error: chrome.runtime.lastError?.message || 'Alexa-Tab konnte nicht geoeffnet werden.' });
       return;

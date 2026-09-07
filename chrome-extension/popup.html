@@ -9,17 +9,38 @@
     main { padding:16px; display:grid; gap:14px; }
     h1 { font-size:18px; margin:0; }
     p { margin:0; color:var(--muted); line-height:1.45; font-size:13px; }
-    button { width:100%; border:1px solid #2793ef; border-radius:14px; background:var(--accent); color:var(--text); padding:13px 14px; font-weight:800; cursor:pointer; font-size:15px; }
+    button { width:100%; border:1px solid #2793ef; border-radius:14px; background:var(--accent); color:var(--text); padding:13px 14px; font-weight:800; cursor:pointer; font-size:15px; margin-bottom:14px; }
     button:hover { background:#1688e6; }
+    select { width:100%; border:1px solid var(--line); border-radius:10px; background:var(--panel); color:var(--text); padding:10px 12px; margin-bottom:14px; font-size:14px; outline:none; font-family:inherit; cursor:pointer; }
+    select:focus { border-color: var(--accent); }
     .status { white-space:pre-wrap; font-family: ui-monospace, Consolas, monospace; font-size:12px; color:#c9d7e8; min-height:18px; }
   </style>
 </head>
 <body>
   <main>
-    <div>
-      <h1>Alexa Device Manager</h1>
-      <p>Ein Klick öffnet die Alexa-Geräteliste und startet den Manager automatisch.</p>
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
+      <img src="icon.png" width="56" height="56" alt="Icon" style="border-radius:12px; border:1px solid var(--line);">
+      <div>
+        <h1>Alexa Device Manager</h1>
+        <p>Ein Klick öffnet die Alexa-Geräteliste und startet den Manager automatisch.</p>
+      </div>
     </div>
+    
+    <select id="region">
+      <option value="amazon.com">USA (amazon.com)</option>
+      <option value="amazon.de">Deutschland (amazon.de)</option>
+      <option value="amazon.co.uk">UK (amazon.co.uk)</option>
+      <option value="amazon.fr">Frankreich (amazon.fr)</option>
+      <option value="amazon.it">Italien (amazon.it)</option>
+      <option value="amazon.es">Spanien (amazon.es)</option>
+      <option value="amazon.ca">Kanada (amazon.ca)</option>
+      <option value="amazon.com.au">Australien (amazon.com.au)</option>
+      <option value="amazon.co.jp">Japan (amazon.co.jp)</option>
+      <option value="amazon.in">Indien (amazon.in)</option>
+      <option value="amazon.com.br">Brasilien (amazon.com.br)</option>
+      <option value="amazon.com.mx">Mexiko (amazon.com.mx)</option>
+    </select>
+
     <button id="open">Manager öffnen</button>
     <a href="https://www.buymeacoffee.com/stereodruid" target="_blank" style="display:flex; justify-content:center; text-decoration:none; width:100%; border:1px solid #e0c200; border-radius:14px; background:#FFDD00; color:#000000; padding:13px 14px; font-weight:800; font-size:15px; text-align:center;">☕ Buy me a coffee</a>
     <div id="status" class="status">Bereit.</div>

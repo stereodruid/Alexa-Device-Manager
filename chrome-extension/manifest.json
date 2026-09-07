@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Alexa Device Manager",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Lokaler Manager fuer Alexa Smart-Home-Geraete mit Backup, Filtern und kontrolliertem Loeschen.",
   "permissions": [
     "activeTab",
@@ -11,15 +11,36 @@
   "host_permissions": [
     "https://alexa.amazon.de/*",
     "https://alexa.amazon.com/*",
+    "https://alexa.amazon.co.uk/*",
+    "https://alexa.amazon.fr/*",
+    "https://alexa.amazon.it/*",
+    "https://alexa.amazon.es/*",
+    "https://alexa.amazon.ca/*",
+    "https://alexa.amazon.com.au/*",
+    "https://alexa.amazon.co.jp/*",
+    "https://alexa.amazon.in/*",
+    "https://alexa.amazon.com.br/*",
+    "https://alexa.amazon.com.mx/*",
     "https://pitangui.amazon.com/*",
-    "https://layla.amazon.com/*",
-    "https://alexa.amazon.co.jp/*"
+    "https://layla.amazon.com/*"
   ],
   "background": {
     "service_worker": "background.js"
   },
+  "icons": {
+    "16": "icon16.png",
+    "32": "icon32.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
   "action": {
     "default_title": "Alexa Device Manager",
-    "default_popup": "popup.html"
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icon16.png",
+      "32": "icon32.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    }
   }
 }

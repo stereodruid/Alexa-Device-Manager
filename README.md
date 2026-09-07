@@ -58,7 +58,7 @@ Der Manager lädt die Alexa-Liste nach jeder Änderung erneut und prüft den tat
 | **Deaktivieren** | Reversibel aus Alexa ausblenden |
 | **Aktivieren** | Zuvor deaktivierte Geräte wieder freigeben |
 | **Löschen** | Dauerhaft aus Alexa entfernen |
-
+| **Länderauswahl** | Dynamische und manuelle Auswahl aller Amazon-Regionen (.com, .de, .co.uk, etc.) |
 Die Quellenklassifikation ist eine Bedienhilfe. Alexa liefert kein verlässliches, einheitliches Herkunftsfeld; deshalb wertet der Manager Namen, Beschreibung und Herstellertext aus.
 
 ### Deaktivieren oder löschen?
@@ -84,7 +84,7 @@ Geräte ohne verknüpfte moderne Alexa-Endpunkt-ID werden ebenfalls gesperrt. Da
 **Der Manager zeigt nur JSON oder startet nicht**
 1. In `chrome://extensions/` die Erweiterung mit dem Neu-laden-Symbol aktualisieren.
 2. Sicherstellen, dass `Alexa Device Manager` aktiviert ist.
-3. Bei `alexa.amazon.de` im richtigen Amazon-Konto angemeldet sein.
+3. Bei `alexa.amazon.*` im richtigen Amazon-Konto angemeldet sein.
 4. Den Manager ausschließlich über das Erweiterungssymbol und `Manager öffnen` starten.
 
 **Ein gelöschtes Gerät erscheint wieder**
@@ -168,7 +168,7 @@ After every change, the manager reloads the Alexa list and verifies the actual s
 | **Disable** | Reversibly hide from Alexa |
 | **Enable** | Re-enable previously disabled devices |
 | **Delete** | Permanently remove from Alexa |
-
+| **Region Selector** | Dynamic and manual selection of all Amazon regions (.com, .de, .co.uk, etc.) |
 Source classification is a convenience feature. Alexa does not provide one reliable source field, so the manager evaluates name, description, and manufacturer text.
 
 ### Disable or Delete?
