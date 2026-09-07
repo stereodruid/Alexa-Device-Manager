@@ -14,7 +14,7 @@
 
 Lokaler, zweisprachiger Chrome-Manager für Alexa-Smart-Home-Geräte. Er arbeitet ausschließlich in der bereits angemeldeten Amazon-Sitzung im Browser. Es gibt keinen eigenen Server, keinen Upload und keine gespeicherten Zugangsdaten.
 
-![Preview of the Alexa Device Manager](assets/preview_v060.png)
+![Preview of the Alexa Device Manager](assets/preview_main.png)
 
 #### Installation
 
@@ -59,6 +59,9 @@ Der Manager lädt die Alexa-Liste nach jeder Änderung erneut und prüft den tat
 | **Aktivieren** | Zuvor deaktivierte Geräte wieder freigeben |
 | **Löschen** | Dauerhaft aus Alexa entfernen |
 | **Länderauswahl** | Dynamische und manuelle Auswahl aller Amazon-Regionen (.com, .de, .co.uk, etc.) |
+
+<p align="center"><img src="assets/preview_popup.png" alt="Country Selector Popup" width="300"></p>
+
 Die Quellenklassifikation ist eine Bedienhilfe. Alexa liefert kein verlässliches, einheitliches Herkunftsfeld; deshalb wertet der Manager Namen, Beschreibung und Herstellertext aus.
 
 ### Deaktivieren oder löschen?
@@ -124,7 +127,7 @@ Dieses Projekt greift auf private Amazon-Web-Endpunkte zu, die sich jederzeit ä
 
 A local, bilingual Chrome manager for Alexa smart-home devices. It only uses the Amazon session already signed in to the browser. There is no separate server, upload, or stored credential.
 
-![Preview of the Alexa Device Manager](assets/preview_v060.png)
+![Preview of the Alexa Device Manager](assets/preview_main.png)
 
 ### Setup
 
@@ -169,6 +172,9 @@ After every change, the manager reloads the Alexa list and verifies the actual s
 | **Enable** | Re-enable previously disabled devices |
 | **Delete** | Permanently remove from Alexa |
 | **Region Selector** | Dynamic and manual selection of all Amazon regions (.com, .de, .co.uk, etc.) |
+
+<p align="center"><img src="assets/preview_popup.png" alt="Country Selector Popup" width="300"></p>
+
 Source classification is a convenience feature. Alexa does not provide one reliable source field, so the manager evaluates name, description, and manufacturer text.
 
 ### Disable or Delete?
