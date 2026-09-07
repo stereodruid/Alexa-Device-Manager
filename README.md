@@ -14,7 +14,7 @@
 
 Lokaler, zweisprachiger Chrome-Manager für Alexa-Smart-Home-Geräte. Er arbeitet ausschließlich in der bereits angemeldeten Amazon-Sitzung im Browser. Es gibt keinen eigenen Server, keinen Upload und keine gespeicherten Zugangsdaten.
 
-![Preview of the Alexa Device Manager](assets/preview.png)
+![Preview of the Alexa Device Manager](assets/preview_v060.png)
 
 #### Installation
 
@@ -124,7 +124,7 @@ Dieses Projekt greift auf private Amazon-Web-Endpunkte zu, die sich jederzeit ä
 
 A local, bilingual Chrome manager for Alexa smart-home devices. It only uses the Amazon session already signed in to the browser. There is no separate server, upload, or stored credential.
 
-![Preview of the Alexa Device Manager](assets/preview.png)
+![Preview of the Alexa Device Manager](assets/preview_v060.png)
 
 ### Setup
 
