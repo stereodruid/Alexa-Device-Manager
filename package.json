@@ -1,0 +1,33 @@
+{
+  "name": "alexadevicemanager",
+  "version": "1.0.0",
+  "description": "<p>\r   <a href=\"https://www.buymeacoffee.com/stereodruid\">\r     <img src=\"https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png\" height=\"60\" alt=\"Buy Me A Coffee\" align=\"middle\">\r   </a>\r   &nbsp;&nbsp;\r   <img src=\"assets/bmc_qr.png\" height=\"60\" alt=\"QR Code\" align=\"middle\">\r </p>",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stereodruid/Alexa-Device-Manager.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/stereodruid/Alexa-Device-Manager/issues"
+  },
+  "homepage": "https://github.com/stereodruid/Alexa-Device-Manager#readme",
+  "dependencies": {
+    "lucide-react": "^1.43.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^6.1.1",
+    "autoprefixer": "^10.5.5",
+    "postcss": "^8.5.28",
+    "tailwindcss": "^3.4.19",
+    "vite": "^8.2.2"
+  }
+}

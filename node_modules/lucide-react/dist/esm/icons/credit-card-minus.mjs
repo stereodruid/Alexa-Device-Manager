@@ -1,0 +1,23 @@
+/**
+ * @license lucide-react v1.43.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+
+import createLucideIcon from '../createLucideIcon.mjs';
+
+const __iconData = {
+  name: "credit-card-minus",
+  size: 24,
+  node: [
+    ["path", { d: "M16 17h6", key: "1ook5g" }],
+    ["path", { d: "M22 10H2", key: "jawrgs" }],
+    ["path", { d: "M22 13V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2h8.536", key: "ljwgfh" }]
+  ]
+};
+__iconData.node;
+const CreditCardMinus = createLucideIcon(__iconData);
+
+export { __iconData, CreditCardMinus as default };
+//# sourceMappingURL=credit-card-minus.mjs.map

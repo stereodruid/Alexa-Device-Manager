@@ -15,6 +15,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       if (updatedTabId !== tabId || changeInfo.status !== 'complete') return;
       chrome.tabs.onUpdated.removeListener(inject);
       try {
+        await chrome.scripting.insertCSS({ target: { tabId }, files: ['content.css'] });
         await chrome.scripting.executeScript({ target: { tabId }, files: ['content.js'] });
         sendResponse({ ok: true });
       } catch (error) {

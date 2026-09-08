@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Scoped to avoid breaking amazon.de */
+#aura-root {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 999999;
+  background-color: #0f172a;
+  color: #f8fafc;
+  overflow: auto;
+}
