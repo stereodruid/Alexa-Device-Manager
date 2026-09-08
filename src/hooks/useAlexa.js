@@ -53,23 +53,26 @@ export function useAlexa() {
       const allGraphQLById = new Map();
       
       for (const endpoint of endpoints) {
+        const endpointId = endpoint?.endpointId;
         const applianceId = endpoint?.legacyAppliance?.applianceId;
         const entityId = endpoint?.legacyIdentifiers?.chrsIdentifier?.entityId;
         
         let reachability = null;
         if (Array.isArray(endpoint?.features)) {
-          const reachFeature = endpoint.features.find(f => f.name === 'alexa.reachability');
-          if (reachFeature && Array.isArray(reachFeature.properties)) {
-            const prop = reachFeature.properties.find(p => p.name === 'reachability');
-            if (prop && prop.reachabilityStatusValue) {
-              reachability = prop.reachabilityStatusValue;
-            }
+          const conn = endpoint.features.find(f => f.name === 'connectivity');
+          if (conn && Array.isArray(conn.properties)) {
+            const prop = conn.properties.find(p => p.reachabilityStatusValue || p.name === 'reachability');
+            if (prop) reachability = prop.reachabilityStatusValue;
           }
         }
         
-        endpoint._admReachability = reachability;
-        if (entityId) endpointByEntityId.set(entityId, endpoint);
-        if (applianceId) allGraphQLById.set(applianceId, endpoint);
+        const data = { endpointId, applianceId, enablement: endpoint?.enablement, reachability, raw: endpoint };
+        
+        if (endpointId) allGraphQLById.set(endpointId, data);
+        
+        for (const key of [endpointId, entityId, String(endpointId || '').replace(/^amzn1\.alexa\.endpoint\./, '')]) {
+          if (key) endpointByEntityId.set(key, data);
+        }
       }
 
       // Merge data
@@ -84,10 +87,10 @@ export function useAlexa() {
 
         return {
           ...d,
-          _admApplianceId: match?.legacyAppliance?.applianceId || d.alexaId,
+          _admApplianceId: match?.applianceId || d.alexaId,
           _admEndpointId: match?.endpointId,
           _admEnablement: match?.enablement,
-          _admReachability: match?._admReachability,
+          _admReachability: match?.reachability,
           _gqlMatch: !!match
         };
       });
