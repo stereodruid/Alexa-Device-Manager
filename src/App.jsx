@@ -162,11 +162,9 @@ export default function App() {
       {/* Top Header */}
       <header className="flex-none flex justify-between items-center bg-[#131B2B] p-3 px-5 rounded-2xl border border-[#1E293B] shadow-lg">
         <div className="flex items-center gap-4">
-          <div className="w-10 h-10 rounded-full border-[3px] border-[#00A3FF] flex items-center justify-center shadow-[0_0_15px_rgba(0,163,255,0.4)]">
-            <div className="w-8 h-8 rounded-full border-2 border-transparent border-t-[#00FFFF] border-r-[#00FFFF] rotate-45"></div>
-          </div>
+          <img src={typeof chrome !== 'undefined' && chrome.runtime?.getURL ? chrome.runtime.getURL('icon128.png') : ''} alt="Aura Logo" className="w-12 h-12" />
           <div>
-            <h1 className="text-lg font-bold text-white tracking-wide">Alexa Device Manager</h1>
+            <h1 className="text-lg font-bold text-white tracking-wide">Aura Device Master</h1>
             <p className="text-xs text-slate-400">Verwalte, sichere und lösche deine Alexa-Geräte – schnell und einfach.</p>
           </div>
         </div>
@@ -234,7 +232,7 @@ export default function App() {
             </div>
           </div>
         </div>
-        <div className="w-[30%] bg-[#0A101A] rounded-2xl border border-[#1E293B] p-4 flex items-center relative overflow-hidden">
+        <div className="w-[400px] flex-none bg-[#0A101A] rounded-2xl border border-[#1E293B] p-4 flex items-center relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-[#007AFF] blur-[80px] opacity-20"></div>
           <div className="relative z-10 w-full text-center lg:text-left pl-2">
             <div className="text-[#00A3FF] font-bold text-xl leading-tight">Dein Zuhause.</div>
@@ -360,7 +358,7 @@ export default function App() {
         </div>
 
         {/* Right Sidebar */}
-        <div className="w-[30%] bg-[#131B2B] rounded-2xl border border-[#1E293B] p-5 flex flex-col gap-6 overflow-y-auto">
+        <div className="w-[400px] flex-none bg-[#131B2B] rounded-2xl border border-[#1E293B] p-5 flex flex-col gap-6 overflow-y-auto">
           {selectedDevice ? (
             <>
               {/* Header section with glowing image */}
