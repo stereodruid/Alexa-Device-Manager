@@ -162,7 +162,7 @@ export default function App() {
               <div className="p-8 text-center text-red-400">Fehler: {error}</div>
             ) : (
               <table className="w-full text-left text-sm border-collapse">
-                <thead className="bg-slate-800/50 sticky top-0 z-10">
+                <thead className="bg-[#1e293b] sticky top-0 z-10 shadow-md">
                   <tr>
                     <th className="p-4 w-12"><input type="checkbox" className="accent-aura w-4 h-4" /></th>
                     <th className="p-4 text-slate-400 font-semibold cursor-pointer select-none group" onClick={() => handleSort('name')}>

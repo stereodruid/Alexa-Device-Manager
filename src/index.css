@@ -11,3 +11,19 @@
   color: #f8fafc;
   overflow: auto;
 }
+
+#aura-root ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+#aura-root ::-webkit-scrollbar-track {
+  background: #0f172a; /* bgDark */
+  border-radius: 4px;
+}
+#aura-root ::-webkit-scrollbar-thumb {
+  background: #334155; /* slate-700 */
+  border-radius: 4px;
+}
+#aura-root ::-webkit-scrollbar-thumb:hover {
+  background: #00d2ff; /* aura cyan */
+}

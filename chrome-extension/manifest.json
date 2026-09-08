@@ -23,6 +23,12 @@
     "https://pitangui.amazon.com/*",
     "https://layla.amazon.com/*"
   ],
+  "web_accessible_resources": [
+    {
+      "resources": ["icon128.png", "icon48.png", "icon32.png", "icon16.png", "*.jpg"],
+      "matches": ["*://alexa.amazon.de/*", "*://alexa.amazon.com/*", "*://alexa.amazon.co.uk/*"]
+    }
+  ],
   "background": {
     "service_worker": "background.js"
   },
