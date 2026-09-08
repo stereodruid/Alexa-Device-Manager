@@ -14,7 +14,13 @@ export default function App() {
     fetchDevices();
   }, [fetchDevices]);
 
-  const onlineCount = devices.filter(d => d._admReachability === 'OK' || d.availability === 'ONLINE').length;
+  const isDeviceOnline = (d) => {
+    return d._admReachability === 'OK' || 
+           d.availability === 'ONLINE' || 
+           d.availability === 'AVAILABLE';
+  };
+
+  const onlineCount = devices.filter(isDeviceOnline).length;
   const deletableCount = devices.filter(d => d._admEndpointId || d._admApplianceId).length;
   const offlineCount = devices.length - onlineCount;
 
@@ -27,7 +33,7 @@ export default function App() {
 
   const filteredAndSortedDevices = useMemo(() => {
     let result = devices.filter(d => {
-      const isOnline = d._admReachability === 'OK' || d.availability === 'ONLINE';
+      const isOnline = isDeviceOnline(d);
       const isDeletable = Boolean(d._admEndpointId || d._admApplianceId);
       
       if (filterType === 'ONLINE' && !isOnline) return false;
@@ -48,7 +54,7 @@ export default function App() {
         if (sortConfig.key === 'name') return (d.displayName || d.friendlyNameObject?.value?.text || 'Unbekannt').toLowerCase();
         if (sortConfig.key === 'description') return (d.description || '').toLowerCase();
         if (sortConfig.key === 'type') return (d.providerData?.deviceType || d.icon?.value || d.deviceFamily || '').toLowerCase();
-        if (sortConfig.key === 'status') return (d._admReachability === 'OK' || d.availability === 'ONLINE') ? '1' : '0';
+        if (sortConfig.key === 'status') return isDeviceOnline(d) ? '1' : '0';
         return '';
       };
       const valA = getVal(a);
@@ -181,7 +187,7 @@ export default function App() {
                 </thead>
                 <tbody className="divide-y divide-slate-700/50">
                   {filteredAndSortedDevices.map(d => {
-                    const isOnline = d._admReachability === 'OK' || d.availability === 'ONLINE';
+                    const isOnline = isDeviceOnline(d);
                     const devName = d.displayName || d.friendlyNameObject?.value?.text || 'Unbekannt';
                     const devType = d.providerData?.deviceType || d.icon?.value || d.deviceFamily || 'UNKNOWN';
                     return (
@@ -237,9 +243,9 @@ export default function App() {
                  <h2 className="text-2xl font-bold text-white mb-1 leading-tight">{selectedDevice.displayName || selectedDevice.friendlyNameObject?.value?.text || 'Unbekannt'}</h2>
                  <p className="text-slate-400 text-sm">{selectedDevice.description || 'Keine Beschreibung'}</p>
                  <div className="flex items-center gap-2 mt-2">
-                   <span className={`w-2 h-2 rounded-full ${(selectedDevice._admReachability === 'OK' || selectedDevice.availability === 'ONLINE') ? 'bg-green-500 shadow-[0_0_8px_#22c55e]' : 'bg-red-500 shadow-[0_0_8px_#ef4444]'}`}></span>
-                   <span className={`text-sm font-bold ${(selectedDevice._admReachability === 'OK' || selectedDevice.availability === 'ONLINE') ? 'text-green-500' : 'text-red-500'}`}>
-                     {(selectedDevice._admReachability === 'OK' || selectedDevice.availability === 'ONLINE') ? 'Online' : 'Offline'}
+                   <span className={`w-2 h-2 rounded-full ${isDeviceOnline(selectedDevice) ? 'bg-green-500 shadow-[0_0_8px_#22c55e]' : 'bg-red-500 shadow-[0_0_8px_#ef4444]'}`}></span>
+                   <span className={`text-sm font-bold ${isDeviceOnline(selectedDevice) ? 'text-green-500' : 'text-red-500'}`}>
+                     {isDeviceOnline(selectedDevice) ? 'Online' : 'Offline'}
                    </span>
                  </div>
                </div>
