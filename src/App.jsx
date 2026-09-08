@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Search, Wifi, WifiOff, Trash2, RefreshCw, ChevronUp, ChevronDown, Download, Terminal, CheckSquare, Square, Shield, MoreHorizontal, Moon, Speaker, Monitor, Zap, Thermometer, Radio, Lightbulb, Smartphone, Info, AlertTriangle, Home, Layers } from 'lucide-react';
+import { Search, Wifi, WifiOff, Trash2, RefreshCw, ChevronUp, ChevronDown, Download, Terminal, CheckSquare, Square, Shield, MoreHorizontal, Moon, Speaker, Monitor, Zap, Thermometer, Radio, Lightbulb, Smartphone, Info, AlertTriangle, Home, Layers, Power } from 'lucide-react';
 import { useAlexa } from './hooks/useAlexa';
 
 // Legacy V1 helpers for Tags/Sources
@@ -39,6 +39,17 @@ const getImage = (d) => {
   return chrome.runtime.getURL('echo.jpg');
 };
 
+const defaultColOrder = ['name', 'description', 'type', 'actions', 'status', 'source', 'id'];
+const colDefs = {
+  name: { label: 'Name', sortable: 'name' },
+  description: { label: 'Beschreibung', sortable: 'description' },
+  type: { label: 'Typ', sortable: 'type' },
+  actions: { label: '', sortable: null },
+  status: { label: 'Status', sortable: 'status' },
+  source: { label: 'Quelle', sortable: null },
+  id: { label: 'ID', sortable: null }
+};
+
 export default function App() {
   const { devices, loading, error, fetchDevices, logs, logger, deleteDevices, toggleDevices } = useAlexa();
   const [selectedId, setSelectedId] = useState(null);
@@ -55,6 +66,32 @@ export default function App() {
   
   const [sortConfig, setSortConfig] = useState({ key: 'name', dir: 'asc' });
   const logEndRef = useRef(null);
+
+  const [colOrder, setColOrder] = useState(() => {
+    try {
+      const saved = localStorage.getItem('aura_col_order');
+      if (saved) {
+         const parsed = JSON.parse(saved);
+         if (parsed.length === defaultColOrder.length) return parsed;
+      }
+    } catch(e) {}
+    return defaultColOrder;
+  });
+
+  const handleDragStart = (e, id) => {
+    e.dataTransfer.setData('colId', id);
+  };
+  const handleDrop = (e, dropId) => {
+    const dragId = e.dataTransfer.getData('colId');
+    if (!dragId || dragId === dropId) return;
+    const newOrder = [...colOrder];
+    const dragIdx = newOrder.indexOf(dragId);
+    newOrder.splice(dragIdx, 1);
+    const dropIdx = newOrder.indexOf(dropId);
+    newOrder.splice(dropIdx, 0, dragId);
+    setColOrder(newOrder);
+    localStorage.setItem('aura_col_order', JSON.stringify(newOrder));
+  };
 
   useEffect(() => {
     fetchDevices();
@@ -341,12 +378,21 @@ export default function App() {
                         {checkedIds.size > 0 && checkedIds.size === filteredAndSortedDevices.length ? <CheckSquare className="w-3 h-3 text-white" /> : null}
                       </div>
                     </th>
-                    <th className="p-3 font-medium text-slate-300 border-b border-[#1E293B] cursor-pointer" onClick={() => handleSort('name')}>Name <ChevronUp className="w-3 h-3 inline-block ml-1 opacity-50"/></th>
-                    <th className="p-3 font-medium text-slate-300 border-b border-[#1E293B] cursor-pointer" onClick={() => handleSort('description')}>Beschreibung</th>
-                    <th className="p-3 font-medium text-slate-300 border-b border-[#1E293B] cursor-pointer" onClick={() => handleSort('type')}>Typ</th>
-                    <th className="p-3 font-medium text-slate-300 border-b border-[#1E293B] cursor-pointer" onClick={() => handleSort('status')}>Status</th>
-                    <th className="p-3 font-medium text-slate-300 border-b border-[#1E293B]">Quelle</th>
-                    <th className="p-3 font-medium text-slate-300 border-b border-[#1E293B]">ID</th>
+                    {colOrder.map(colId => (
+                      <th
+                        key={colId}
+                        draggable
+                        onDragStart={(e) => handleDragStart(e, colId)}
+                        onDragOver={(e) => e.preventDefault()}
+                        onDrop={(e) => handleDrop(e, colId)}
+                        className={`p-3 font-medium text-slate-300 border-b border-[#1E293B] cursor-move select-none hover:bg-[#1E293B]/50 transition-colors ${colId === 'actions' ? 'w-20' : ''}`}
+                        onClick={() => colDefs[colId].sortable && handleSort(colDefs[colId].sortable)}
+                        title="Ziehen, um die Spalte zu verschieben"
+                      >
+                        {colDefs[colId].label}
+                        {colDefs[colId].sortable && <ChevronUp className="w-3 h-3 inline-block ml-1 opacity-50"/>}
+                      </th>
+                    ))}
                     <th className="p-3 border-b border-[#1E293B]"></th>
                   </tr>
                 </thead>
@@ -365,31 +411,53 @@ export default function App() {
                             {isChecked && <CheckSquare className="w-4 h-4 text-white opacity-0" />}
                           </div>
                         </td>
-                        <td className="p-3 font-medium text-white flex items-center gap-3">
-                          {getIcon(d)}
-                          {d.displayName || d.friendlyNameObject?.value?.text || 'Unbekannt'}
-                        </td>
-                        <td className="p-3 text-slate-400">{d.description || '-'}</td>
-                        <td className="p-3">
-                          <span className="bg-[#1C2534] text-[#94A3B8] text-[10px] px-3 py-1 rounded-full border border-[#2E3C51] font-semibold tracking-wider">{typeStr}</span>
-                        </td>
-                        <td className="p-3">
-                          <div className="flex items-start gap-2">
-                            {d._admReachability === 'OK' ? (
-                               <><span className="w-3 h-3 mt-0.5 rounded-full bg-[#00C853] shadow-[0_0_8px_#00C853]"></span><div><div className="text-[#00C853] font-medium leading-none">Online</div><div className="text-[10px] text-slate-500 mt-1">Gerade eben</div></div></>
-                            ) : d._admReachability === 'UNAVAILABLE' ? (
-                               <><span className="w-3 h-3 mt-0.5 rounded-full bg-[#FF3B30]"></span><div><div className="text-[#FF3B30] font-medium leading-none">Offline</div><div className="text-[10px] text-slate-500 mt-1">Vor {Math.floor(Math.random() * 5) + 1} Tagen</div></div></>
-                            ) : d._admReachability ? (
-                               <><span className="w-3 h-3 mt-0.5 rounded-full bg-yellow-500"></span><div><div className="text-yellow-500 font-medium leading-none">{d._admReachability}</div></div></>
-                            ) : d.availability ? (
-                               <><span className="w-3 h-3 mt-0.5 rounded-full bg-slate-400"></span><div><div className="text-slate-400 font-medium leading-none">{d.availability}</div></div></>
-                            ) : (
-                               <><span className="w-3 h-3 mt-0.5 rounded-full bg-slate-700"></span><div><div className="text-slate-500 font-medium leading-none">-</div></div></>
+                        {colOrder.map(colId => (
+                          <React.Fragment key={colId}>
+                            {colId === 'name' && (
+                              <td className="p-3 font-medium text-white flex items-center gap-3">
+                                {getIcon(d)}
+                                {d.displayName || d.friendlyNameObject?.value?.text || 'Unbekannt'}
+                              </td>
                             )}
-                          </div>
-                        </td>
-                        <td className="p-3 text-slate-300">{sourceStr}</td>
-                        <td className="p-3 text-slate-400 font-mono text-xs truncate max-w-[140px]">{d._admEndpointId || d._admApplianceId || '-'}</td>
+                            {colId === 'description' && (
+                              <td className="p-3 text-slate-400">{d.description || '-'}</td>
+                            )}
+                            {colId === 'type' && (
+                              <td className="p-3">
+                                <span className="bg-[#1C2534] text-[#94A3B8] text-[10px] px-3 py-1 rounded-full border border-[#2E3C51] font-semibold tracking-wider">{typeStr}</span>
+                              </td>
+                            )}
+                            {colId === 'actions' && (
+                              <td className="p-3 whitespace-nowrap w-20">
+                                <button onClick={(e) => { e.stopPropagation(); toggleDevices([d], d._admEnablement === 'DISABLED_BY_CUSTOMER' ? true : false); }} className="text-slate-500 hover:text-white transition mr-3" title="Aktivieren / Deaktivieren"><Power className="w-4 h-4 inline-block" /></button>
+                                <button onClick={(e) => { e.stopPropagation(); if (hasEndpointId(d)) { if(confirm('Soll dieses Gerät permanent aus Alexa gelöscht werden?')) deleteDevices([d]); } else { alert('Dieses Gerät (z.B. Echo, Gruppe) kann nicht gelöscht werden.'); } }} className="text-slate-500 hover:text-[#FF3B30] transition" title="Löschen"><Trash2 className="w-4 h-4 inline-block" /></button>
+                              </td>
+                            )}
+                            {colId === 'status' && (
+                              <td className="p-3">
+                                <div className="flex items-start gap-2">
+                                  {d._admReachability === 'OK' ? (
+                                     <><span className="w-3 h-3 mt-0.5 rounded-full bg-[#00C853] shadow-[0_0_8px_#00C853]"></span><div><div className="text-[#00C853] font-medium leading-none">AVAILABLE</div></div></>
+                                  ) : d._admReachability === 'UNAVAILABLE' ? (
+                                     <><span className="w-3 h-3 mt-0.5 rounded-full bg-[#FF3B30]"></span><div><div className="text-[#FF3B30] font-medium leading-none">UNREACHABLE</div></div></>
+                                  ) : d._admReachability ? (
+                                     <><span className="w-3 h-3 mt-0.5 rounded-full bg-yellow-500"></span><div><div className="text-yellow-500 font-medium leading-none">{d._admReachability}</div></div></>
+                                  ) : d.availability ? (
+                                     <><span className="w-3 h-3 mt-0.5 rounded-full bg-slate-400"></span><div><div className="text-slate-400 font-medium leading-none">{d.availability}</div></div></>
+                                  ) : (
+                                     <><span className="w-3 h-3 mt-0.5 rounded-full bg-slate-700"></span><div><div className="text-slate-500 font-medium leading-none">-</div></div></>
+                                  )}
+                                </div>
+                              </td>
+                            )}
+                            {colId === 'source' && (
+                              <td className="p-3 text-slate-300">{sourceStr}</td>
+                            )}
+                            {colId === 'id' && (
+                              <td className="p-3 text-slate-400 font-mono text-xs truncate max-w-[140px]">{d._admEndpointId || d._admApplianceId || '-'}</td>
+                            )}
+                          </React.Fragment>
+                        ))}
                         <td className="p-3 text-slate-500 text-right"><MoreHorizontal className="w-4 h-4 inline-block" /></td>
                       </tr>
                     );
@@ -416,27 +484,30 @@ export default function App() {
                     <MoreHorizontal className="w-5 h-5 text-slate-500 cursor-pointer" />
                   </div>
                   <p className="text-slate-400 text-sm mt-1">{selectedDevice.description || 'Keine Beschreibung'}</p>
-                  <div className="flex items-center gap-2 mt-3">
-                    {selectedDevice._admReachability === 'OK' ? (
-                      <><span className="w-3 h-3 rounded-full bg-[#00C853] shadow-[0_0_8px_#00C853]"></span><div><div className="text-sm font-bold text-[#00C853]">Online</div><div className="text-xs text-slate-500">Gerade eben</div></div></>
-                    ) : selectedDevice._admReachability === 'UNAVAILABLE' ? (
-                      <><span className="w-3 h-3 rounded-full bg-[#FF3B30]"></span><div><div className="text-sm font-bold text-[#FF3B30]">Offline</div><div className="text-xs text-slate-500">Vorhin</div></div></>
-                    ) : selectedDevice._admReachability ? (
-                      <><span className="w-3 h-3 rounded-full bg-yellow-500"></span><div><div className="text-sm font-bold text-yellow-500">{selectedDevice._admReachability}</div><div className="text-xs text-slate-500">Unbekannt</div></div></>
-                    ) : selectedDevice.availability ? (
-                      <><span className="w-3 h-3 rounded-full bg-slate-400"></span><div><div className="text-sm font-bold text-slate-400">{selectedDevice.availability}</div><div className="text-xs text-slate-500">Unbekannt</div></div></>
-                    ) : (
-                      <><span className="w-3 h-3 rounded-full bg-slate-700"></span><div><div className="text-sm font-bold text-slate-500">-</div><div className="text-xs text-slate-500">-</div></div></>
-                    )}
-                  </div>
                 </div>
               </div>
 
               {/* Data Grid */}
               <div className="bg-[#0A0F18] border border-[#1E293B] rounded-xl p-4 text-sm space-y-3">
-                <div className="flex"><div className="w-32 text-slate-400">Typ</div><div className="text-slate-200 font-medium">{(selectedDevice.providerData?.deviceType || selectedDevice.icon?.value || 'UNKNOWN').toUpperCase()}</div></div>
-                <div className="flex"><div className="w-32 text-slate-400">Quelle</div><div className="text-slate-200 font-medium">{source(selectedDevice)}</div></div>
-                <div className="flex"><div className="w-32 text-slate-400">Geräte-ID</div><div className="text-slate-200 font-mono text-xs truncate max-w-[150px]">{selectedDevice._admEndpointId || selectedDevice._admApplianceId || '-'}</div></div>
+                <div className="flex items-center"><div className="w-32 text-slate-400">Typ</div><div className="text-slate-200 font-medium">{(selectedDevice.providerData?.deviceType || selectedDevice.icon?.value || 'UNKNOWN').toUpperCase()}</div></div>
+                <div className="flex items-center">
+                  <div className="w-32 text-slate-400">Status</div>
+                  <div className="flex items-center gap-2">
+                    {selectedDevice._admReachability === 'OK' ? (
+                      <><span className="w-2.5 h-2.5 rounded-full bg-[#00C853] shadow-[0_0_8px_#00C853]"></span><span className="font-medium text-[#00C853]">AVAILABLE</span></>
+                    ) : selectedDevice._admReachability === 'UNAVAILABLE' ? (
+                      <><span className="w-2.5 h-2.5 rounded-full bg-[#FF3B30]"></span><span className="font-medium text-[#FF3B30]">UNREACHABLE</span></>
+                    ) : selectedDevice._admReachability ? (
+                      <><span className="w-2.5 h-2.5 rounded-full bg-yellow-500"></span><span className="font-medium text-yellow-500">{selectedDevice._admReachability}</span></>
+                    ) : selectedDevice.availability ? (
+                      <><span className="w-2.5 h-2.5 rounded-full bg-slate-400"></span><span className="font-medium text-slate-400">{selectedDevice.availability}</span></>
+                    ) : (
+                      <><span className="w-2.5 h-2.5 rounded-full bg-slate-700"></span><span className="font-medium text-slate-500">-</span></>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center"><div className="w-32 text-slate-400">Quelle</div><div className="text-slate-200 font-medium">{source(selectedDevice)}</div></div>
+                <div className="flex items-center"><div className="w-32 text-slate-400">Geräte-ID</div><div className="text-slate-200 font-mono text-xs truncate max-w-[150px]">{selectedDevice._admEndpointId || selectedDevice._admApplianceId || '-'}</div></div>
                 <div className="flex"><div className="w-32 text-slate-400">Beschreibung</div><div className="text-slate-200 font-medium truncate">{selectedDevice.description || '-'}</div></div>
                 <div className="flex"><div className="w-32 text-slate-400">Löschbar</div><div className={`font-bold ${hasEndpointId(selectedDevice) ? 'text-[#00C853]' : 'text-slate-500'}`}>{hasEndpointId(selectedDevice) ? 'Ja' : 'Nein'}</div></div>
                 <div className="flex"><div className="w-32 text-slate-400">Geschützt</div><div className="text-slate-200 font-medium">Nein</div></div>
