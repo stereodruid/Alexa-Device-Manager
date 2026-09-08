@@ -37,10 +37,7 @@ export function useAlexa() {
             friendlyNameObject { value { text } }
             manufacturer { value { text } }
             displayCategories { primary { value } }
-            features {
-              name
-              properties { reachabilityStatusValue name }
-            }
+            reachability { reachability status }
           }
         }
       }`;
@@ -67,14 +64,8 @@ export function useAlexa() {
           const endpointId = endpoint?.endpointId;
           const applianceId = endpoint?.legacyAppliance?.applianceId;
           const entityId = endpoint?.legacyIdentifiers?.chrsIdentifier?.entityId;
-          let reachability = null;
-          if (Array.isArray(endpoint?.features)) {
-            const conn = endpoint.features.find(f => f.name === 'connectivity');
-            if (conn && Array.isArray(conn.properties)) {
-              const prop = conn.properties.find(p => p.reachabilityStatusValue || p.name === 'reachability');
-              if (prop) reachability = prop.reachabilityStatusValue;
-            }
-          }
+          let reachability = endpoint?.reachability?.status || endpoint?.reachability?.reachability || null;
+          
           const data = { endpointId, applianceId, enablement: endpoint?.enablement, reachability, raw: endpoint };
           if (endpointId) allGraphQLById.set(endpointId, data);
           for (const key of [endpointId, entityId, String(endpointId || '').replace(/^amzn1\.alexa\.endpoint\./, '')]) {
