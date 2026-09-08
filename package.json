@@ -13,7 +13,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "bugs": {
     "url": "https://github.com/stereodruid/Alexa-Device-Manager/issues"
   },
@@ -28,6 +28,7 @@
     "autoprefixer": "^10.5.5",
     "postcss": "^8.5.28",
     "tailwindcss": "^3.4.19",
-    "vite": "^8.2.2"
+    "vite": "^8.2.2",
+    "vite-plugin-css-injected-by-js": "^5.0.2"
   }
 }

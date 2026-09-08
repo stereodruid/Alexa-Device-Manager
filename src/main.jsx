@@ -3,6 +3,8 @@ import { createRoot } from 'react-dom/client';
 import App from './App';
 import './index.css';
 
+console.log("AURA MANAGER: Content script is executing!");
+
 // Inject React Root if it doesn't exist
 let rootEl = document.getElementById('aura-root');
 if (!rootEl) {

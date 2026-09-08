@@ -15,10 +15,12 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       if (updatedTabId !== tabId || changeInfo.status !== 'complete') return;
       chrome.tabs.onUpdated.removeListener(inject);
       try {
-        await chrome.scripting.insertCSS({ target: { tabId }, files: ['content.css'] });
+        console.log("AURA MANAGER: Injecting into tab", tabId);
         await chrome.scripting.executeScript({ target: { tabId }, files: ['content.js'] });
+        console.log("AURA MANAGER: Successfully injected content.js");
         sendResponse({ ok: true });
       } catch (error) {
+        console.error("AURA MANAGER: Injection failed:", error);
         sendResponse({ ok: false, error: error.message });
       }
     };
