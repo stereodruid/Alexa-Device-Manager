@@ -267,29 +267,40 @@ export default function App() {
       </header>
       
       {/* KPI & Banner Row */}
-      <div className="flex-none flex gap-3 h-16">
-        <div className="w-64 flex-none bg-[#0A101A] rounded-xl border border-[#1E293B] p-3 flex flex-col justify-center relative overflow-hidden">
+      <div className="flex-none flex gap-2 h-10">
+        <div className="w-56 flex-none bg-[#0A101A] rounded-lg border border-[#1E293B] px-3 flex flex-col justify-center relative overflow-hidden">
           <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-[#00A3FF]/20 to-transparent blur-xl"></div>
-          <h1 className="text-[#00A3FF] font-bold text-sm tracking-wide leading-tight relative z-10">Dein Zuhause.<br/>Deine Kontrolle.</h1>
-          <p className="text-slate-500 text-[9px] uppercase tracking-widest mt-0.5 font-semibold relative z-10">AURA DEVICE MASTER</p>
+          <div className="flex justify-between items-center relative z-10">
+            <span className="text-[#00A3FF] font-bold text-xs tracking-wide">Aura Device Master</span>
+            <span className="text-slate-500 text-[8px] uppercase tracking-widest font-semibold">v2.0</span>
+          </div>
         </div>
 
-        <div className="flex-1 grid grid-cols-9 gap-3">
+        <div className="flex-1 flex gap-2 overflow-x-auto pb-1 scrollbar-thin">
           {kpiOrder.map(kpiId => {
             const k = kpiData[kpiId];
             if (!k) return null;
             const Icon = k.icon;
             return (
-              <div key={kpiId} draggable={true} onDragStart={(e) => handleKpiDragStart(e, kpiId)} onDragOver={(e) => e.preventDefault()} onDrop={(e) => handleKpiDrop(e, kpiId)} onClick={k.onClick} className="bg-[#131B2B] border border-[#1E293B] rounded-xl p-2 px-3 flex items-center gap-3 cursor-pointer hover:bg-[#1E293B] hover:-translate-y-1 hover:shadow-lg transition-all active:scale-95 select-none" title="Klicken zum Filtern / Ziehen zum Sortieren">
-                <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${k.color}15`, color: k.color }}>
-                  {Icon ? <Icon className="w-3.5 h-3.5" /> : (
-                    kpiId === 'online' ? <span className="w-2 h-2 rounded-full bg-[#00FF88] shadow-[0_0_6px_#00FF88]"></span> :
-                    kpiId === 'offline' ? <span className="w-2 h-2 rounded-full bg-slate-500"></span> : null
+              <div 
+                key={kpiId} 
+                draggable={true} 
+                onDragStart={(e) => handleKpiDragStart(e, kpiId)} 
+                onDragOver={(e) => e.preventDefault()} 
+                onDrop={(e) => { e.preventDefault(); handleKpiDrop(e, kpiId); }} 
+                onClick={k.onClick} 
+                className="flex-1 min-w-[80px] bg-[#131B2B] border border-[#1E293B] rounded-lg px-2 flex items-center gap-2 cursor-pointer hover:bg-[#1E293B] hover:-translate-y-0.5 hover:shadow-md transition-all active:scale-95 select-none" 
+                title="Klicken zum Filtern / Ziehen zum Sortieren"
+              >
+                <div className="w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${k.color}15`, color: k.color }}>
+                  {Icon ? <Icon className="w-3 h-3" /> : (
+                    kpiId === 'online' ? <span className="w-1.5 h-1.5 rounded-full bg-[#00FF88] shadow-[0_0_4px_#00FF88]"></span> :
+                    kpiId === 'offline' ? <span className="w-1.5 h-1.5 rounded-full bg-slate-500"></span> : null
                   )}
                 </div>
-                <div>
-                  <div className="text-lg font-bold text-white leading-tight">{k.value}</div>
-                  <div className="text-[9px] text-slate-400 uppercase tracking-wider">{k.label}</div>
+                <div className="flex flex-col justify-center overflow-hidden">
+                  <div className="text-sm font-bold text-white leading-none truncate">{k.value}</div>
+                  <div className="text-[8px] text-slate-400 uppercase tracking-widest mt-0.5 truncate">{k.label}</div>
                 </div>
               </div>
             );
