@@ -65,6 +65,13 @@ export default function App() {
   const [hideProtected, setHideProtected] = useState(true);
   const [powerStates, setPowerStates] = useState({});
   
+  const defaultKpiOrder = ['gesamt', 'online', 'offline', 'defekt', 'echos', 'ha', 'gruppen', 'loeschbar', 'geschuetzt'];
+  const [kpiOrder, setKpiOrder] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('aura_kpi_order')) || defaultKpiOrder; }
+    catch { return defaultKpiOrder; }
+  });
+  React.useEffect(() => { localStorage.setItem('aura_kpi_order', JSON.stringify(kpiOrder)); }, [kpiOrder]);
+  
   const [sortConfig, setSortConfig] = useState({ key: 'name', dir: 'asc' });
   const logEndRef = useRef(null);
 
@@ -115,6 +122,33 @@ export default function App() {
 
   const handleSort = (key) => setSortConfig(prev => ({ key, dir: prev.key === key && prev.dir === 'asc' ? 'desc' : 'asc' }));
 
+  const handleKpiDragStart = (e, kpiId) => { e.dataTransfer.setData('text/plain/kpi', kpiId); };
+  const handleKpiDrop = (e, targetKpi) => {
+    const sourceKpi = e.dataTransfer.getData('text/plain/kpi');
+    if (!sourceKpi || sourceKpi === targetKpi) return;
+    setKpiOrder(prev => {
+      const arr = [...prev];
+      const fromIndex = arr.indexOf(sourceKpi);
+      const toIndex = arr.indexOf(targetKpi);
+      arr.splice(fromIndex, 1);
+      arr.splice(toIndex, 0, sourceKpi);
+      return arr;
+    });
+  };
+
+
+  const kpiData = {
+    gesamt: { label: 'Gesamt', value: devices.length, icon: Smartphone, color: '#00A3FF', onClick: () => { setTypeFilter('ALL'); setStatusFilter('ALL'); setGroupFilter('ALL'); setSourceFilter('ALL'); setOnlyDeletable(false); setHideProtected(false); } },
+    online: { label: 'Online', value: onlineCount, icon: null, color: '#00FF88', onClick: () => setStatusFilter('ONLINE') },
+    offline: { label: 'Offline', value: offlineCount, icon: null, color: '#94A3B8', onClick: () => setStatusFilter('OFFLINE') },
+    defekt: { label: 'Defekt', value: defektCount, icon: AlertTriangle, color: '#FF9500', onClick: () => setStatusFilter('DEFEKT') },
+    echos: { label: 'Echos', value: echosCount, icon: Speaker, color: '#00C853', onClick: () => { setStatusFilter('ALL'); setTypeFilter('ALEXA_VOICE_ENABLED'); setHideProtected(false); } },
+    ha: { label: 'HA', value: haCount, icon: Home, color: '#3B82F6', onClick: () => { setStatusFilter('ALL'); setSourceFilter('HA'); setHideProtected(false); } },
+    gruppen: { label: 'Gruppen', value: groupCount, icon: Layers, color: '#8B5CF6', onClick: () => { setStatusFilter('ALL'); setTypeFilter('GROUP'); setHideProtected(false); } },
+    loeschbar: { label: 'Löschbar', value: deletableCount, icon: Trash2, color: '#FF3B30', onClick: () => { setStatusFilter('ALL'); setOnlyDeletable(true); setHideProtected(false); } },
+    geschuetzt: { label: 'Geschützt', value: protectedCount, icon: Shield, color: '#64748B', onClick: () => { setStatusFilter('PROTECTED'); setHideProtected(false); } }
+  };
+
   const filteredAndSortedDevices = useMemo(() => {
     let result = devices.filter(d => {
       const isOnline = isDeviceOnline(d);
@@ -126,6 +160,8 @@ export default function App() {
       if (statusFilter === 'ONLINE' && !isOnline) return false;
       if (statusFilter === 'OFFLINE' && isOnline) return false;
       if (statusFilter === 'ECHO' && !isEcho(d)) return false;
+      if (statusFilter === 'DEFEKT' && hasEndpointId(d)) return false;
+      if (statusFilter === 'PROTECTED' && !isProtected) return false;
       
       const devSource = source(d);
       if (sourceFilter !== 'ALL' && devSource !== sourceFilter) return false;
@@ -487,7 +523,7 @@ export default function App() {
         </div>
 
         {/* Right Sidebar */}
-        <div className="w-[400px] flex-none bg-[#131B2B] rounded-2xl border border-[#1E293B] p-5 flex flex-col gap-6 overflow-y-auto">
+        <div className="w-[400px] flex-none bg-[#131B2B] rounded-2xl border border-[#1E293B] p-5 flex flex-col gap-3 overflow-y-auto">
           {selectedDevice ? (
             <>
               {/* Header section with glowing image */}

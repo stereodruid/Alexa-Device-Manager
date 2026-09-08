@@ -245,6 +245,9 @@ export function useAlexa() {
     
     logger(`Sende Sprachausgabe an ${d.displayName}: "${text}"`);
     try {
+      const csrfMatch = document.cookie.match(/csrf=([^;]+)/i);
+      const csrfToken = csrfMatch ? csrfMatch[1] : '';
+
       const sequenceJson = JSON.stringify({
         "@type": "com.amazon.alexa.behavior.model.Sequence",
         "startNode": {
@@ -261,7 +264,11 @@ export function useAlexa() {
       });
       const res = await fetch(API_PREVIEW, {
         method: 'POST',
-        headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+        headers: { 
+          Accept: 'application/json', 
+          'Content-Type': 'application/json',
+          'csrf': csrfToken
+        },
         body: JSON.stringify({
           behaviorId: "PREVIEW",
           sequenceJson,
