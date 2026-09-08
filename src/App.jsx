@@ -63,6 +63,7 @@ export default function App() {
   const [sourceFilter, setSourceFilter] = useState('ALL');
   const [onlyDeletable, setOnlyDeletable] = useState(false);
   const [hideProtected, setHideProtected] = useState(true);
+  const [powerStates, setPowerStates] = useState({});
   
   const [sortConfig, setSortConfig] = useState({ key: 'name', dir: 'asc' });
   const logEndRef = useRef(null);
@@ -440,8 +441,14 @@ export default function App() {
                             )}
                             {colId === 'actions' && (
                               <td className="p-3 whitespace-nowrap w-20">
-                                <button onClick={(e) => { e.stopPropagation(); toggleDevices([d], d._admEnablement === 'DISABLED_BY_CUSTOMER' ? true : false); }} className="text-slate-500 hover:text-white transition mr-3" title="Aktivieren / Deaktivieren"><Power className="w-4 h-4 inline-block" /></button>
-                                <button onClick={(e) => { e.stopPropagation(); if (hasEndpointId(d)) { if(confirm('Soll dieses Gerät permanent aus Alexa gelöscht werden?')) deleteDevices([d]); } else { alert('Dieses Gerät (z.B. Echo, Gruppe) kann nicht gelöscht werden.'); } }} className="text-slate-500 hover:text-[#FF3B30] transition" title="Löschen"><Trash2 className="w-4 h-4 inline-block" /></button>
+                                <div className="flex gap-2">
+                                  <button onClick={(e) => { e.stopPropagation(); toggleDevices([d], d._admEnablement === 'DISABLED_BY_CUSTOMER' ? true : false); }} className="p-1.5 text-slate-400 hover:text-[#00A3FF] transition" title="Aktivieren/Deaktivieren (Sichtbarkeit)">
+                                    <Shield className="w-4 h-4" />
+                                  </button>
+                                  <button onClick={(e) => { e.stopPropagation(); if (hasEndpointId(d) && confirm('Wirklich löschen?')) deleteDevices([d]); }} className={`p-1.5 transition ${hasEndpointId(d) ? 'text-slate-400 hover:text-[#FF3B30]' : 'text-slate-700 cursor-not-allowed'}`} title="Löschen">
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </div>
                               </td>
                             )}
                             {colId === 'status' && (
@@ -510,11 +517,12 @@ export default function App() {
                   <Trash2 className="w-5 h-5" />
                 </button>
                 <div className="w-px h-6 bg-[#1E293B] mx-2"></div>
-                <button onClick={() => switchDeviceState(selectedDevice, true)} className="p-2 text-[#00C853] hover:text-[#00E676] transition shadow-[0_0_10px_rgba(0,200,83,0.2)] rounded-full" title="Einschalten (ON)">
+                <button onClick={() => {
+                   const isCurrentlyOn = powerStates[selectedDevice.id] || false;
+                   switchDeviceState(selectedDevice, !isCurrentlyOn);
+                   setPowerStates(prev => ({ ...prev, [selectedDevice.id]: !isCurrentlyOn }));
+                }} className={`p-2 transition rounded-full shadow-lg ${powerStates[selectedDevice.id] ? 'text-[#00C853] hover:text-[#00E676] shadow-[#00C853]/20' : 'text-[#FF3B30] hover:text-[#FF5252] shadow-[#FF3B30]/20'}`} title="Gerät Schalten (On/Off)">
                   <Power className="w-5 h-5" />
-                </button>
-                <button onClick={() => switchDeviceState(selectedDevice, false)} className="p-2 text-[#FF3B30] hover:text-[#FF5252] transition shadow-[0_0_10px_rgba(255,59,48,0.2)] rounded-full" title="Ausschalten (OFF)">
-                  <Power className="w-5 h-5 opacity-50" />
                 </button>
                 <button onClick={() => alert('Bitte nicht stören wird übermittelt...')} className="p-2 text-slate-400 hover:text-purple-400 transition ml-2" title="Bitte nicht stören (DND)">
                   <Moon className="w-5 h-5" />

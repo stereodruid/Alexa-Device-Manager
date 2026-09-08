@@ -47,7 +47,7 @@ export function useAlexa() {
       const gqlRes = await fetch(API_ENDPOINTS, {
         method: 'POST',
         headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query }),
+        body: JSON.stringify({ operationName: 'getDevicesBaseData', query }),
       });
       
       let endpointByEntityId = new Map();
@@ -55,9 +55,15 @@ export function useAlexa() {
       
       if (gqlRes.ok) {
         const gqlData = await gqlRes.json();
-        const eps = gqlData.data?.allDevices?.endpoints || [];
+        if (gqlData.errors) {
+          logger(`GraphQL Warnung/Fehler: ${JSON.stringify(gqlData.errors).substring(0, 100)}`);
+        }
+        const eps = gqlData.data?.allDevices?.endpoints;
+        if (!eps) {
+          logger(`Fehler: Keine Endpoints im GraphQL-Data Objekt gefunden! (Data keys: ${Object.keys(gqlData).join(',')})`);
+        }
         
-        for (const endpoint of eps) {
+        for (const endpoint of (eps || [])) {
           const endpointId = endpoint?.endpointId;
           const applianceId = endpoint?.legacyAppliance?.applianceId;
           const entityId = endpoint?.legacyIdentifiers?.chrsIdentifier?.entityId;
