@@ -274,27 +274,6 @@ export function useAlexa() {
       logger(`-> Ausnahme beim Senden (TTS): ${err.message}`);
     }
   };
-      const res = await fetch(API_PREVIEW, {
-        method: 'POST',
-        headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          behaviorId: "PREVIEW",
-          sequenceJson,
-          status: "READY"
-        })
-      });
-      if(res.ok) {
-         logger(`-> TTS erfolgreich gesendet.`);
-         return true;
-      } else {
-         logger(`-> TTS Fehler: HTTP ${res.status}`);
-         return false;
-      }
-    } catch (e) {
-      logger(`-> Ausnahme beim TTS: ${e.message}`);
-      return false;
-    }
-  };
 
   return { devices, loading, error, fetchDevices, logs, logger, deleteDevices, toggleDevices, switchDeviceState, sendTTS };
 }
