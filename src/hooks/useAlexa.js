@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 
 const API_LIST = '/api/behaviors/entities?skillId=amzn1.ask.1p.smarthome';
 const API_ENDPOINTS = '/nexus/v1/graphql';
-const API_DELETE_LEGACY = id => /api/phoenix/appliance/ + encodeURIComponent(id);
+const API_DELETE_LEGACY = id => '/api/phoenix/appliance/' + encodeURIComponent(id);
 
 export function useAlexa() {
   const [devices, setDevices] = useState([]);
@@ -19,7 +19,7 @@ export function useAlexa() {
       const listData = await listRes.json();
       
       // 2. Fetch GraphQL endpoints for Delete IDs and Status
-      const query = query getDevicesBaseData {
+      const query = `query getDevicesBaseData {
         allDevices: listEndpoints(listEndpointsInput: { includeHouseholdDevices: true }) {
           endpoints {
             endpointId: id
@@ -38,7 +38,7 @@ export function useAlexa() {
             }
           }
         }
-      };
+      }`;
       const gqlRes = await fetch(API_ENDPOINTS, {
         method: 'POST',
         headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
