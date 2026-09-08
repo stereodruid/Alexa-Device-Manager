@@ -267,97 +267,33 @@ export default function App() {
       </header>
       
       {/* KPI & Banner Row */}
-      <div className="flex-none flex gap-4">
-        <div className="flex-1 grid grid-cols-9 gap-3">
-          <div className="bg-[#131B2B] border border-[#1E293B] rounded-2xl p-3 flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-[#00A3FF]/10 flex items-center justify-center text-[#00A3FF]">
-              <Smartphone className="w-4 h-4" />
-            </div>
-            <div>
-              <div className="text-xl font-bold text-white leading-tight">{devices.length}</div>
-              <div className="text-[10px] text-slate-400">Gesamt</div>
-            </div>
-          </div>
-          <div className="bg-[#131B2B] border border-[#1E293B] rounded-2xl p-3 flex items-center gap-3 shadow-[0_0_15px_rgba(34,197,94,0.05)]">
-            <div className="w-8 h-8 rounded-xl bg-[#00FF88]/10 flex items-center justify-center">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#00FF88] shadow-[0_0_8px_#00FF88]"></span>
-            </div>
-            <div>
-              <div className="text-xl font-bold text-white leading-tight">{onlineCount}</div>
-              <div className="text-[10px] text-slate-400">Online</div>
-            </div>
-          </div>
-          <div className="bg-[#131B2B] border border-[#1E293B] rounded-2xl p-3 flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-slate-700/30 flex items-center justify-center">
-              <span className="w-2.5 h-2.5 rounded-full bg-slate-500"></span>
-            </div>
-            <div>
-              <div className="text-xl font-bold text-white leading-tight">{offlineCount}</div>
-              <div className="text-[10px] text-slate-400">Offline</div>
-            </div>
-          </div>
-          <div className="bg-[#131B2B] border border-[#1E293B] rounded-2xl p-3 flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-[#FF9500]/10 flex items-center justify-center text-[#FF9500]">
-              <AlertTriangle className="w-4 h-4" />
-            </div>
-            <div>
-              <div className="text-xl font-bold text-white leading-tight">{defektCount}</div>
-              <div className="text-[10px] text-slate-400">Defekt</div>
-            </div>
-          </div>
-          <div className="bg-[#131B2B] border border-[#1E293B] rounded-2xl p-3 flex items-center gap-3 cursor-pointer hover:bg-[#1E293B] transition" onClick={() => {setStatusFilter('ECHO'); setHideProtected(false);}}>
-            <div className="w-8 h-8 rounded-xl bg-[#00FFFF]/10 flex items-center justify-center text-[#00FFFF]">
-              <Speaker className="w-4 h-4" />
-            </div>
-            <div>
-              <div className="text-xl font-bold text-white leading-tight">{echoCount}</div>
-              <div className="text-[10px] text-slate-400">Echos</div>
-            </div>
-          </div>
-          <div className="bg-[#131B2B] border border-[#1E293B] rounded-2xl p-3 flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-[#007AFF]/10 flex items-center justify-center text-[#007AFF]">
-              <Home className="w-4 h-4" />
-            </div>
-            <div>
-              <div className="text-xl font-bold text-white leading-tight">{haCount}</div>
-              <div className="text-[10px] text-slate-400">HA</div>
-            </div>
-          </div>
-          <div className="bg-[#131B2B] border border-[#1E293B] rounded-2xl p-3 flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-[#AF52DE]/10 flex items-center justify-center text-[#AF52DE]">
-              <Layers className="w-4 h-4" />
-            </div>
-            <div>
-              <div className="text-xl font-bold text-white leading-tight">{groupCount}</div>
-              <div className="text-[10px] text-slate-400">Gruppen</div>
-            </div>
-          </div>
-          <div className="bg-[#131B2B] border border-[#1E293B] rounded-2xl p-3 flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-[#FF3B30]/10 flex items-center justify-center text-[#FF3B30]">
-              <Trash2 className="w-4 h-4" />
-            </div>
-            <div>
-              <div className="text-xl font-bold text-white leading-tight">{deletableCount}</div>
-              <div className="text-[10px] text-slate-400">Löschbar</div>
-            </div>
-          </div>
-          <div className="bg-[#131B2B] border border-[#1E293B] rounded-2xl p-3 flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-slate-700/30 flex items-center justify-center text-slate-400">
-              <Shield className="w-4 h-4" />
-            </div>
-            <div>
-              <div className="text-xl font-bold text-white leading-tight">0</div>
-              <div className="text-[10px] text-slate-400">Geschützt</div>
-            </div>
-          </div>
+      <div className="flex-none flex gap-3 h-16">
+        <div className="w-64 flex-none bg-[#0A101A] rounded-xl border border-[#1E293B] p-3 flex flex-col justify-center relative overflow-hidden">
+          <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-[#00A3FF]/20 to-transparent blur-xl"></div>
+          <h1 className="text-[#00A3FF] font-bold text-sm tracking-wide leading-tight relative z-10">Dein Zuhause.<br/>Deine Kontrolle.</h1>
+          <p className="text-slate-500 text-[9px] uppercase tracking-widest mt-0.5 font-semibold relative z-10">AURA DEVICE MASTER</p>
         </div>
-        <div className="w-[400px] flex-none bg-[#0A101A] rounded-2xl border border-[#1E293B] p-4 flex items-center relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-[#007AFF] blur-[80px] opacity-20"></div>
-          <div className="relative z-10 w-full text-center lg:text-left pl-2">
-            <div className="text-[#00A3FF] font-bold text-xl leading-tight">Dein Zuhause.</div>
-            <div className="text-[#00A3FF] font-bold text-xl leading-tight">Deine Kontrolle.</div>
-            <div className="text-xs text-slate-400 mt-1">Schnell. Sicher. Übersichtlich.</div>
-          </div>
+
+        <div className="flex-1 grid grid-cols-9 gap-3">
+          {kpiOrder.map(kpiId => {
+            const k = kpiData[kpiId];
+            if (!k) return null;
+            const Icon = k.icon;
+            return (
+              <div key={kpiId} draggable={true} onDragStart={(e) => handleKpiDragStart(e, kpiId)} onDragOver={(e) => e.preventDefault()} onDrop={(e) => handleKpiDrop(e, kpiId)} onClick={k.onClick} className="bg-[#131B2B] border border-[#1E293B] rounded-xl p-2 px-3 flex items-center gap-3 cursor-pointer hover:bg-[#1E293B] hover:-translate-y-1 hover:shadow-lg transition-all active:scale-95 select-none" title="Klicken zum Filtern / Ziehen zum Sortieren">
+                <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${k.color}15`, color: k.color }}>
+                  {Icon ? <Icon className="w-3.5 h-3.5" /> : (
+                    kpiId === 'online' ? <span className="w-2 h-2 rounded-full bg-[#00FF88] shadow-[0_0_6px_#00FF88]"></span> :
+                    kpiId === 'offline' ? <span className="w-2 h-2 rounded-full bg-slate-500"></span> : null
+                  )}
+                </div>
+                <div>
+                  <div className="text-lg font-bold text-white leading-tight">{k.value}</div>
+                  <div className="text-[9px] text-slate-400 uppercase tracking-wider">{k.label}</div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 

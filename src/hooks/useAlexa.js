@@ -275,8 +275,14 @@ export function useAlexa() {
           status: "ENABLED"
         })
       });
-      if (res.ok) logger(`-> Sprachausgabe erfolgreich gesendet!`);
-      else logger(`-> Fehler beim Senden (TTS): HTTP ${res.status}`);
+      if (res.ok) {
+        logger(`-> Sprachausgabe erfolgreich gesendet!`);
+      } else {
+        const errorText = await res.text().catch(() => '');
+        logger(`-> Fehler beim Senden (TTS): HTTP ${res.status}`);
+        logger(`-> Amazon API sagt: ${errorText.substring(0, 200)}`);
+        logger(`-> Verwendete Parameter: Typ=${dt}, Serial=${dsn}, CID=${cid}`);
+      }
     } catch (err) {
       logger(`-> Ausnahme beim Senden (TTS): ${err.message}`);
     }
