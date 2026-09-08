@@ -267,16 +267,16 @@ export default function App() {
       </header>
       
       {/* KPI & Banner Row */}
-      <div className="flex-none flex gap-2 h-10">
-        <div className="w-56 flex-none bg-[#0A101A] rounded-lg border border-[#1E293B] px-3 flex flex-col justify-center relative overflow-hidden">
+      <div className="flex-none flex gap-3 h-16">
+        <div className="w-64 flex-none bg-[#0A101A] rounded-xl border border-[#1E293B] px-4 flex flex-col justify-center relative overflow-hidden">
           <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-[#00A3FF]/20 to-transparent blur-xl"></div>
-          <div className="flex justify-between items-center relative z-10">
-            <span className="text-[#00A3FF] font-bold text-xs tracking-wide">Aura Device Master</span>
-            <span className="text-slate-500 text-[8px] uppercase tracking-widest font-semibold">v2.0</span>
+          <div className="flex flex-col relative z-10">
+            <span className="text-[#00A3FF] font-bold text-sm tracking-wide leading-tight">Aura Device Master</span>
+            <span className="text-slate-500 text-[9px] uppercase tracking-widest font-semibold mt-0.5">Control Panel v2</span>
           </div>
         </div>
 
-        <div className="flex-1 flex gap-2 overflow-x-auto pb-1 scrollbar-thin">
+        <div className="flex-1 flex gap-3 overflow-x-auto pb-1 scrollbar-thin">
           {kpiOrder.map(kpiId => {
             const k = kpiData[kpiId];
             if (!k) return null;
@@ -289,18 +289,18 @@ export default function App() {
                 onDragOver={(e) => e.preventDefault()} 
                 onDrop={(e) => { e.preventDefault(); handleKpiDrop(e, kpiId); }} 
                 onClick={k.onClick} 
-                className="flex-1 min-w-[80px] bg-[#131B2B] border border-[#1E293B] rounded-lg px-2 flex items-center gap-2 cursor-pointer hover:bg-[#1E293B] hover:-translate-y-0.5 hover:shadow-md transition-all active:scale-95 select-none" 
+                className="flex-1 min-w-[90px] bg-[#131B2B] border border-[#1E293B] rounded-xl px-3 flex items-center gap-3 cursor-pointer hover:bg-[#1E293B] hover:-translate-y-1 hover:shadow-lg transition-all active:scale-95 select-none" 
                 title="Klicken zum Filtern / Ziehen zum Sortieren"
               >
-                <div className="w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${k.color}15`, color: k.color }}>
-                  {Icon ? <Icon className="w-3 h-3" /> : (
-                    kpiId === 'online' ? <span className="w-1.5 h-1.5 rounded-full bg-[#00FF88] shadow-[0_0_4px_#00FF88]"></span> :
-                    kpiId === 'offline' ? <span className="w-1.5 h-1.5 rounded-full bg-slate-500"></span> : null
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${k.color}15`, color: k.color }}>
+                  {Icon ? <Icon className="w-4 h-4" /> : (
+                    kpiId === 'online' ? <span className="w-2 h-2 rounded-full bg-[#00FF88] shadow-[0_0_6px_#00FF88]"></span> :
+                    kpiId === 'offline' ? <span className="w-2 h-2 rounded-full bg-slate-500"></span> : null
                   )}
                 </div>
                 <div className="flex flex-col justify-center overflow-hidden">
-                  <div className="text-sm font-bold text-white leading-none truncate">{k.value}</div>
-                  <div className="text-[8px] text-slate-400 uppercase tracking-widest mt-0.5 truncate">{k.label}</div>
+                  <div className="text-xl font-bold text-white leading-none truncate">{k.value}</div>
+                  <div className="text-[10px] text-slate-400 uppercase tracking-widest mt-1 truncate">{k.label}</div>
                 </div>
               </div>
             );
@@ -558,13 +558,15 @@ export default function App() {
               )}
 
               {/* CLI Terminal */}
-              <div className="flex-1 min-h-[160px] bg-[#0A0F18] border border-[#1E293B] rounded-xl p-3 font-mono text-[11px] text-[#00FF00] overflow-y-auto shadow-inner flex flex-col gap-1">
-                <div className="flex items-center gap-2 text-slate-500 border-b border-slate-800 pb-2 mb-2 sticky top-0 bg-[#0A0F18] z-10">
-                  <Terminal className="w-4 h-4" /> CLI Terminal
+              <div className="flex-1 min-h-[160px] bg-[#0A0F18] border border-[#1E293B] rounded-xl font-mono text-[11px] text-[#00FF00] shadow-inner flex flex-col overflow-hidden">
+                  <div className="flex items-center gap-2 text-slate-500 border-b border-slate-800 p-2 px-3 bg-[#0A1018] z-10 flex-none">
+                    <Terminal className="w-4 h-4" /> CLI Terminal
+                  </div>
+                  <div className="flex-1 overflow-y-auto p-3 flex flex-col gap-1">
+                    {logs.map((l, i) => <div key={i}>{l}</div>)}
+                    <div ref={logEndRef} />
+                  </div>
                 </div>
-                {logs.map((l, i) => <div key={i}>{l}</div>)}
-                <div ref={logEndRef} />
-              </div>
             </>
           ) : (
             <div className="flex-1 flex flex-col items-center justify-center text-slate-500 text-center gap-4">
@@ -574,13 +576,15 @@ export default function App() {
               </div>
               <p>Wähle links ein Gerät aus, um Details und Aktionen anzuzeigen.</p>
               
-              <div className="w-full mt-8 bg-[#0A0F18] border border-[#1E293B] rounded-xl p-3 font-mono text-[11px] text-[#00FF00] overflow-y-auto shadow-inner flex flex-col gap-1 text-left h-48">
-                <div className="flex items-center gap-2 text-slate-500 border-b border-slate-800 pb-2 mb-2 sticky top-0 bg-[#0A0F18] z-10">
-                  <Terminal className="w-4 h-4" /> CLI Terminal
+              <div className="w-full mt-8 bg-[#0A0F18] border border-[#1E293B] rounded-xl font-mono text-[11px] text-[#00FF00] shadow-inner flex flex-col text-left h-48 overflow-hidden">
+                  <div className="flex items-center gap-2 text-slate-500 border-b border-slate-800 p-2 px-3 bg-[#0A1018] z-10 flex-none">
+                    <Terminal className="w-4 h-4" /> CLI Terminal
+                  </div>
+                  <div className="flex-1 overflow-y-auto p-3 flex flex-col gap-1">
+                    {logs.map((l, i) => <div key={i}>{l}</div>)}
+                    <div ref={logEndRef} />
+                  </div>
                 </div>
-                {logs.map((l, i) => <div key={i}>{l}</div>)}
-                <div ref={logEndRef} />
-              </div>
             </div>
           )}
         </div>
