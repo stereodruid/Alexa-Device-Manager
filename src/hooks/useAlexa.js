@@ -77,23 +77,49 @@ export function useAlexa() {
 
       // Merge data
       const merged = listData.map(d => {
-        let match = null;
-        if (d.id) {
-           const extractedEntityId = d.id.includes('amzn1.ask.skill') ? d.id : d.id.split('-').pop();
-           match = endpointByEntityId.get(extractedEntityId) || endpointByEntityId.get(d.id);
+        const endpoint = endpointByEntityId.get(d.id);
+        if (endpoint) {
+          return {
+            ...d,
+            _admApplianceId: endpoint.applianceId || null,
+            _admEndpointId: endpoint.endpointId || null,
+            _admEnablement: endpoint.enablement || null,
+            _admReachability: endpoint.reachability || null,
+            _gqlMatch: true
+          };
         }
-        if (!match && d.id) match = allGraphQLById.get(d.id);
-        if (!match && d.alexaId) match = allGraphQLById.get(d.alexaId);
-
         return {
           ...d,
-          _admApplianceId: match?.applianceId || d.alexaId,
-          _admEndpointId: match?.endpointId,
-          _admEnablement: match?.enablement,
-          _admReachability: match?.reachability,
-          _gqlMatch: !!match
+          _admApplianceId: null,
+          _admEndpointId: null,
+          _admEnablement: null,
+          _admReachability: null,
+          _gqlMatch: false
         };
       });
+
+      // Add missing GraphQL-only devices (from allGraphQLById) just like the old script did
+      const matchedEndpointIds = new Set(merged.map(d => d._admEndpointId).filter(Boolean));
+      for (const [endpointId, data] of allGraphQLById.entries()) {
+        if (!matchedEndpointIds.has(endpointId)) {
+          const ep = data.raw;
+          const cat = ep.displayCategories?.primary?.value || 'OTHER';
+          const mfg = ep.manufacturer?.value?.text || '';
+          merged.push({
+            id: endpointId,
+            displayName: ep.friendlyNameObject?.value?.text || 'Unbekannt',
+            description: 'Nur via GraphQL gefunden',
+            manufacturerName: mfg,
+            providerData: { categoryType: cat, deviceType: cat },
+            availability: 'UNKNOWN',
+            _admApplianceId: ep.legacyAppliance?.applianceId || null,
+            _admEndpointId: endpointId,
+            _admEnablement: ep.enablement || null,
+            _admReachability: data.reachability || null,
+            _gqlMatch: true
+          });
+        }
+      }
 
       setDevices(merged);
     } catch (err) {

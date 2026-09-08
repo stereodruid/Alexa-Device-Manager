@@ -1,30 +1,79 @@
-import React, { useState, useEffect } from 'react';
-import { Search, Wifi, WifiOff, Trash2, RefreshCw } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Search, Wifi, WifiOff, Trash2, RefreshCw, ChevronUp, ChevronDown } from 'lucide-react';
 import { useAlexa } from './hooks/useAlexa';
 
 export default function App() {
   const { devices, loading, error, fetchDevices } = useAlexa();
   const [selectedId, setSelectedId] = useState(null);
   const [search, setSearch] = useState('');
+  const [filterType, setFilterType] = useState('ALL'); // ALL, ONLINE, OFFLINE, DELETABLE
+  const [sortConfig, setSortConfig] = useState({ key: 'name', dir: 'asc' });
 
   // Fetch devices on mount
   useEffect(() => {
     fetchDevices();
   }, [fetchDevices]);
 
-  const filteredDevices = devices.filter(d => 
-    d.name?.toLowerCase().includes(search.toLowerCase()) || 
-    d.description?.toLowerCase().includes(search.toLowerCase())
-  );
+  const onlineCount = devices.filter(d => d._admReachability === 'OK' || d.availability === 'ONLINE').length;
+  const deletableCount = devices.filter(d => d._admEndpointId || d._admApplianceId).length;
+  const offlineCount = devices.length - onlineCount;
+
+  const handleSort = (key) => {
+    setSortConfig(prev => ({
+      key,
+      dir: prev.key === key && prev.dir === 'asc' ? 'desc' : 'asc'
+    }));
+  };
+
+  const filteredAndSortedDevices = useMemo(() => {
+    let result = devices.filter(d => {
+      const isOnline = d._admReachability === 'OK' || d.availability === 'ONLINE';
+      const isDeletable = Boolean(d._admEndpointId || d._admApplianceId);
+      
+      if (filterType === 'ONLINE' && !isOnline) return false;
+      if (filterType === 'OFFLINE' && isOnline) return false;
+      if (filterType === 'DELETABLE' && !isDeletable) return false;
+      
+      const q = search.toLowerCase();
+      if (q) {
+        const dName = (d.displayName || d.friendlyNameObject?.value?.text || 'Unbekannt').toLowerCase();
+        const dDesc = (d.description || '').toLowerCase();
+        if (!dName.includes(q) && !dDesc.includes(q)) return false;
+      }
+      return true;
+    });
+
+    result.sort((a, b) => {
+      const getVal = (d) => {
+        if (sortConfig.key === 'name') return (d.displayName || d.friendlyNameObject?.value?.text || 'Unbekannt').toLowerCase();
+        if (sortConfig.key === 'description') return (d.description || '').toLowerCase();
+        if (sortConfig.key === 'type') return (d.providerData?.deviceType || d.icon?.value || d.deviceFamily || '').toLowerCase();
+        if (sortConfig.key === 'status') return (d._admReachability === 'OK' || d.availability === 'ONLINE') ? '1' : '0';
+        return '';
+      };
+      const valA = getVal(a);
+      const valB = getVal(b);
+      if (valA < valB) return sortConfig.dir === 'asc' ? -1 : 1;
+      if (valA > valB) return sortConfig.dir === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    return result;
+  }, [devices, filterType, search, sortConfig]);
 
   const selectedDevice = devices.find(d => d.id === selectedId);
-  const onlineCount = devices.filter(d => d._admReachability === 'OK' || d.availability === 'ONLINE').length;
-  const deletableCount = devices.filter(d => d._admApplianceId).length;
+
+  const SortIcon = ({ colKey }) => {
+    if (sortConfig.key !== colKey) return <ChevronUp className="w-4 h-4 opacity-0 group-hover:opacity-30 inline-block ml-1" />;
+    return sortConfig.dir === 'asc' 
+      ? <ChevronUp className="w-4 h-4 text-aura inline-block ml-1" />
+      : <ChevronDown className="w-4 h-4 text-aura inline-block ml-1" />;
+  };
 
   return (
-    <div className="min-h-screen bg-bgDark text-slate-300 font-sans p-6 flex flex-col gap-6">
+    <div className="h-screen max-h-screen bg-bgDark text-slate-300 font-sans p-6 flex flex-col gap-6 overflow-hidden">
       {/* Header */}
-      <header className="flex justify-between items-center bg-panel p-4 rounded-2xl shadow-lg border border-slate-700">
+      <header className="flex-none flex justify-between items-center bg-panel p-4 rounded-2xl shadow-lg border border-slate-700">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-full border-2 border-aura flex items-center justify-center text-aura font-bold text-xl shadow-[0_0_15px_rgba(0,210,255,0.4)]">A</div>
           <div>
@@ -54,76 +103,84 @@ export default function App() {
       </header>
       
       {/* KPI Cards */}
-      <div className="grid grid-cols-5 gap-4">
-        <div className="bg-panel p-4 rounded-xl border border-slate-700 flex items-center gap-4">
+      <div className="flex-none grid grid-cols-5 gap-4 cursor-pointer select-none">
+        <div onClick={() => setFilterType('ALL')} className={`p-4 rounded-xl border flex items-center gap-4 transition-all ${filterType === 'ALL' ? 'bg-aura/10 border-aura shadow-[0_0_15px_rgba(0,210,255,0.2)]' : 'bg-panel border-slate-700 hover:border-slate-500'}`}>
           <div className="text-3xl font-bold text-white">{devices.length}</div>
           <div className="text-sm text-slate-400">Geräte gesamt</div>
         </div>
-        <div className="bg-panel p-4 rounded-xl border border-green-500/30 flex items-center gap-4">
-          <Wifi className="text-green-500" />
+        
+        <div onClick={() => setFilterType('ONLINE')} className={`p-4 rounded-xl border flex items-center gap-4 transition-all col-span-2 ${filterType === 'ONLINE' ? 'bg-green-500/10 border-green-500 shadow-[0_0_15px_rgba(34,197,94,0.2)]' : 'bg-panel border-slate-700 hover:border-slate-500'}`}>
+          <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center text-green-500">
+            <Wifi className="w-5 h-5" />
+          </div>
           <div>
             <div className="text-2xl font-bold text-green-500">{onlineCount}</div>
             <div className="text-sm text-slate-400">Online</div>
           </div>
         </div>
-        <div className="bg-panel p-4 rounded-xl border border-slate-700 flex items-center gap-4">
-          <WifiOff className="text-slate-500" />
+
+        <div onClick={() => setFilterType('OFFLINE')} className={`p-4 rounded-xl border flex items-center gap-4 transition-all col-span-1 ${filterType === 'OFFLINE' ? 'bg-slate-700/50 border-slate-400' : 'bg-panel border-slate-700 hover:border-slate-500'}`}>
+          <div className="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-slate-400">
+            <WifiOff className="w-5 h-5" />
+          </div>
           <div>
-            <div className="text-2xl font-bold text-white">{devices.length - onlineCount}</div>
+            <div className="text-2xl font-bold text-slate-300">{offlineCount}</div>
             <div className="text-sm text-slate-400">Offline/Unbekannt</div>
           </div>
         </div>
-        <div className="bg-panel p-4 rounded-xl border border-red-500/30 flex items-center gap-4">
-          <Trash2 className="text-red-500" />
+
+        <div onClick={() => setFilterType('DELETABLE')} className={`p-4 rounded-xl border flex items-center gap-4 transition-all col-span-1 ${filterType === 'DELETABLE' ? 'bg-red-500/10 border-red-500 shadow-[0_0_15px_rgba(239,68,68,0.2)]' : 'bg-panel border-slate-700 hover:border-slate-500'}`}>
+          <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center text-red-500">
+            <Trash2 className="w-5 h-5" />
+          </div>
           <div>
             <div className="text-2xl font-bold text-red-500">{deletableCount}</div>
             <div className="text-sm text-slate-400">Löschbar</div>
           </div>
         </div>
-        <div className="bg-gradient-to-r from-panel to-slate-800 p-4 rounded-xl border border-aura/30 flex flex-col justify-center">
-           <div className="text-aura font-bold">Dein Zuhause. Deine Kontrolle.</div>
-           <div className="text-xs text-slate-400">Schnell. Sicher. Übersichtlich.</div>
-        </div>
       </div>
 
       {/* Main Grid: Table (75%) + Sidebar (25%) */}
-      <div className="grid grid-cols-4 gap-6 flex-1 min-h-0">
+      <div className="flex-1 min-h-0 grid grid-cols-4 gap-6">
         
-        {/* Table Area (Now takes 3 out of 4 columns, making it wider and sidebar narrower) */}
+        {/* Table Container */}
         <div className="col-span-3 bg-panel rounded-2xl border border-slate-700 flex flex-col overflow-hidden">
-          <div className="p-4 border-b border-slate-700 flex justify-between items-center bg-slate-800/50">
-             <div className="font-bold text-white">Gefundene Geräte: {filteredDevices.length}</div>
-             <div className="flex gap-2">
-               <button className="bg-slate-700 hover:bg-slate-600 px-4 py-1.5 rounded-lg text-sm text-white border border-slate-600">Deaktivieren</button>
-               <button className="bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/50 px-4 py-1.5 rounded-lg text-sm">Löschen</button>
-             </div>
+          <div className="flex-none p-4 border-b border-slate-700 flex justify-between items-center bg-bgDark/30">
+            <h2 className="font-bold text-white">Gefundene Geräte: {filteredAndSortedDevices.length}</h2>
+            <div className="flex gap-2">
+              <button className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-1.5 rounded-lg text-sm transition-colors">Deaktivieren</button>
+              <button className="bg-red-500/20 hover:bg-red-500/30 text-red-500 border border-red-500/50 px-4 py-1.5 rounded-lg text-sm transition-colors">Löschen</button>
+            </div>
           </div>
           
-          <div className="flex-1 overflow-auto">
+          <div className="flex-1 overflow-y-auto">
             {loading ? (
-              <div className="h-full flex flex-col items-center justify-center text-slate-500 gap-4">
-                <div className="w-16 h-16 rounded-full border-4 border-t-aura animate-spin"></div>
-                <p>Verbinde mit lokaler Alexa-Session...</p>
+              <div className="h-full flex items-center justify-center">
+                <RefreshCw className="w-8 h-8 text-aura animate-spin" />
               </div>
             ) : error ? (
-              <div className="h-full flex flex-col items-center justify-center text-red-400 gap-4 p-8 text-center">
-                <p>Fehler beim Laden: {error}</p>
-              </div>
+              <div className="p-8 text-center text-red-400">Fehler: {error}</div>
             ) : (
-              <table className="w-full text-left text-sm">
-                <thead className="bg-bgDark sticky top-0 border-b border-slate-700">
+              <table className="w-full text-left text-sm border-collapse">
+                <thead className="bg-slate-800/50 sticky top-0 z-10">
                   <tr>
-                    <th className="p-4 font-medium text-slate-400 w-10">
-                      <input type="checkbox" className="accent-aura w-4 h-4" />
+                    <th className="p-4 w-12"><input type="checkbox" className="accent-aura w-4 h-4" /></th>
+                    <th className="p-4 text-slate-400 font-semibold cursor-pointer select-none group" onClick={() => handleSort('name')}>
+                      Name <SortIcon colKey="name" />
                     </th>
-                    <th className="p-4 font-medium text-slate-400">Name</th>
-                    <th className="p-4 font-medium text-slate-400">Beschreibung</th>
-                    <th className="p-4 font-medium text-slate-400">Typ</th>
-                    <th className="p-4 font-medium text-slate-400">Status</th>
+                    <th className="p-4 text-slate-400 font-semibold cursor-pointer select-none group" onClick={() => handleSort('description')}>
+                      Beschreibung <SortIcon colKey="description" />
+                    </th>
+                    <th className="p-4 text-slate-400 font-semibold cursor-pointer select-none group" onClick={() => handleSort('type')}>
+                      Typ <SortIcon colKey="type" />
+                    </th>
+                    <th className="p-4 text-slate-400 font-semibold cursor-pointer select-none group" onClick={() => handleSort('status')}>
+                      Status <SortIcon colKey="status" />
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-700/50">
-                  {filteredDevices.map(d => {
+                  {filteredAndSortedDevices.map(d => {
                     const isOnline = d._admReachability === 'OK' || d.availability === 'ONLINE';
                     const devName = d.displayName || d.friendlyNameObject?.value?.text || 'Unbekannt';
                     const devType = d.providerData?.deviceType || d.icon?.value || d.deviceFamily || 'UNKNOWN';
