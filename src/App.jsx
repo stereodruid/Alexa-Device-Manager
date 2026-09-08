@@ -119,6 +119,8 @@ export default function App() {
   const groupCount = devices.filter(isGroup).length;
   const defektCount = devices.filter(d => !hasEndpointId(d)).length;
   const echoCount = devices.filter(isEcho).length;
+  const protectedCount = devices.length - deletableCount + groupCount + echoCount; // Roughly, or just length - deletableCount if we simplify it to isProtected logic. Let's just use exact logic.
+  const actualProtectedCount = devices.filter(d => !Boolean(d._admEndpointId || d._admApplianceId) || isGroup(d) || isEcho(d)).length;
 
   const handleSort = (key) => setSortConfig(prev => ({ key, dir: prev.key === key && prev.dir === 'asc' ? 'desc' : 'asc' }));
 
@@ -136,17 +138,16 @@ export default function App() {
     });
   };
 
-
   const kpiData = {
     gesamt: { label: 'Gesamt', value: devices.length, icon: Smartphone, color: '#00A3FF', onClick: () => { setTypeFilter('ALL'); setStatusFilter('ALL'); setGroupFilter('ALL'); setSourceFilter('ALL'); setOnlyDeletable(false); setHideProtected(false); } },
     online: { label: 'Online', value: onlineCount, icon: null, color: '#00FF88', onClick: () => setStatusFilter('ONLINE') },
     offline: { label: 'Offline', value: offlineCount, icon: null, color: '#94A3B8', onClick: () => setStatusFilter('OFFLINE') },
     defekt: { label: 'Defekt', value: defektCount, icon: AlertTriangle, color: '#FF9500', onClick: () => setStatusFilter('DEFEKT') },
-    echos: { label: 'Echos', value: echosCount, icon: Speaker, color: '#00C853', onClick: () => { setStatusFilter('ALL'); setTypeFilter('ALEXA_VOICE_ENABLED'); setHideProtected(false); } },
+    echos: { label: 'Echos', value: echoCount, icon: Speaker, color: '#00C853', onClick: () => { setStatusFilter('ALL'); setTypeFilter('ALEXA_VOICE_ENABLED'); setHideProtected(false); } },
     ha: { label: 'HA', value: haCount, icon: Home, color: '#3B82F6', onClick: () => { setStatusFilter('ALL'); setSourceFilter('HA'); setHideProtected(false); } },
     gruppen: { label: 'Gruppen', value: groupCount, icon: Layers, color: '#8B5CF6', onClick: () => { setStatusFilter('ALL'); setTypeFilter('GROUP'); setHideProtected(false); } },
     loeschbar: { label: 'Löschbar', value: deletableCount, icon: Trash2, color: '#FF3B30', onClick: () => { setStatusFilter('ALL'); setOnlyDeletable(true); setHideProtected(false); } },
-    geschuetzt: { label: 'Geschützt', value: protectedCount, icon: Shield, color: '#64748B', onClick: () => { setStatusFilter('PROTECTED'); setHideProtected(false); } }
+    geschuetzt: { label: 'Geschützt', value: actualProtectedCount, icon: Shield, color: '#64748B', onClick: () => { setStatusFilter('PROTECTED'); setHideProtected(false); } }
   };
 
   const filteredAndSortedDevices = useMemo(() => {
