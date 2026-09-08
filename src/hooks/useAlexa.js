@@ -9,9 +9,17 @@ export function useAlexa() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  const [logs, setLogs] = useState(['[System] Aura Device Master V2 initialisiert.']);
+
+  const logger = useCallback((msg) => {
+    const time = new Date().toLocaleTimeString('de-DE');
+    setLogs(prev => [...prev, `[${time}] ${msg}`]);
+  }, []);
+
   const fetchDevices = useCallback(async () => {
     setLoading(true);
     setError(null);
+    logger('Lade Geräte von Alexa...');
     try {
       // 1. Fetch basic list
       const listRes = await fetch(API_LIST, { headers: { Accept: 'application/json' }});
@@ -98,7 +106,7 @@ export function useAlexa() {
         };
       });
 
-      // Add missing GraphQL-only devices (from allGraphQLById) just like the old script did
+      // Add missing GraphQL-only devices
       const matchedEndpointIds = new Set(merged.map(d => d._admEndpointId).filter(Boolean));
       for (const [endpointId, data] of allGraphQLById.entries()) {
         if (!matchedEndpointIds.has(endpointId)) {
@@ -122,12 +130,84 @@ export function useAlexa() {
       }
 
       setDevices(merged);
+      logger(`${merged.length} Geräte geladen.`);
     } catch (err) {
       setError(err.message);
+      logger(`Fehler beim Laden: ${err.message}`);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [logger]);
 
-  return { devices, loading, error, fetchDevices };
+  const deleteDevices = async (devicesToDelete) => {
+    if (!devicesToDelete || !devicesToDelete.length) return;
+    logger(`Starte Löschung von ${devicesToDelete.length} Geräten...`);
+    
+    for (const d of devicesToDelete) {
+      try {
+        let status, statusText, body;
+        if (d._admEndpointId) {
+          const query = 'mutation forgetEndpoint($input: ForgetEndpointInput!) { forgetEndpoint(forgetEndpointInput: $input) { endpointId } }';
+          const res = await fetch(API_ENDPOINTS, {
+            method: 'POST',
+            headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+            body: JSON.stringify({ operationName: 'forgetEndpoint', query, variables: { input: { endpointId: d._admEndpointId } } }),
+          });
+          body = await res.json().catch(() => null);
+          const forgottenId = body?.data?.forgetEndpoint?.endpointId;
+          const errorMsg = body?.errors?.[0]?.message;
+          if (!res.ok || errorMsg || forgottenId !== d._admEndpointId) throw new Error(errorMsg || 'Alexa hat die Löschung nicht bestätigt.');
+          status = res.status;
+          statusText = 'vergessen (GraphQL)';
+        } else if (d._admApplianceId) {
+          const res = await fetch(API_DELETE_LEGACY(d._admApplianceId), { method: 'DELETE', headers: { Accept: 'application/json', 'Content-Type': 'application/json' }});
+          body = await res.text().catch(() => '');
+          status = res.status;
+          statusText = res.statusText + ' (Legacy API)';
+        } else {
+          throw new Error('Kein Lösch-ID vorhanden.');
+        }
+        logger(`${status} ${statusText} - ${d.displayName || 'Unbekannt'}`);
+      } catch (e) {
+        logger(`FEHLER: ${d.displayName || 'Unbekannt'} - ${e.message}`);
+      }
+      await new Promise(resolve => setTimeout(resolve, 800)); // Delay
+    }
+    logger(`Löschlauf beendet. Lade Geräte neu...`);
+    await fetchDevices();
+  };
+
+  const toggleDevices = async (devicesToToggle, enable) => {
+    if (!devicesToToggle || !devicesToToggle.length) return;
+    const target = enable ? 'ENABLED' : 'DISABLED_BY_CUSTOMER';
+    logger(`Setze ${devicesToToggle.length} Geräte auf ${target}...`);
+    
+    for (const d of devicesToToggle) {
+      if (!d._admEndpointId) {
+        logger(`FEHLER: ${d.displayName} hat keine Endpoint-ID für Deaktivierung.`);
+        continue;
+      }
+      try {
+        const query = 'mutation setEndpointEnablement($input: SetEndpointEnablementInput!) { setEndpointEnablement(setEndpointEnablementInput: $input) { endpoint { enablement } error { __typename } } }';
+        const res = await fetch(API_ENDPOINTS, {
+          method: 'POST',
+          headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+          body: JSON.stringify({ operationName: 'setEndpointEnablement', query, variables: { input: { endpointId: d._admEndpointId, enablement: target } } }),
+        });
+        const body = await res.json().catch(() => null);
+        const result = body?.data?.setEndpointEnablement;
+        const errorMsg = body?.errors?.[0]?.message || result?.error?.__typename;
+        const actual = result?.endpoint?.enablement;
+        if (!res.ok || errorMsg || actual !== target) throw new Error(errorMsg || `Fehler. Status: ${actual}`);
+        logger(`OK - ${d.displayName}: ${actual}`);
+      } catch (e) {
+        logger(`FEHLER: ${d.displayName} - ${e.message}`);
+      }
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+    logger(`Umschalten beendet. Lade Geräte neu...`);
+    await fetchDevices();
+  };
+
+  return { devices, loading, error, fetchDevices, logs, logger, deleteDevices, toggleDevices };
 }
