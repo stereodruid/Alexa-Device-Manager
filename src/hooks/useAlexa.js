@@ -234,15 +234,18 @@ export function useAlexa() {
   const sendTTS = async (d, text) => {
     let dt = d.deviceType || d.deviceFamily || (d.providerData ? d.providerData.deviceType : '');
     let dsn = d.serialNumber || (d.deviceAccountId ? d.deviceAccountId : d.id);
-    let cid = d.deviceOwnerCustomerId || 'A2Q2Q2Q2Q2Q2Q2';
+    
+    // Extract REAL customer ID from the page HTML instead of using a dummy fallback
+    let cid = '';
+    const cidMatch = document.documentElement.innerHTML.match(/"customerId"\s*:\s*"([^"]+)"/i);
+    if (cidMatch) cid = cidMatch[1];
+    if (!cid) cid = d.deviceOwnerCustomerId || 'A2Q2Q2Q2Q2Q2Q2';
     
     logger(`Sende Sprachausgabe an ${d.displayName}: "${text}"`);
     try {
       const csrfMatch = document.cookie.match(/csrf=([^;]+)/i);
       const csrfToken = csrfMatch ? csrfMatch[1] : '';
 
-      // If the deviceType is the generic ALEXA_VOICE_ENABLED, it will fail (HTTP 400).
-      // We must fetch the real hardware type and serial from devices-v2 API
       if (!dt || !dsn || dt === 'ALEXA_VOICE_ENABLED' || dsn.includes('-')) {
         try {
           const devRes = await fetch('/api/devices-v2/device?cached=true', {
@@ -258,7 +261,7 @@ export function useAlexa() {
             if (matchedDev) {
               dt = matchedDev.deviceType;
               dsn = matchedDev.serialNumber;
-              cid = matchedDev.deviceOwnerCustomerId;
+              if (matchedDev.deviceOwnerCustomerId) cid = matchedDev.deviceOwnerCustomerId;
             }
           }
         } catch (fetchErr) {
@@ -271,40 +274,91 @@ export function useAlexa() {
         return false;
       }
 
-      const sequenceJson = JSON.stringify({
-        "@type": "com.amazon.alexa.behavior.model.Sequence",
-        "startNode": {
-          "@type": "com.amazon.alexa.behavior.model.OpaquePayloadOperationNode",
-          "type": "Alexa.SynthesizeSpeech",
-          "operationPayload": {
-            "deviceType": dt,
-            "deviceSerialNumber": dsn,
-            "locale": "de-DE",
-            "customerId": cid,
-            "textToSpeak": text
+      const payloads = [
+        // 1. Standard SynthesizeSpeech
+        JSON.stringify({
+          "@type": "com.amazon.alexa.behavior.model.Sequence",
+          "startNode": {
+            "@type": "com.amazon.alexa.behavior.model.OpaquePayloadOperationNode",
+            "type": "Alexa.SynthesizeSpeech",
+            "operationPayload": {
+              "deviceType": dt,
+              "deviceSerialNumber": dsn,
+              "locale": "de-DE",
+              "customerId": cid,
+              "textToSpeak": text
+            }
           }
-        }
-      });
-      const res = await fetch(API_PREVIEW, {
-        method: 'POST',
-        headers: { 
-          Accept: 'application/json', 
-          'Content-Type': 'application/json',
-          'csrf': csrfToken
-        },
-        body: JSON.stringify({
-          behaviorId: "PREVIEW",
-          sequenceJson,
-          status: "ENABLED"
+        }),
+        // 2. Alternative Speak Node
+        JSON.stringify({
+          "@type": "com.amazon.alexa.behavior.model.Sequence",
+          "startNode": {
+            "@type": "com.amazon.alexa.behavior.model.OpaquePayloadOperationNode",
+            "type": "Alexa.Speak",
+            "operationPayload": {
+              "deviceType": dt,
+              "deviceSerialNumber": dsn,
+              "locale": "de-DE",
+              "customerId": cid,
+              "textToSpeak": text
+            }
+          }
+        }),
+        // 3. Announcement as absolute fallback
+        JSON.stringify({
+          "@type": "com.amazon.alexa.behavior.model.Sequence",
+          "startNode": {
+            "@type": "com.amazon.alexa.behavior.model.OpaquePayloadOperationNode",
+            "type": "AlexaAnnouncement.Announcement",
+            "operationPayload": {
+              "expireAfter": "PT10M",
+              "customerId": cid,
+              "content": [{
+                "locale": "de-DE",
+                "display": { "title": "Aura", "body": text },
+                "speak": { "type": "text", "value": text }
+              }],
+              "target": {
+                "customerId": cid,
+                "devices": [{ "deviceSerialNumber": dsn, "deviceTypeId": dt }]
+              }
+            }
+          }
         })
-      });
-      if (res.ok) {
-        logger(`-> Sprachausgabe erfolgreich gesendet!`);
-      } else {
-        const errorText = await res.text().catch(() => '');
-        logger(`-> Fehler beim Senden (TTS): HTTP ${res.status}`);
-        logger(`-> Amazon API sagt: ${errorText.substring(0, 100)}`);
-        logger(`-> Verwendet: Typ=${dt}, Serial=${dsn}`);
+      ];
+
+      let success = false;
+      let lastError = '';
+
+      for (let i = 0; i < payloads.length; i++) {
+        const res = await fetch(API_PREVIEW, {
+          method: 'POST',
+          headers: { 
+            Accept: 'application/json', 
+            'Content-Type': 'application/json',
+            'csrf': csrfToken
+          },
+          body: JSON.stringify({
+            behaviorId: "PREVIEW",
+            sequenceJson: payloads[i],
+            status: "ENABLED"
+          })
+        });
+
+        if (res.ok) {
+          logger(`-> Sprachausgabe erfolgreich gesendet! (Methode ${i + 1})`);
+          success = true;
+          break;
+        } else {
+          lastError = await res.text().catch(() => '');
+        }
+      }
+
+      if (!success) {
+        logger(`-> Fehler beim Senden (TTS): HTTP 400 (Alle Methoden fehlgeschlagen)`);
+        logger(`-> Amazon API sagt: ${lastError.substring(0, 100)}`);
+        logger(`-> Verwendet: Typ=${dt}, Serial=${dsn}, CID=${cid}`);
       }
     } catch (err) {
       logger(`-> Ausnahme beim Senden (TTS): ${err.message}`);
