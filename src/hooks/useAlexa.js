@@ -30,12 +30,17 @@ export function useAlexa() {
       const query = `query getDevicesBaseData {
         allDevices: listEndpoints(listEndpointsInput: { includeHouseholdDevices: true }) {
           endpoints {
-            id
+            endpointId: id
             enablement
-            description
-            friendlyNameObject { value { text } }
             legacyAppliance { applianceId }
-            reachability { reachability status statusDetail }
+            legacyIdentifiers { chrsIdentifier { entityId } }
+            friendlyNameObject { value { text } }
+            manufacturer { value { text } }
+            displayCategories { primary { value } }
+            features {
+              name
+              properties { reachabilityStatusValue name }
+            }
           }
         }
       }`;
@@ -44,24 +49,69 @@ export function useAlexa() {
         headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
         body: JSON.stringify({ query }),
       });
-      let endpointsMap = {};
+      
+      let endpointByEntityId = new Map();
+      let allGraphQLById = new Map();
+      
       if (gqlRes.ok) {
         const gqlData = await gqlRes.json();
         const eps = gqlData.data?.allDevices?.endpoints || [];
-        eps.forEach(ep => {
-          endpointsMap[ep.id] = {
-            _admEndpointId: ep.id,
-            _admApplianceId: ep.legacyAppliance?.applianceId,
-            _admEnablement: ep.enablement,
-            _admReachability: ep.reachability?.status || ep.reachability?.reachability || 'UNKNOWN'
-          };
-        });
+        
+        for (const endpoint of eps) {
+          const endpointId = endpoint?.endpointId;
+          const applianceId = endpoint?.legacyAppliance?.applianceId;
+          const entityId = endpoint?.legacyIdentifiers?.chrsIdentifier?.entityId;
+          let reachability = null;
+          if (Array.isArray(endpoint?.features)) {
+            const conn = endpoint.features.find(f => f.name === 'connectivity');
+            if (conn && Array.isArray(conn.properties)) {
+              const prop = conn.properties.find(p => p.reachabilityStatusValue || p.name === 'reachability');
+              if (prop) reachability = prop.reachabilityStatusValue;
+            }
+          }
+          const data = { endpointId, applianceId, enablement: endpoint?.enablement, reachability, raw: endpoint };
+          if (endpointId) allGraphQLById.set(endpointId, data);
+          for (const key of [endpointId, entityId, String(endpointId || '').replace(/^amzn1\.alexa\.endpoint\./, '')]) {
+            if (key) endpointByEntityId.set(key, data);
+          }
+        }
       }
 
+      const matchedEndpointIds = new Set();
       const merged = listData.map(d => {
-        const epMatch = endpointsMap[d.id] || Object.values(endpointsMap).find(ep => ep._admApplianceId === d.id) || {};
-        return { ...d, ...epMatch };
+        const endpoint = endpointByEntityId.get(d.id);
+        if (endpoint) {
+          matchedEndpointIds.add(endpoint.endpointId);
+          return {
+            ...d,
+            _admApplianceId: endpoint.applianceId || null,
+            _admEndpointId: endpoint.endpointId || null,
+            _admEnablement: endpoint.enablement || null,
+            _admReachability: endpoint.reachability || null
+          };
+        }
+        return d;
       });
+
+      for (const [endpointId, data] of allGraphQLById.entries()) {
+        if (!matchedEndpointIds.has(endpointId)) {
+          const ep = data.raw;
+          const cat = ep.displayCategories?.primary?.value || 'ENDPOINT';
+          const mfg = ep.manufacturer?.value?.text || '';
+          merged.push({
+            id: endpointId,
+            displayName: ep.friendlyNameObject?.value?.text || 'Unknown Endpoint',
+            description: 'GraphQL Skill Endpoint' + (mfg ? ` (${mfg})` : ''),
+            manufacturerName: mfg,
+            providerData: { categoryType: cat, deviceType: cat },
+            availability: 'UNKNOWN',
+            _admApplianceId: ep.legacyAppliance?.applianceId || null,
+            _admEndpointId: endpointId,
+            _admEnablement: ep.enablement || null,
+            _admReachability: data.reachability || null
+          });
+        }
+      }
 
       setDevices(merged);
       logger(`✓ ${merged.length} Geräte geladen.`);
