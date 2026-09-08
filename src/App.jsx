@@ -313,57 +313,7 @@ export default function App() {
         
         {/* Left Side: Table & Filters */}
         <div className="flex-1 flex flex-col gap-4 min-w-0">
-          {/* Action & Filter Bar */}
-          <div className="flex-none flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <div className="relative">
-                <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
-                <input type="text" placeholder="Geräte filtern ..." value={search} onChange={e => setSearch(e.target.value)} className="bg-[#0A0F18] border border-[#1E293B] rounded-lg pl-9 pr-4 py-2 text-sm focus:border-[#007AFF] outline-none text-white w-48" />
-              </div>
-              
-              <select value={typeFilter} onChange={e => setTypeFilter(e.target.value)} className="bg-[#0A0F18] border border-[#1E293B] rounded-lg px-3 py-2 text-sm outline-none text-slate-300 min-w-[140px]">
-                <option value="ALL">Alle Gerätetypen</option>
-                {types.map(t => <option key={t} value={t}>{t}</option>)}
-              </select>
-              
-              <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="bg-[#0A0F18] border border-[#1E293B] rounded-lg px-3 py-2 text-sm outline-none text-slate-300 min-w-[120px]">
-                <option value="ALL">Alle Status</option>
-                <option value="ONLINE">Online</option>
-                <option value="OFFLINE">Offline</option>
-              </select>
-
-              <select value={sourceFilter} onChange={e => setSourceFilter(e.target.value)} className="bg-[#0A0F18] border border-[#1E293B] rounded-lg px-3 py-2 text-sm outline-none text-slate-300 min-w-[120px]">
-                <option value="ALL">Alle Quellen</option>
-                {sources.map(s => <option key={s} value={s}>{s}</option>)}
-              </select>
-
-              <label className="flex items-center gap-2 text-sm text-slate-300 cursor-pointer ml-3">
-                <input type="checkbox" checked={hideProtected} onChange={e => setHideProtected(e.target.checked)} className="w-4 h-4 rounded border-[#1E293B]" />
-                Geschützte ausblenden
-              </label>
-              <label className="flex items-center gap-2 text-sm text-slate-300 cursor-pointer ml-3">
-                <input type="checkbox" checked={onlyDeletable} onChange={e => setOnlyDeletable(e.target.checked)} className="w-4 h-4 rounded border-[#1E293B]" />
-                Nur löschbare anzeigen
-              </label>
-            </div>
-            
-            <div className="flex items-center gap-2">
-              <button onClick={exportJson} className="flex items-center gap-2 bg-[#0A1D3A] hover:bg-[#102A54] text-[#00A3FF] border border-[#1E3A5F] px-4 py-2 rounded-lg text-sm font-medium transition">
-                <Download className="w-4 h-4" /> Sichern
-              </button>
-              <button onClick={() => handleBulkToggle(false)} className="flex items-center gap-2 bg-[#1C2534] hover:bg-[#253041] border border-[#2E3C51] text-white px-4 py-2 rounded-lg text-sm font-medium transition">
-                <Power className="w-4 h-4" /> Deaktivieren
-              </button>
-              <button onClick={handleBulkDelete} className="flex items-center gap-2 bg-[#A11B1B] hover:bg-[#8A1717] border border-[#B32020] text-white px-4 py-2 rounded-lg text-sm font-medium transition">
-                <Trash2 className="w-4 h-4" /> Löschen
-              </button>
-              <button className="p-2 bg-[#0A0F18] border border-[#1E293B] rounded-lg hover:bg-[#1E293B]">
-                <MoreHorizontal className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-
-          {/* Table */}
+            {/* Table */}
           <div className="flex-1 bg-[#131B2B] rounded-2xl border border-[#1E293B] overflow-hidden flex flex-col">
             <div className="flex-1 overflow-y-auto">
               <table className="w-full text-left text-sm border-collapse">
@@ -471,7 +421,7 @@ export default function App() {
         </div>
 
         {/* Right Sidebar */}
-        <div className="w-[400px] flex-none bg-[#131B2B] rounded-2xl border border-[#1E293B] p-5 flex flex-col gap-3 overflow-y-auto">
+        <div className="w-[400px] flex-none bg-[#131B2B] rounded-2xl border border-[#1E293B] p-5 flex flex-col gap-3 overflow-hidden">
           {selectedDevice ? (
             <>
               {/* Header section with glowing image */}
@@ -589,26 +539,70 @@ export default function App() {
           )}
         </div>
       </div>
+      {/* Filter & Action Footer */}
+      <div className="flex-none flex flex-col gap-2 pb-2">
+{/* Action & Filter Bar */}
+          <div className="flex-none flex justify-between items-center">
+            <div className="flex items-center gap-2">
+              <div className="relative">
+                <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
+                <input type="text" placeholder="Geräte filtern ..." value={search} onChange={e => setSearch(e.target.value)} className="bg-[#0A0F18] border border-[#1E293B] rounded-lg pl-9 pr-4 py-2 text-sm focus:border-[#007AFF] outline-none text-white w-48" />
+              </div>
+              
+              <select value={typeFilter} onChange={e => setTypeFilter(e.target.value)} className="bg-[#0A0F18] border border-[#1E293B] rounded-lg px-3 py-2 text-sm outline-none text-slate-300 min-w-[140px]">
+                <option value="ALL">Alle Gerätetypen</option>
+                {types.map(t => <option key={t} value={t}>{t}</option>)}
+              </select>
+              
+              <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="bg-[#0A0F18] border border-[#1E293B] rounded-lg px-3 py-2 text-sm outline-none text-slate-300 min-w-[120px]">
+                <option value="ALL">Alle Status</option>
+                <option value="ONLINE">Online</option>
+                <option value="OFFLINE">Offline</option>
+              </select>
 
-      {/* Footer Navigation (Konfigurationen) */}
-      <div className="flex-none flex justify-between items-center px-2 py-1 text-sm text-slate-500">
-        <div>{checkedIds.size} von {filteredAndSortedDevices.length} Geräten ausgewählt</div>
-        
-        <div className="flex gap-2">
-          <button className="px-4 py-1.5 rounded-md bg-[#1C2534] border border-[#2E3C51] text-white hover:bg-[#253041] transition text-xs font-medium">Konfiguration 1</button>
-          <button className="px-4 py-1.5 rounded-md bg-[#1C2534] border border-[#2E3C51] text-white hover:bg-[#253041] transition text-xs font-medium">Konfig 2</button>
-          <button className="px-4 py-1.5 rounded-md bg-[#1C2534] border border-[#2E3C51] text-white hover:bg-[#253041] transition text-xs font-medium">Konfig 3</button>
-        </div>
+              <select value={sourceFilter} onChange={e => setSourceFilter(e.target.value)} className="bg-[#0A0F18] border border-[#1E293B] rounded-lg px-3 py-2 text-sm outline-none text-slate-300 min-w-[120px]">
+                <option value="ALL">Alle Quellen</option>
+                {sources.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
 
-        <div className="flex items-center gap-2">
-          Einträge pro Seite
-          <select className="bg-[#0A0F18] border border-[#1E293B] rounded px-2 py-1 outline-none text-white">
-            <option>10</option>
-            <option>50</option>
-            <option>100</option>
-          </select>
+              <label className="flex items-center gap-2 text-sm text-slate-300 cursor-pointer ml-3">
+                <input type="checkbox" checked={hideProtected} onChange={e => setHideProtected(e.target.checked)} className="w-4 h-4 rounded border-[#1E293B]" />
+                Geschützte ausblenden
+              </label>
+              <label className="flex items-center gap-2 text-sm text-slate-300 cursor-pointer ml-3">
+                <input type="checkbox" checked={onlyDeletable} onChange={e => setOnlyDeletable(e.target.checked)} className="w-4 h-4 rounded border-[#1E293B]" />
+                Nur löschbare anzeigen
+              </label>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <button onClick={exportJson} className="flex items-center gap-2 bg-[#0A1D3A] hover:bg-[#102A54] text-[#00A3FF] border border-[#1E3A5F] px-4 py-2 rounded-lg text-sm font-medium transition">
+                <Download className="w-4 h-4" /> Sichern
+              </button>
+              <button onClick={() => handleBulkToggle(false)} className="flex items-center gap-2 bg-[#1C2534] hover:bg-[#253041] border border-[#2E3C51] text-white px-4 py-2 rounded-lg text-sm font-medium transition">
+                <Power className="w-4 h-4" /> Deaktivieren
+              </button>
+              <button onClick={handleBulkDelete} className="flex items-center gap-2 bg-[#A11B1B] hover:bg-[#8A1717] border border-[#B32020] text-white px-4 py-2 rounded-lg text-sm font-medium transition">
+                <Trash2 className="w-4 h-4" /> Löschen
+              </button>
+              <button className="p-2 bg-[#0A0F18] border border-[#1E293B] rounded-lg hover:bg-[#1E293B]">
+                <MoreHorizontal className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        <div className="flex justify-between items-center px-4 text-sm text-slate-500">
+          <div>{checkedIds.size} von {filteredAndSortedDevices.length} Geräten ausgewählt</div>
+          <div className="flex items-center gap-2">
+            Einträge pro Seite
+            <select className="bg-[#0A0F18] border border-[#1E293B] rounded px-2 py-1 outline-none text-white">
+              <option>10</option>
+              <option>50</option>
+              <option>100</option>
+            </select>
+          </div>
         </div>
       </div>
+</div>
 
     </div>
   );
