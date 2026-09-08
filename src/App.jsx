@@ -18,7 +18,7 @@ export default function App() {
   );
 
   const selectedDevice = devices.find(d => d.id === selectedId);
-  const onlineCount = devices.filter(d => d._admReachability === 'OK').length;
+  const onlineCount = devices.filter(d => d._admReachability === 'OK' || d.availability === 'ONLINE').length;
   const deletableCount = devices.filter(d => d._admApplianceId).length;
 
   return (
@@ -124,7 +124,9 @@ export default function App() {
                 </thead>
                 <tbody className="divide-y divide-slate-700/50">
                   {filteredDevices.map(d => {
-                    const isOnline = d._admReachability === 'OK';
+                    const isOnline = d._admReachability === 'OK' || d.availability === 'ONLINE';
+                    const devName = d.displayName || d.friendlyNameObject?.value?.text || 'Unbekannt';
+                    const devType = d.providerData?.deviceType || d.icon?.value || d.deviceFamily || 'UNKNOWN';
                     return (
                       <tr 
                         key={d.id} 
@@ -132,10 +134,10 @@ export default function App() {
                         className={`hover:bg-slate-700/30 cursor-pointer transition-colors ${selectedId === d.id ? 'bg-aura/10' : ''}`}
                       >
                         <td className="p-4"><input type="checkbox" className="accent-aura w-4 h-4" onClick={(e) => e.stopPropagation()}/></td>
-                        <td className="p-4 font-medium text-white">{d.name || d.deviceType || 'Unbekannt'}</td>
+                        <td className="p-4 font-medium text-white">{devName}</td>
                         <td className="p-4 text-slate-400">{d.description || '-'}</td>
                         <td className="p-4">
-                          <span className="bg-slate-800 text-xs px-2 py-1 rounded-md border border-slate-600">{d.deviceFamily || 'UNKNOWN'}</span>
+                          <span className="bg-slate-800 text-xs px-2 py-1 rounded-md border border-slate-600">{devType}</span>
                         </td>
                         <td className="p-4">
                           <div className="flex items-center gap-2">
@@ -152,30 +154,29 @@ export default function App() {
           </div>
         </div>
 
-        {/* Right Sidebar (Now 1 out of 4 columns, meaning it's narrower) */}
+        {/* Right Sidebar */}
         <div className="col-span-1 bg-panel rounded-2xl border border-slate-700 p-6 flex flex-col gap-6 overflow-y-auto">
            {selectedDevice ? (
              <>
                <div className="bg-bgDark rounded-xl p-8 flex items-center justify-center border border-slate-700/50 relative overflow-hidden min-h-[160px]">
                  <div className="absolute inset-0 bg-aura/5"></div>
-                 {/* Placeholder for specific realistic images */}
                  <div className="text-6xl relative z-10 drop-shadow-lg">
-                   {selectedDevice.deviceFamily === 'ECHO' || selectedDevice.deviceFamily === 'KNIGHT' ? '🔊' : '🔌'}
+                   {(selectedDevice.providerData?.deviceType === 'ECHO' || selectedDevice.deviceFamily === 'KNIGHT' || selectedDevice.icon?.value === 'ECHO') ? '🔊' : '🔌'}
                  </div>
                </div>
                <div>
-                 <h2 className="text-2xl font-bold text-white mb-1 leading-tight">{selectedDevice.name}</h2>
+                 <h2 className="text-2xl font-bold text-white mb-1 leading-tight">{selectedDevice.displayName || selectedDevice.friendlyNameObject?.value?.text || 'Unbekannt'}</h2>
                  <p className="text-slate-400 text-sm">{selectedDevice.description || 'Keine Beschreibung'}</p>
                  <div className="flex items-center gap-2 mt-2">
-                   <span className={`w-2 h-2 rounded-full ${selectedDevice._admReachability === 'OK' ? 'bg-green-500 shadow-[0_0_8px_#22c55e]' : 'bg-red-500 shadow-[0_0_8px_#ef4444]'}`}></span>
-                   <span className={`text-sm font-bold ${selectedDevice._admReachability === 'OK' ? 'text-green-500' : 'text-red-500'}`}>
-                     {selectedDevice._admReachability === 'OK' ? 'Online' : 'Offline'}
+                   <span className={`w-2 h-2 rounded-full ${(selectedDevice._admReachability === 'OK' || selectedDevice.availability === 'ONLINE') ? 'bg-green-500 shadow-[0_0_8px_#22c55e]' : 'bg-red-500 shadow-[0_0_8px_#ef4444]'}`}></span>
+                   <span className={`text-sm font-bold ${(selectedDevice._admReachability === 'OK' || selectedDevice.availability === 'ONLINE') ? 'text-green-500' : 'text-red-500'}`}>
+                     {(selectedDevice._admReachability === 'OK' || selectedDevice.availability === 'ONLINE') ? 'Online' : 'Offline'}
                    </span>
                  </div>
                </div>
                
                <div className="flex flex-col gap-3 text-sm mt-4 border-t border-slate-700 pt-6">
-                 <div className="flex justify-between"><span className="text-slate-500">Typ</span><span className="text-white font-medium text-right">{selectedDevice.deviceFamily || '-'}</span></div>
+                 <div className="flex justify-between"><span className="text-slate-500">Typ</span><span className="text-white font-medium text-right">{selectedDevice.providerData?.deviceType || selectedDevice.icon?.value || selectedDevice.deviceFamily || '-'}</span></div>
                  <div className="flex justify-between"><span className="text-slate-500">Netzwerk</span><span className="text-white font-medium text-right">{selectedDevice.deviceOwnerCustomerId ? 'Lokal/Cloud' : '-'}</span></div>
                  <div className="flex justify-between"><span className="text-slate-500">Löschbar</span><span className={selectedDevice._admApplianceId ? "text-red-400 font-medium" : "text-slate-500 font-medium"}>{selectedDevice._admApplianceId ? 'Ja' : 'Nein'}</span></div>
                  <div className="flex justify-between"><span className="text-slate-500">ID</span><span className="text-slate-400 text-xs truncate max-w-[120px]" title={selectedDevice.id}>{selectedDevice.id}</span></div>
