@@ -367,7 +367,7 @@ export default function App() {
                 <Download className="w-4 h-4" /> Sichern
               </button>
               <button onClick={() => handleBulkToggle(false)} className="flex items-center gap-2 bg-[#1C2534] hover:bg-[#253041] border border-[#2E3C51] text-white px-4 py-2 rounded-lg text-sm font-medium transition">
-                || Deaktivieren
+                <Power className="w-4 h-4" /> Deaktivieren
               </button>
               <button onClick={handleBulkDelete} className="flex items-center gap-2 bg-[#A11B1B] hover:bg-[#8A1717] border border-[#B32020] text-white px-4 py-2 rounded-lg text-sm font-medium transition">
                 <Trash2 className="w-4 h-4" /> Löschen

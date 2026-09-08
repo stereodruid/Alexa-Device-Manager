@@ -34,7 +34,7 @@ export function useAlexa() {
             enablement
             description
             friendlyNameObject { value { text } }
-            applianceId
+            legacyAppliance { applianceId }
             reachability { reachability status statusDetail }
           }
         }
@@ -51,7 +51,7 @@ export function useAlexa() {
         eps.forEach(ep => {
           endpointsMap[ep.id] = {
             _admEndpointId: ep.id,
-            _admApplianceId: ep.applianceId,
+            _admApplianceId: ep.legacyAppliance?.applianceId,
             _admEnablement: ep.enablement,
             _admReachability: ep.reachability?.status || ep.reachability?.reachability || 'UNKNOWN'
           };
