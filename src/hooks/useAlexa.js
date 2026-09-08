@@ -37,14 +37,20 @@ export function useAlexa() {
             friendlyNameObject { value { text } }
             manufacturer { value { text } }
             displayCategories { primary { value } }
-            reachability { reachability status }
+            features {
+              name
+              properties {
+                name
+                ... on Reachability { reachabilityStatusValue }
+              }
+            }
           }
         }
       }`;
       const gqlRes = await fetch(API_ENDPOINTS, {
         method: 'POST',
         headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
-        body: JSON.stringify({ operationName: 'getDevicesBaseData', query }),
+        body: JSON.stringify({ query }),
       });
       
       let endpointByEntityId = new Map();
@@ -64,7 +70,14 @@ export function useAlexa() {
           const endpointId = endpoint?.endpointId;
           const applianceId = endpoint?.legacyAppliance?.applianceId;
           const entityId = endpoint?.legacyIdentifiers?.chrsIdentifier?.entityId;
-          let reachability = endpoint?.reachability?.status || endpoint?.reachability?.reachability || null;
+          let reachability = null;
+          if (Array.isArray(endpoint?.features)) {
+            const conn = endpoint.features.find(f => f.name === 'connectivity');
+            if (conn && Array.isArray(conn.properties)) {
+              const prop = conn.properties.find(p => p.reachabilityStatusValue || p.name === 'reachability');
+              if (prop) reachability = prop.reachabilityStatusValue;
+            }
+          }
           
           const data = { endpointId, applianceId, enablement: endpoint?.enablement, reachability, raw: endpoint };
           if (endpointId) allGraphQLById.set(endpointId, data);
