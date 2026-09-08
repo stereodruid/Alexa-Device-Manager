@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Search, Wifi, WifiOff, Trash2, RefreshCw, ChevronUp, ChevronDown, Download, Terminal, CheckSquare, Square, Shield, MoreHorizontal, Moon, Speaker, Monitor, Zap, Thermometer, Radio, Lightbulb, Smartphone, Info } from 'lucide-react';
+import { Search, Wifi, WifiOff, Trash2, RefreshCw, ChevronUp, ChevronDown, Download, Terminal, CheckSquare, Square, Shield, MoreHorizontal, Moon, Speaker, Monitor, Zap, Thermometer, Radio, Lightbulb, Smartphone, Info, AlertTriangle, Home, Layers } from 'lucide-react';
 import { useAlexa } from './hooks/useAlexa';
 
 // Legacy V1 helpers for Tags/Sources
@@ -31,12 +31,12 @@ const getIcon = (d) => {
 const getImage = (d) => {
   if (typeof chrome === 'undefined' || !chrome.runtime?.getURL) return '';
   const type = (d.providerData?.deviceType || d.icon?.value || '').toLowerCase();
-  if (type.includes('plug')) return chrome.runtime.getURL('smart_plug.jpg');
-  if (type.includes('light')) return chrome.runtime.getURL('smart_light.jpg');
-  if (type.includes('camera')) return chrome.runtime.getURL('smart_camera.jpg');
-  if (type.includes('blind')) return chrome.runtime.getURL('smart_blind.jpg');
-  if (type.includes('switch')) return chrome.runtime.getURL('smart_switch.jpg');
-  return chrome.runtime.getURL('echo_speaker.jpg');
+  if (type.includes('plug')) return chrome.runtime.getURL('plug.jpg');
+  if (type.includes('light')) return chrome.runtime.getURL('light.jpg');
+  if (type.includes('camera')) return chrome.runtime.getURL('camera.jpg');
+  if (type.includes('blind')) return chrome.runtime.getURL('blind.jpg');
+  if (type.includes('switch')) return chrome.runtime.getURL('switch.jpg');
+  return chrome.runtime.getURL('echo.jpg');
 };
 
 export default function App() {
@@ -70,6 +70,9 @@ export default function App() {
   const onlineCount = devices.filter(isDeviceOnline).length;
   const offlineCount = devices.filter(isDeviceOffline).length;
   const deletableCount = devices.filter(d => d._admEndpointId || d._admApplianceId).length;
+  const haCount = devices.filter(isHA).length;
+  const groupCount = devices.filter(isGroup).length;
+  const defektCount = devices.filter(d => !hasEndpointId(d)).length;
 
   const handleSort = (key) => setSortConfig(prev => ({ key, dir: prev.key === key && prev.dir === 'asc' ? 'desc' : 'asc' }));
 
@@ -188,50 +191,77 @@ export default function App() {
       
       {/* KPI & Banner Row */}
       <div className="flex-none flex gap-4">
-        <div className="flex-1 grid grid-cols-5 gap-4">
-          <div className="bg-[#131B2B] border border-[#1E293B] rounded-2xl p-4 flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-[#00A3FF]/10 flex items-center justify-center text-[#00A3FF]">
-              <Smartphone className="w-5 h-5" />
+        <div className="flex-1 grid grid-cols-8 gap-3">
+          <div className="bg-[#131B2B] border border-[#1E293B] rounded-2xl p-3 flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl bg-[#00A3FF]/10 flex items-center justify-center text-[#00A3FF]">
+              <Smartphone className="w-4 h-4" />
             </div>
             <div>
-              <div className="text-2xl font-bold text-white">{devices.length}</div>
-              <div className="text-xs text-slate-400">Geräte gesamt</div>
+              <div className="text-xl font-bold text-white leading-tight">{devices.length}</div>
+              <div className="text-[10px] text-slate-400">Gesamt</div>
             </div>
           </div>
-          <div className="bg-[#131B2B] border border-[#1E293B] rounded-2xl p-4 flex items-center gap-4 shadow-[0_0_20px_rgba(34,197,94,0.05)]">
-            <div className="w-10 h-10 rounded-xl bg-[#00FF88]/10 flex items-center justify-center">
-              <span className="w-3 h-3 rounded-full bg-[#00FF88] shadow-[0_0_10px_#00FF88]"></span>
+          <div className="bg-[#131B2B] border border-[#1E293B] rounded-2xl p-3 flex items-center gap-3 shadow-[0_0_15px_rgba(34,197,94,0.05)]">
+            <div className="w-8 h-8 rounded-xl bg-[#00FF88]/10 flex items-center justify-center">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#00FF88] shadow-[0_0_8px_#00FF88]"></span>
             </div>
             <div>
-              <div className="text-2xl font-bold text-white">{onlineCount}</div>
-              <div className="text-xs text-slate-400">Online</div>
+              <div className="text-xl font-bold text-white leading-tight">{onlineCount}</div>
+              <div className="text-[10px] text-slate-400">Online</div>
             </div>
           </div>
-          <div className="bg-[#131B2B] border border-[#1E293B] rounded-2xl p-4 flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-slate-700/30 flex items-center justify-center">
-              <span className="w-3 h-3 rounded-full bg-slate-500"></span>
+          <div className="bg-[#131B2B] border border-[#1E293B] rounded-2xl p-3 flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl bg-slate-700/30 flex items-center justify-center">
+              <span className="w-2.5 h-2.5 rounded-full bg-slate-500"></span>
             </div>
             <div>
-              <div className="text-2xl font-bold text-white">{offlineCount}</div>
-              <div className="text-xs text-slate-400">Offline</div>
+              <div className="text-xl font-bold text-white leading-tight">{offlineCount}</div>
+              <div className="text-[10px] text-slate-400">Offline</div>
             </div>
           </div>
-          <div className="bg-[#131B2B] border border-[#1E293B] rounded-2xl p-4 flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-[#FF3B30]/10 flex items-center justify-center text-[#FF3B30]">
-              <Trash2 className="w-5 h-5" />
+          <div className="bg-[#131B2B] border border-[#1E293B] rounded-2xl p-3 flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl bg-[#FF9500]/10 flex items-center justify-center text-[#FF9500]">
+              <AlertTriangle className="w-4 h-4" />
             </div>
             <div>
-              <div className="text-2xl font-bold text-white">{deletableCount}</div>
-              <div className="text-xs text-slate-400">Löschbar</div>
+              <div className="text-xl font-bold text-white leading-tight">{defektCount}</div>
+              <div className="text-[10px] text-slate-400">Defekt</div>
             </div>
           </div>
-          <div className="bg-[#131B2B] border border-[#1E293B] rounded-2xl p-4 flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-slate-700/30 flex items-center justify-center text-slate-400">
-              <Shield className="w-5 h-5" />
+          <div className="bg-[#131B2B] border border-[#1E293B] rounded-2xl p-3 flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl bg-[#007AFF]/10 flex items-center justify-center text-[#007AFF]">
+              <Home className="w-4 h-4" />
             </div>
             <div>
-              <div className="text-2xl font-bold text-white">0</div>
-              <div className="text-xs text-slate-400">Geschützt</div>
+              <div className="text-xl font-bold text-white leading-tight">{haCount}</div>
+              <div className="text-[10px] text-slate-400">Home Assistant</div>
+            </div>
+          </div>
+          <div className="bg-[#131B2B] border border-[#1E293B] rounded-2xl p-3 flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl bg-[#AF52DE]/10 flex items-center justify-center text-[#AF52DE]">
+              <Layers className="w-4 h-4" />
+            </div>
+            <div>
+              <div className="text-xl font-bold text-white leading-tight">{groupCount}</div>
+              <div className="text-[10px] text-slate-400">Gruppen</div>
+            </div>
+          </div>
+          <div className="bg-[#131B2B] border border-[#1E293B] rounded-2xl p-3 flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl bg-[#FF3B30]/10 flex items-center justify-center text-[#FF3B30]">
+              <Trash2 className="w-4 h-4" />
+            </div>
+            <div>
+              <div className="text-xl font-bold text-white leading-tight">{deletableCount}</div>
+              <div className="text-[10px] text-slate-400">Löschbar</div>
+            </div>
+          </div>
+          <div className="bg-[#131B2B] border border-[#1E293B] rounded-2xl p-3 flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl bg-slate-700/30 flex items-center justify-center text-slate-400">
+              <Shield className="w-4 h-4" />
+            </div>
+            <div>
+              <div className="text-xl font-bold text-white leading-tight">0</div>
+              <div className="text-[10px] text-slate-400">Geschützt</div>
             </div>
           </div>
         </div>
@@ -437,8 +467,9 @@ export default function App() {
             </>
           ) : (
             <div className="flex-1 flex flex-col items-center justify-center text-slate-500 text-center gap-4">
-              <div className="w-16 h-16 rounded-full bg-[#1C2534] border border-[#2E3C51] flex items-center justify-center text-[#00A3FF]">
-                <Info className="w-8 h-8" />
+              <div className="w-24 h-24 rounded-full bg-[#0A101A] border border-[#1E293B] flex items-center justify-center shadow-[0_0_20px_rgba(0,163,255,0.15)] relative">
+                <img src={typeof chrome !== 'undefined' && chrome.runtime?.getURL ? chrome.runtime.getURL('icon128.png') : ''} alt="Aura Logo" className="w-16 h-16 opacity-80" />
+                <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-[#00A3FF] border-r-[#00FFFF] opacity-30"></div>
               </div>
               <p>Wähle links ein Gerät aus, um Details und Aktionen anzuzeigen.</p>
               
