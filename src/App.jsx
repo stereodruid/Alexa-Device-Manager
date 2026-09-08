@@ -51,6 +51,7 @@ export default function App() {
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [sourceFilter, setSourceFilter] = useState('ALL');
   const [onlyDeletable, setOnlyDeletable] = useState(false);
+  const [hideProtected, setHideProtected] = useState(true);
   
   const [sortConfig, setSortConfig] = useState({ key: 'name', dir: 'asc' });
   const logEndRef = useRef(null);
@@ -76,7 +77,9 @@ export default function App() {
     let result = devices.filter(d => {
       const isOnline = isDeviceOnline(d);
       const isDeletable = Boolean(d._admEndpointId || d._admApplianceId);
+      const isProtected = !isDeletable || isGroup(d) || isEcho(d);
       
+      if (hideProtected && isProtected) return false;
       if (onlyDeletable && !isDeletable) return false;
       if (statusFilter === 'ONLINE' && !isOnline) return false;
       if (statusFilter === 'OFFLINE' && isOnline) return false;
@@ -272,6 +275,10 @@ export default function App() {
               </select>
 
               <label className="flex items-center gap-2 text-sm text-slate-300 cursor-pointer ml-3">
+                <input type="checkbox" checked={hideProtected} onChange={e => setHideProtected(e.target.checked)} className="w-4 h-4 rounded border-[#1E293B]" />
+                Geschützte ausblenden
+              </label>
+              <label className="flex items-center gap-2 text-sm text-slate-300 cursor-pointer ml-3">
                 <input type="checkbox" checked={onlyDeletable} onChange={e => setOnlyDeletable(e.target.checked)} className="w-4 h-4 rounded border-[#1E293B]" />
                 Nur löschbare anzeigen
               </label>
@@ -338,10 +345,16 @@ export default function App() {
                         </td>
                         <td className="p-3">
                           <div className="flex items-start gap-2">
-                            {isOnline ? (
+                            {d._admReachability === 'OK' ? (
                                <><span className="w-3 h-3 mt-0.5 rounded-full bg-[#00C853] shadow-[0_0_8px_#00C853]"></span><div><div className="text-[#00C853] font-medium leading-none">Online</div><div className="text-[10px] text-slate-500 mt-1">Gerade eben</div></div></>
-                            ) : (
+                            ) : d._admReachability === 'UNAVAILABLE' ? (
                                <><span className="w-3 h-3 mt-0.5 rounded-full bg-[#FF3B30]"></span><div><div className="text-[#FF3B30] font-medium leading-none">Offline</div><div className="text-[10px] text-slate-500 mt-1">Vor {Math.floor(Math.random() * 5) + 1} Tagen</div></div></>
+                            ) : d._admReachability ? (
+                               <><span className="w-3 h-3 mt-0.5 rounded-full bg-yellow-500"></span><div><div className="text-yellow-500 font-medium leading-none">{d._admReachability}</div></div></>
+                            ) : d.availability ? (
+                               <><span className="w-3 h-3 mt-0.5 rounded-full bg-slate-400"></span><div><div className="text-slate-400 font-medium leading-none">{d.availability}</div></div></>
+                            ) : (
+                               <><span className="w-3 h-3 mt-0.5 rounded-full bg-slate-700"></span><div><div className="text-slate-500 font-medium leading-none">-</div></div></>
                             )}
                           </div>
                         </td>
@@ -374,11 +387,17 @@ export default function App() {
                   </div>
                   <p className="text-slate-400 text-sm mt-1">{selectedDevice.description || 'Keine Beschreibung'}</p>
                   <div className="flex items-center gap-2 mt-3">
-                    <span className={`w-3 h-3 rounded-full ${isDeviceOnline(selectedDevice) ? 'bg-[#00C853] shadow-[0_0_8px_#00C853]' : 'bg-[#FF3B30]'}`}></span>
-                    <div>
-                      <div className={`text-sm font-bold ${isDeviceOnline(selectedDevice) ? 'text-[#00C853]' : 'text-[#FF3B30]'}`}>{isDeviceOnline(selectedDevice) ? 'Online' : 'Offline'}</div>
-                      <div className="text-xs text-slate-500">Gerade eben {isDeviceOnline(selectedDevice) ? 'online' : 'offline'}</div>
-                    </div>
+                    {selectedDevice._admReachability === 'OK' ? (
+                      <><span className="w-3 h-3 rounded-full bg-[#00C853] shadow-[0_0_8px_#00C853]"></span><div><div className="text-sm font-bold text-[#00C853]">Online</div><div className="text-xs text-slate-500">Gerade eben</div></div></>
+                    ) : selectedDevice._admReachability === 'UNAVAILABLE' ? (
+                      <><span className="w-3 h-3 rounded-full bg-[#FF3B30]"></span><div><div className="text-sm font-bold text-[#FF3B30]">Offline</div><div className="text-xs text-slate-500">Vorhin</div></div></>
+                    ) : selectedDevice._admReachability ? (
+                      <><span className="w-3 h-3 rounded-full bg-yellow-500"></span><div><div className="text-sm font-bold text-yellow-500">{selectedDevice._admReachability}</div><div className="text-xs text-slate-500">Unbekannt</div></div></>
+                    ) : selectedDevice.availability ? (
+                      <><span className="w-3 h-3 rounded-full bg-slate-400"></span><div><div className="text-sm font-bold text-slate-400">{selectedDevice.availability}</div><div className="text-xs text-slate-500">Unbekannt</div></div></>
+                    ) : (
+                      <><span className="w-3 h-3 rounded-full bg-slate-700"></span><div><div className="text-sm font-bold text-slate-500">-</div><div className="text-xs text-slate-500">-</div></div></>
+                    )}
                   </div>
                 </div>
               </div>
