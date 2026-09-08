@@ -8,7 +8,7 @@ const isGroup = (d) => d.providerData?.categoryType === 'GROUP';
 const isEcho = (d) => d.providerData?.deviceType === 'ALEXA_VOICE_ENABLED' || String(d.description || '').includes('Amazon intelligentes Gerät') || String(d.description || '').includes('Amazon intelligentes Ger');
 const hasEndpointId = (d) => Boolean(d._admEndpointId);
 const source = (d) => {
-  const text = ${d.description || ''}  .toLowerCase();
+  const text = `${d.description || ''} ${d.manufacturerName || ''} ${d.displayName || ''}`.toLowerCase();
   if (text.includes('via home assistant') || text.includes('home assistant')) return 'HA';
   if (text.includes('iobroker') || text.includes('io.broker')) return 'ioBroker';
   if (text.includes('homey')) return 'Homey';
