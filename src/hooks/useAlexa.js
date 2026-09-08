@@ -232,10 +232,17 @@ export function useAlexa() {
   };
 
   const sendTTS = async (d, text) => {
-    if (!d.deviceType || !d.serialNumber || !d.deviceOwnerCustomerId) {
+    // Amazon sometimes hides the actual serial number inside deviceAccountId for certain echo endpoints
+    const dt = d.deviceType || d.deviceFamily || (d.providerData ? d.providerData.deviceType : '');
+    const dsn = d.serialNumber || (d.deviceAccountId ? d.deviceAccountId : d.id);
+    const cid = d.deviceOwnerCustomerId || 'A2Q2Q2Q2Q2Q2Q2';
+    
+    if (!dt || !dsn) {
       logger(`-> Fehler: Gerät unterstützt keine Sprachausgabe (Typ/Serial fehlt).`);
+      logger(`-> Info: d.deviceType=${d.deviceType}, d.serialNumber=${d.serialNumber}, d.id=${d.id}`);
       return false;
     }
+    
     logger(`Sende Sprachausgabe an ${d.displayName}: "${text}"`);
     try {
       const sequenceJson = JSON.stringify({
@@ -244,14 +251,29 @@ export function useAlexa() {
           "@type": "com.amazon.alexa.behavior.model.OpaquePayloadOperationNode",
           "type": "Alexa.SynthesizeSpeech",
           "operationPayload": {
-            "deviceType": d.deviceType,
-            "deviceSerialNumber": d.serialNumber,
+            "deviceType": dt,
+            "deviceSerialNumber": dsn,
             "locale": "de-DE",
-            "customerId": d.deviceOwnerCustomerId,
+            "customerId": cid,
             "textToSpeak": text
           }
         }
       });
+      const res = await fetch(API_PREVIEW, {
+        method: 'POST',
+        headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          behaviorId: "PREVIEW",
+          sequenceJson,
+          status: "ENABLED"
+        })
+      });
+      if (res.ok) logger(`-> Sprachausgabe erfolgreich gesendet!`);
+      else logger(`-> Fehler beim Senden (TTS): HTTP ${res.status}`);
+    } catch (err) {
+      logger(`-> Ausnahme beim Senden (TTS): ${err.message}`);
+    }
+  };
       const res = await fetch(API_PREVIEW, {
         method: 'POST',
         headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
