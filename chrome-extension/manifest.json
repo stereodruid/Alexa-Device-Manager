@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
-  "name": "Aura Device Manager",
-  "version": "0.6.1",
+  "name": "Aura Device Master",
+  "version": "0.6.2",
   "description": "Lokaler Manager fuer Alexa Smart-Home-Geraete mit Backup, Filtern und kontrolliertem Loeschen.",
   "permissions": [
     "activeTab",
@@ -33,7 +33,7 @@
     "128": "icon128.png"
   },
   "action": {
-    "default_title": "Aura Device Manager",
+    "default_title": "Aura Device Master",
     "default_popup": "popup.html",
     "default_icon": {
       "16": "icon16.png",
