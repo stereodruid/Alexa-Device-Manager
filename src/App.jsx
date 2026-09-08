@@ -158,11 +158,23 @@ export default function App() {
         <div className="col-span-1 bg-panel rounded-2xl border border-slate-700 p-6 flex flex-col gap-6 overflow-y-auto">
            {selectedDevice ? (
              <>
-               <div className="bg-bgDark rounded-xl p-8 flex items-center justify-center border border-slate-700/50 relative overflow-hidden min-h-[160px]">
+               <div className="bg-bgDark rounded-xl p-6 flex items-center justify-center border border-slate-700/50 relative overflow-hidden min-h-[160px]">
                  <div className="absolute inset-0 bg-aura/5"></div>
-                 <div className="text-6xl relative z-10 drop-shadow-lg">
-                   {(selectedDevice.providerData?.deviceType === 'ECHO' || selectedDevice.deviceFamily === 'KNIGHT' || selectedDevice.icon?.value === 'ECHO') ? '🔊' : '🔌'}
-                 </div>
+                 {(() => {
+                   let imgName = 'switch';
+                   const type = (selectedDevice.providerData?.deviceType || selectedDevice.icon?.value || selectedDevice.deviceFamily || '').toUpperCase();
+                   if (type === 'ECHO' || type === 'KNIGHT' || type === 'AUDIO') imgName = 'echo';
+                   else if (type === 'SMARTPLUG' || type === 'PLUG') imgName = 'plug';
+                   else if (type === 'LIGHT' || type === 'SMARTLIGHT') imgName = 'light';
+                   else if (type === 'CAMERA' || type === 'WEBCAM') imgName = 'camera';
+                   else if (type.includes('BLIND') || type.includes('CURTAIN')) imgName = 'blind';
+                   
+                   const imgUrl = typeof chrome !== 'undefined' && chrome.runtime?.getURL 
+                     ? chrome.runtime.getURL(`${imgName}.jpg`) 
+                     : '';
+                     
+                   return <img src={imgUrl} alt={imgName} className="h-32 object-contain relative z-10 drop-shadow-xl rounded-xl mix-blend-screen" />;
+                 })()}
                </div>
                <div>
                  <h2 className="text-2xl font-bold text-white mb-1 leading-tight">{selectedDevice.displayName || selectedDevice.friendlyNameObject?.value?.text || 'Unbekannt'}</h2>
