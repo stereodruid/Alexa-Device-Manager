@@ -2,6 +2,20 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Search, Wifi, WifiOff, Trash2, RefreshCw, ChevronUp, ChevronDown } from 'lucide-react';
 import { useAlexa } from './hooks/useAlexa';
 
+// Legacy V1 helpers for Pills/Tags
+const isHA = (d) => String(d.description || '').toLowerCase().includes('via home assistant') || String(d.description || '').toLowerCase().includes('home assistant');
+const isGroup = (d) => d.providerData?.categoryType === 'GROUP';
+const isEcho = (d) => d.providerData?.deviceType === 'ALEXA_VOICE_ENABLED' || String(d.description || '').includes('Amazon intelligentes Gerät') || String(d.description || '').includes('Amazon intelligentes Ger');
+const hasEndpointId = (d) => Boolean(d._admEndpointId);
+const source = (d) => {
+  const text = `${d.description || ''} ${d.manufacturerName || ''} ${d.displayName || ''}`.toLowerCase();
+  if (text.includes('via home assistant') || text.includes('home assistant')) return 'HA';
+  if (text.includes('iobroker') || text.includes('io.broker')) return 'ioBroker';
+  if (text.includes('homey')) return 'Homey';
+  if (isEcho(d) || text.includes('amazon')) return 'Alexa';
+  return 'Andere';
+};
+
 export default function App() {
   const { devices, loading, error, fetchDevices } = useAlexa();
   const [selectedId, setSelectedId] = useState(null);
@@ -14,15 +28,9 @@ export default function App() {
     fetchDevices();
   }, [fetchDevices]);
 
-  const isDeviceOnline = (d) => {
-    return d._admReachability === 'OK' || 
-           d.availability === 'ONLINE' || 
-           d.availability === 'AVAILABLE';
-  };
-
-  const onlineCount = devices.filter(isDeviceOnline).length;
+  const haCount = devices.filter(isHA).length;
+  const groupCount = devices.filter(isGroup).length;
   const deletableCount = devices.filter(d => d._admEndpointId || d._admApplianceId).length;
-  const offlineCount = devices.length - onlineCount;
 
   const handleSort = (key) => {
     setSortConfig(prev => ({
@@ -33,11 +41,10 @@ export default function App() {
 
   const filteredAndSortedDevices = useMemo(() => {
     let result = devices.filter(d => {
-      const isOnline = isDeviceOnline(d);
       const isDeletable = Boolean(d._admEndpointId || d._admApplianceId);
       
-      if (filterType === 'ONLINE' && !isOnline) return false;
-      if (filterType === 'OFFLINE' && isOnline) return false;
+      if (filterType === 'HA' && !isHA(d)) return false;
+      if (filterType === 'GROUP' && !isGroup(d)) return false;
       if (filterType === 'DELETABLE' && !isDeletable) return false;
       
       const q = search.toLowerCase();
@@ -54,7 +61,7 @@ export default function App() {
         if (sortConfig.key === 'name') return (d.displayName || d.friendlyNameObject?.value?.text || 'Unbekannt').toLowerCase();
         if (sortConfig.key === 'description') return (d.description || '').toLowerCase();
         if (sortConfig.key === 'type') return (d.providerData?.deviceType || d.icon?.value || d.deviceFamily || '').toLowerCase();
-        if (sortConfig.key === 'status') return isDeviceOnline(d) ? '1' : '0';
+        if (sortConfig.key === 'status') return d._admReachability === 'OK' ? '1' : d._admReachability === 'UNAVAILABLE' ? '4' : '2';
         return '';
       };
       const valA = getVal(a);
@@ -110,28 +117,28 @@ export default function App() {
       
       {/* KPI Cards */}
       <div className="flex-none grid grid-cols-5 gap-4 cursor-pointer select-none">
-        <div onClick={() => setFilterType('ALL')} className={`p-4 rounded-xl border flex items-center gap-4 transition-all ${filterType === 'ALL' ? 'bg-aura/10 border-aura shadow-[0_0_15px_rgba(0,210,255,0.2)]' : 'bg-panel border-slate-700 hover:border-slate-500'}`}>
+        <div onClick={() => setFilterType('ALL')} className={`p-4 rounded-xl border flex items-center gap-4 transition-all col-span-1 ${filterType === 'ALL' ? 'bg-aura/10 border-aura shadow-[0_0_15px_rgba(0,210,255,0.2)]' : 'bg-panel border-slate-700 hover:border-slate-500'}`}>
           <div className="text-3xl font-bold text-white">{devices.length}</div>
           <div className="text-sm text-slate-400">Geräte gesamt</div>
         </div>
         
-        <div onClick={() => setFilterType('ONLINE')} className={`p-4 rounded-xl border flex items-center gap-4 transition-all col-span-2 ${filterType === 'ONLINE' ? 'bg-green-500/10 border-green-500 shadow-[0_0_15px_rgba(34,197,94,0.2)]' : 'bg-panel border-slate-700 hover:border-slate-500'}`}>
-          <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center text-green-500">
-            <Wifi className="w-5 h-5" />
+        <div onClick={() => setFilterType('HA')} className={`p-4 rounded-xl border flex items-center gap-4 transition-all col-span-2 ${filterType === 'HA' ? 'bg-blue-500/10 border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.2)]' : 'bg-panel border-slate-700 hover:border-slate-500'}`}>
+          <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-500 font-bold">
+            HA
           </div>
           <div>
-            <div className="text-2xl font-bold text-green-500">{onlineCount}</div>
-            <div className="text-sm text-slate-400">Online</div>
+            <div className="text-2xl font-bold text-blue-400">{haCount}</div>
+            <div className="text-sm text-slate-400">Home Assistant</div>
           </div>
         </div>
 
-        <div onClick={() => setFilterType('OFFLINE')} className={`p-4 rounded-xl border flex items-center gap-4 transition-all col-span-1 ${filterType === 'OFFLINE' ? 'bg-slate-700/50 border-slate-400' : 'bg-panel border-slate-700 hover:border-slate-500'}`}>
-          <div className="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-slate-400">
-            <WifiOff className="w-5 h-5" />
+        <div onClick={() => setFilterType('GROUP')} className={`p-4 rounded-xl border flex items-center gap-4 transition-all col-span-1 ${filterType === 'GROUP' ? 'bg-purple-500/10 border-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.2)]' : 'bg-panel border-slate-700 hover:border-slate-500'}`}>
+          <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-500 font-bold">
+            G
           </div>
           <div>
-            <div className="text-2xl font-bold text-slate-300">{offlineCount}</div>
-            <div className="text-sm text-slate-400">Offline/Unbekannt</div>
+            <div className="text-2xl font-bold text-purple-400">{groupCount}</div>
+            <div className="text-sm text-slate-400">Gruppen</div>
           </div>
         </div>
 
@@ -187,9 +194,9 @@ export default function App() {
                 </thead>
                 <tbody className="divide-y divide-slate-700/50">
                   {filteredAndSortedDevices.map(d => {
-                    const isOnline = isDeviceOnline(d);
                     const devName = d.displayName || d.friendlyNameObject?.value?.text || 'Unbekannt';
                     const devType = d.providerData?.deviceType || d.icon?.value || d.deviceFamily || 'UNKNOWN';
+                    
                     return (
                       <tr 
                         key={d.id} 
@@ -197,15 +204,33 @@ export default function App() {
                         className={`hover:bg-slate-700/30 cursor-pointer transition-colors ${selectedId === d.id ? 'bg-aura/10' : ''}`}
                       >
                         <td className="p-4"><input type="checkbox" className="accent-aura w-4 h-4" onClick={(e) => e.stopPropagation()}/></td>
-                        <td className="p-4 font-medium text-white">{devName}</td>
+                        <td className="p-4 font-medium text-white flex flex-col gap-1 items-start">
+                          {devName}
+                          <div className="flex gap-1">
+                            {isHA(d) && <span className="bg-blue-900/50 text-blue-400 text-[10px] px-1.5 py-0.5 rounded border border-blue-500/30">HA</span>}
+                            {isGroup(d) && <span className="bg-purple-900/50 text-purple-400 text-[10px] px-1.5 py-0.5 rounded border border-purple-500/30">GRUPPE</span>}
+                            {isEcho(d) && <span className="bg-orange-900/50 text-orange-400 text-[10px] px-1.5 py-0.5 rounded border border-orange-500/30">ECHO</span>}
+                            {!hasEndpointId(d) && <span className="bg-red-900/50 text-red-400 text-[10px] px-1.5 py-0.5 rounded border border-red-500/30">ID FEHLT</span>}
+                            <span className="bg-slate-700/50 text-slate-300 text-[10px] px-1.5 py-0.5 rounded border border-slate-600/30">{source(d)}</span>
+                          </div>
+                        </td>
                         <td className="p-4 text-slate-400">{d.description || '-'}</td>
                         <td className="p-4">
                           <span className="bg-slate-800 text-xs px-2 py-1 rounded-md border border-slate-600">{devType}</span>
                         </td>
                         <td className="p-4">
                           <div className="flex items-center gap-2">
-                            <span className={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-500 shadow-[0_0_8px_#22c55e]' : 'bg-red-500 shadow-[0_0_8px_#ef4444]'}`}></span>
-                            <span className={isOnline ? 'text-green-500' : 'text-red-500'}>{isOnline ? 'Online' : 'Offline'}</span>
+                            {d._admReachability === 'OK' ? (
+                               <><span className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e]"></span><span className="text-green-500 font-medium">Online</span></>
+                            ) : d._admReachability === 'UNAVAILABLE' ? (
+                               <><span className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_#ef4444]"></span><span className="text-red-500 font-medium">Offline</span></>
+                            ) : d._admReachability ? (
+                               <><span className="w-2 h-2 rounded-full bg-yellow-500 shadow-[0_0_8px_#eab308]"></span><span className="text-yellow-500 font-medium">{d._admReachability}</span></>
+                            ) : d.availability ? (
+                               <><span className="w-2 h-2 rounded-full bg-slate-400 shadow-[0_0_8px_#9ca3af]"></span><span className="text-slate-400 font-medium">{d.availability}</span></>
+                            ) : (
+                               <span className="text-slate-600">-</span>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -243,10 +268,17 @@ export default function App() {
                  <h2 className="text-2xl font-bold text-white mb-1 leading-tight">{selectedDevice.displayName || selectedDevice.friendlyNameObject?.value?.text || 'Unbekannt'}</h2>
                  <p className="text-slate-400 text-sm">{selectedDevice.description || 'Keine Beschreibung'}</p>
                  <div className="flex items-center gap-2 mt-2">
-                   <span className={`w-2 h-2 rounded-full ${isDeviceOnline(selectedDevice) ? 'bg-green-500 shadow-[0_0_8px_#22c55e]' : 'bg-red-500 shadow-[0_0_8px_#ef4444]'}`}></span>
-                   <span className={`text-sm font-bold ${isDeviceOnline(selectedDevice) ? 'text-green-500' : 'text-red-500'}`}>
-                     {isDeviceOnline(selectedDevice) ? 'Online' : 'Offline'}
-                   </span>
+                    {selectedDevice._admReachability === 'OK' ? (
+                       <><span className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e]"></span><span className="text-sm font-bold text-green-500">Online</span></>
+                    ) : selectedDevice._admReachability === 'UNAVAILABLE' ? (
+                       <><span className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_#ef4444]"></span><span className="text-sm font-bold text-red-500">Offline</span></>
+                    ) : selectedDevice._admReachability ? (
+                       <><span className="w-2 h-2 rounded-full bg-yellow-500 shadow-[0_0_8px_#eab308]"></span><span className="text-sm font-bold text-yellow-500">{selectedDevice._admReachability}</span></>
+                    ) : selectedDevice.availability ? (
+                       <><span className="w-2 h-2 rounded-full bg-slate-400 shadow-[0_0_8px_#9ca3af]"></span><span className="text-sm font-bold text-slate-400">{selectedDevice.availability}</span></>
+                    ) : (
+                       <span className="text-sm font-bold text-slate-600">-</span>
+                    )}
                  </div>
                </div>
                
