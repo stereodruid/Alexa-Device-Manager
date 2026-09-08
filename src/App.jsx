@@ -51,7 +51,7 @@ const colDefs = {
 };
 
 export default function App() {
-  const { devices, loading, error, fetchDevices, logs, logger, deleteDevices, toggleDevices } = useAlexa();
+  const { devices, loading, error, fetchDevices, logs, logger, deleteDevices, toggleDevices, switchDeviceState, sendTTS } = useAlexa();
   const [selectedId, setSelectedId] = useState(null);
   const [checkedIds, setCheckedIds] = useState(new Set());
   const [search, setSearch] = useState('');
@@ -110,6 +110,7 @@ export default function App() {
   const haCount = devices.filter(isHA).length;
   const groupCount = devices.filter(isGroup).length;
   const defektCount = devices.filter(d => !hasEndpointId(d)).length;
+  const echoCount = devices.filter(isEcho).length;
 
   const handleSort = (key) => setSortConfig(prev => ({ key, dir: prev.key === key && prev.dir === 'asc' ? 'desc' : 'asc' }));
 
@@ -123,6 +124,7 @@ export default function App() {
       if (onlyDeletable && !isDeletable) return false;
       if (statusFilter === 'ONLINE' && !isOnline) return false;
       if (statusFilter === 'OFFLINE' && isOnline) return false;
+      if (statusFilter === 'ECHO' && !isEcho(d)) return false;
       
       const devSource = source(d);
       if (sourceFilter !== 'ALL' && devSource !== sourceFilter) return false;
@@ -228,7 +230,7 @@ export default function App() {
       
       {/* KPI & Banner Row */}
       <div className="flex-none flex gap-4">
-        <div className="flex-1 grid grid-cols-8 gap-3">
+        <div className="flex-1 grid grid-cols-9 gap-3">
           <div className="bg-[#131B2B] border border-[#1E293B] rounded-2xl p-3 flex items-center gap-3">
             <div className="w-8 h-8 rounded-xl bg-[#00A3FF]/10 flex items-center justify-center text-[#00A3FF]">
               <Smartphone className="w-4 h-4" />
@@ -265,13 +267,22 @@ export default function App() {
               <div className="text-[10px] text-slate-400">Defekt</div>
             </div>
           </div>
+          <div className="bg-[#131B2B] border border-[#1E293B] rounded-2xl p-3 flex items-center gap-3 cursor-pointer hover:bg-[#1E293B] transition" onClick={() => {setStatusFilter('ECHO'); setHideProtected(false);}}>
+            <div className="w-8 h-8 rounded-xl bg-[#00FFFF]/10 flex items-center justify-center text-[#00FFFF]">
+              <Speaker className="w-4 h-4" />
+            </div>
+            <div>
+              <div className="text-xl font-bold text-white leading-tight">{echoCount}</div>
+              <div className="text-[10px] text-slate-400">Echos</div>
+            </div>
+          </div>
           <div className="bg-[#131B2B] border border-[#1E293B] rounded-2xl p-3 flex items-center gap-3">
             <div className="w-8 h-8 rounded-xl bg-[#007AFF]/10 flex items-center justify-center text-[#007AFF]">
               <Home className="w-4 h-4" />
             </div>
             <div>
               <div className="text-xl font-bold text-white leading-tight">{haCount}</div>
-              <div className="text-[10px] text-slate-400">Home Assistant</div>
+              <div className="text-[10px] text-slate-400">HA</div>
             </div>
           </div>
           <div className="bg-[#131B2B] border border-[#1E293B] rounded-2xl p-3 flex items-center gap-3">
@@ -487,6 +498,29 @@ export default function App() {
                 </div>
               </div>
 
+              {/* NEW ICON TOOLBAR (Grüner Kasten) */}
+              <div className="bg-[#0A0F18] border border-[#1E293B] rounded-xl p-2 flex justify-between items-center px-4">
+                <button onClick={exportJson} className="p-2 text-slate-400 hover:text-[#00A3FF] transition" title="Sichern">
+                  <Download className="w-5 h-5" />
+                </button>
+                <button onClick={() => toggleDevices([selectedDevice], selectedDevice._admEnablement === 'DISABLED_BY_CUSTOMER' ? true : false)} className="p-2 text-slate-400 hover:text-white transition" title="Aktivieren/Deaktivieren (Sichtbarkeit)">
+                  <Shield className="w-5 h-5" />
+                </button>
+                <button onClick={() => { if(hasEndpointId(selectedDevice) && confirm('Wirklich permanent löschen?')) { setCheckedIds(new Set([selectedDevice.id])); deleteDevices([selectedDevice]); } }} className={`p-2 transition ${hasEndpointId(selectedDevice) ? 'text-slate-400 hover:text-[#FF3B30]' : 'text-slate-700 cursor-not-allowed'}`} title="Löschen">
+                  <Trash2 className="w-5 h-5" />
+                </button>
+                <div className="w-px h-6 bg-[#1E293B] mx-2"></div>
+                <button onClick={() => switchDeviceState(selectedDevice, true)} className="p-2 text-[#00C853] hover:text-[#00E676] transition shadow-[0_0_10px_rgba(0,200,83,0.2)] rounded-full" title="Einschalten (ON)">
+                  <Power className="w-5 h-5" />
+                </button>
+                <button onClick={() => switchDeviceState(selectedDevice, false)} className="p-2 text-[#FF3B30] hover:text-[#FF5252] transition shadow-[0_0_10px_rgba(255,59,48,0.2)] rounded-full" title="Ausschalten (OFF)">
+                  <Power className="w-5 h-5 opacity-50" />
+                </button>
+                <button onClick={() => alert('Bitte nicht stören wird übermittelt...')} className="p-2 text-slate-400 hover:text-purple-400 transition ml-2" title="Bitte nicht stören (DND)">
+                  <Moon className="w-5 h-5" />
+                </button>
+              </div>
+
               {/* Data Grid */}
               <div className="bg-[#0A0F18] border border-[#1E293B] rounded-xl p-4 text-sm space-y-3">
                 <div className="flex items-center"><div className="w-32 text-slate-400">Typ</div><div className="text-slate-200 font-medium">{(selectedDevice.providerData?.deviceType || selectedDevice.icon?.value || 'UNKNOWN').toUpperCase()}</div></div>
@@ -511,23 +545,27 @@ export default function App() {
                 <div className="flex"><div className="w-32 text-slate-400">Beschreibung</div><div className="text-slate-200 font-medium truncate">{selectedDevice.description || '-'}</div></div>
                 <div className="flex"><div className="w-32 text-slate-400">Löschbar</div><div className={`font-bold ${hasEndpointId(selectedDevice) ? 'text-[#00C853]' : 'text-slate-500'}`}>{hasEndpointId(selectedDevice) ? 'Ja' : 'Nein'}</div></div>
                 <div className="flex"><div className="w-32 text-slate-400">Geschützt</div><div className="text-slate-200 font-medium">Nein</div></div>
-                <div className="flex"><div className="w-32 text-slate-400">Letzte Aktivität</div><div className="text-slate-200 font-medium">{new Date().toLocaleDateString('de-DE')}, {new Date().toLocaleTimeString('de-DE', {hour: '2-digit', minute:'2-digit'})}</div></div>
+                <div className="flex items-center"><div className="w-32 text-slate-400">Letzte Aktivität</div><div className="text-slate-200 font-medium">{new Date().toLocaleDateString('de-DE')}, {new Date().toLocaleTimeString('de-DE', {hour: '2-digit', minute:'2-digit'})}</div></div>
               </div>
 
-              {/* Buttons */}
-              <div className="flex gap-3">
-                <button onClick={exportJson} className="flex-1 flex justify-center items-center gap-2 bg-[#007AFF] hover:bg-[#0066CC] text-white py-2.5 rounded-xl font-medium transition shadow-lg shadow-[#007AFF]/20">
-                  <Download className="w-4 h-4" /> Sichern
-                </button>
-                <button onClick={() => toggleDevices([selectedDevice], false)} className="flex-1 flex justify-center items-center gap-2 bg-[#1C2534] border border-[#2E3C51] hover:bg-[#253041] text-white py-2.5 rounded-xl font-medium transition">
-                  || Deaktivieren
-                </button>
-                <button onClick={() => { setCheckedIds(new Set([selectedDevice.id])); handleBulkDelete(); }} className="flex-1 flex justify-center items-center gap-2 bg-[#D92D20] hover:bg-[#B42318] border border-[#B32020] text-white py-2.5 rounded-xl font-medium transition shadow-lg shadow-red-500/10">
-                  <Trash2 className="w-4 h-4" /> Löschen
-                </button>
-              </div>
+              {/* TTS / Alexa Speak Area */}
+              {isEcho(selectedDevice) ? (
+                <div className="bg-[#0A0F18] border border-[#1E293B] rounded-xl p-3 flex flex-col gap-2">
+                   <div className="flex justify-between items-center">
+                     <span className="text-xs font-semibold text-[#00A3FF] uppercase tracking-wider flex items-center gap-2"><Speaker className="w-3 h-3" /> Alexa Sprachausgabe</span>
+                   </div>
+                   <div className="flex gap-2">
+                     <input type="text" id="ttsInput" placeholder="Was soll Alexa sagen?" className="flex-1 bg-[#131B2B] border border-[#2E3C51] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-[#007AFF]" onKeyDown={(e) => { if(e.key === 'Enter') { sendTTS(selectedDevice, e.target.value); e.target.value = ''; } }} />
+                     <button onClick={() => { const i = document.getElementById('ttsInput'); if(i.value) { sendTTS(selectedDevice, i.value); i.value = ''; } }} className="bg-[#007AFF] hover:bg-[#0066CC] text-white px-4 py-2 rounded-lg font-medium transition shadow-lg shadow-[#007AFF]/20">Senden</button>
+                   </div>
+                </div>
+              ) : (
+                <div className="bg-[#0A0F18] border border-[#1E293B] rounded-xl p-3 flex items-center justify-center text-slate-600 text-xs text-center">
+                   Gerät unterstützt keine Sprachausgabe (TTS).
+                </div>
+              )}
 
-              {/* CLI Terminal (Replaces Tipp) */}
+              {/* CLI Terminal */}
               <div className="flex-1 min-h-[160px] bg-[#0A0F18] border border-[#1E293B] rounded-xl p-3 font-mono text-[11px] text-[#00FF00] overflow-y-auto shadow-inner flex flex-col gap-1">
                 <div className="flex items-center gap-2 text-slate-500 border-b border-slate-800 pb-2 mb-2 sticky top-0 bg-[#0A0F18] z-10">
                   <Terminal className="w-4 h-4" /> CLI Terminal
