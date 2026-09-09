@@ -82,7 +82,7 @@ export function useAlexa() {
         if (current.length !== 1)
           throw new Error("Bitte genau ein Gerät auswählen.");
         if (action === "speak")
-          await client.speak(current[0], approval.text || "", approval.locale || "de-DE");
+          await client.speak(current[0], approval.text || "");
         else await client.power(current[0], action === "on");
         logger(
           `${deviceName(current[0])}: ${action === "speak" ? "Sprachausgabe" : "Schaltbefehl"} angefordert. Der tatsächliche Gerätezustand ist nicht überprüft.`,

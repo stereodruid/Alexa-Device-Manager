@@ -4,7 +4,9 @@
   "description": "<p>\r   <a href=\"https://www.buymeacoffee.com/stereodruid\">\r     <img src=\"https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png\" height=\"60\" alt=\"Buy Me A Coffee\" align=\"middle\">\r   </a>\r   &nbsp;&nbsp;\r   <img src=\"assets/bmc_qr.png\" height=\"60\" alt=\"QR Code\" align=\"middle\">\r </p>",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --test tests/*.test.js",
+    "build": "vite build",
+    "check": "node --check src/alexa.js && node --check src/hooks/useAlexa.js && node --check chrome-extension/background.js && node --check chrome-extension/popup.js"
   },
   "repository": {
     "type": "git",

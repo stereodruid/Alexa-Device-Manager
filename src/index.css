@@ -1,29 +1,641 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* Scoped to avoid breaking amazon.de */
 #aura-root {
   position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  z-index: 999999;
-  background-color: #0f172a;
-  color: #f8fafc;
+  inset: 0;
+  z-index: 2147483647;
+  color-scheme: dark;
+  background: #0e131f;
+  color: #d9e2f1;
+  font:
+    14px/1.5 system-ui,
+    sans-serif;
+  isolation: isolate;
+}
+#aura-root,
+#aura-root * {
+  box-sizing: border-box;
+}
+#aura-root h1,
+#aura-root h2,
+#aura-root h3,
+#aura-root p {
+  margin: 0;
+}
+#aura-root h1 {
+  font-size: 21px;
+  color: #fff;
+  font-weight: 700;
+}
+#aura-root h2 {
+  font-size: 18px;
+  color: #fff;
+  font-weight: 650;
+}
+#aura-root h3 {
+  font-size: 14px;
+  font-weight: 600;
+}
+#aura-root button,
+#aura-root input,
+#aura-root select {
+  font: inherit;
+  color: inherit;
+  border: 1px solid #30405a;
+  border-radius: 8px;
+  background: #0c1422;
+  padding: 8px 11px;
+  margin: 0;
+}
+#aura-root button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+#aura-root button:hover:not(:disabled) {
+  background: #253751;
+}
+#aura-root button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+#aura-root :focus-visible {
+  outline: 2px solid #62b7ff;
+  outline-offset: 2px;
+}
+#aura-root input[type="checkbox"] {
+  accent-color: #188cff;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+#aura-root label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+#aura-root .aura-app {
+  height: 100%;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   overflow: auto;
 }
+#aura-root .panel {
+  background: #131d2e;
+  border: 1px solid #25324a;
+  border-radius: 14px;
+}
+#aura-root .app-header,
+#aura-root .action-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding: 14px 18px;
+  flex-shrink: 0;
+}
+#aura-root .brand,
+#aura-root .toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+#aura-root .brand {
+  gap: 14px;
+}
+#aura-root .brand img {
+  height: 44px;
+  width: 44px;
+}
+#aura-root .muted {
+  color: #94a3b8;
+  font-size: 12px;
+}
+#aura-root .block {
+  display: block;
+}
+#aura-root .primary {
+  background: #0963bc;
+  border-color: #398be0;
+  color: #fff;
+}
+#aura-root .danger {
+  background: #792b36;
+  border-color: #a64452;
+  color: #fff;
+}
+#aura-root .kpis {
+  display: flex;
+  gap: 9px;
+  overflow-x: auto;
+  flex-shrink: 0;
+  padding-bottom: 4px;
+}
+#aura-root .kpi {
+  flex: 1;
+  min-width: 106px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 9px 14px;
+  gap: 0;
+}
+#aura-root .kpi strong {
+  font-size: 24px;
+  color: #64b5ff;
+}
+#aura-root .kpi span {
+  font-size: 11px;
+}
+#aura-root .filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  flex-shrink: 0;
+}
+#aura-root .filters label {
+  font-size: 12px;
+}
+#aura-root .search {
+  flex: 1;
+  min-width: 240px;
+}
+#aura-root .search input {
+  width: 100%;
+}
+#aura-root .workspace {
+  display: flex;
+  gap: 14px;
+  flex: 1;
+  min-height: 570px;
+}
+#aura-root .device-list {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+#aura-root .table-scroll {
+  overflow: auto;
+  flex: 1;
+}
+#aura-root table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  color: #d9e2f1;
+}
+#aura-root th {
+  position: sticky;
+  top: 0;
+  background: #0c1422;
+  z-index: 1;
+  text-align: left;
+}
+#aura-root th,
+#aura-root td {
+  border-bottom: 1px solid #25324a;
+  padding: 10px;
+  vertical-align: middle;
+}
+#aura-root th button {
+  border: 0;
+  padding: 0;
+  font-weight: 650;
+}
+#aura-root td .device-name {
+  border: 0;
+  padding: 0;
+  background: none;
+  white-space: normal;
+  text-align: left;
+  justify-content: flex-start;
+  color: #edf5ff;
+}
+#aura-root tr:hover {
+  background: #1b2b42;
+}
+#aura-root tr.selected {
+  background: #153858;
+}
+#aura-root .description {
+  display: block;
+  min-width: 100px;
+  max-width: 240px;
+  overflow-wrap: anywhere;
+}
+#aura-root .id {
+  display: block;
+  max-width: 145px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: monospace;
+}
+#aura-root .tag {
+  font-size: 10px;
+  background: #20304a;
+  padding: 4px 7px;
+  border-radius: 5px;
+}
+#aura-root .status-online {
+  color: #62dea5;
+}
+#aura-root .status-offline {
+  color: #ff8e93;
+}
+#aura-root .table-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px;
+  font-size: 12px;
+  border-top: 1px solid #25324a;
+}
+#aura-root .sidebar {
+  width: 345px;
+  flex-shrink: 0;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow: hidden;
+}
+#aura-root .detail-heading {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+#aura-root .detail-heading img {
+  width: 65px;
+  height: 65px;
+  object-fit: contain;
+  border-radius: 10px;
+}
+#aura-root dl {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  gap: 9px;
+  margin: 0;
+  font-size: 12px;
+}
+#aura-root dt {
+  color: #94a3b8;
+}
+#aura-root dd {
+  margin: 0;
+}
+#aura-root .break-id {
+  word-break: break-all;
+  font-family: monospace;
+}
+#aura-root .wrap {
+  flex-wrap: wrap;
+}
+#aura-root .sidebar form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+#aura-root .power-controls p {
+  margin-bottom: 8px;
+}
+#aura-root .log {
+  background: #0a101b;
+  border-radius: 9px;
+  border: 1px solid #26344b;
+  min-height: 160px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+#aura-root .log h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px;
+  border-bottom: 1px solid #26344b;
+}
+#aura-root .log > div {
+  overflow: auto;
+  padding: 9px;
+  max-height: 280px;
+  font: 11px/1.6 monospace;
+  color: #9cb9a8;
+  overflow-wrap: anywhere;
+}
+#aura-root .empty {
+  padding: 30px;
+  text-align: center;
+  color: #94a3b8;
+}
+#aura-root .empty svg {
+  margin: 0 auto 12px;
+}
+#aura-root .notice {
+  padding: 10px 14px;
+  border-radius: 9px;
+  flex-shrink: 0;
+}
+#aura-root .error {
+  background: #422330;
+  color: #ffd3d6;
+  border: 1px solid #824350;
+}
+#aura-root .modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: #030814cf;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 10;
+}
+#aura-root .modal {
+  width: 680px;
+  max-width: 100%;
+  max-height: 95vh;
+  overflow: auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+#aura-root .plan-list {
+  max-height: 34vh;
+  overflow: auto;
+  border: 1px solid #30405a;
+  border-radius: 8px;
+}
+#aura-root .plan-item {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 12px;
+  border-bottom: 1px solid #30405a;
+}
+#aura-root .plan-item code {
+  color: #94a3b8;
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+#aura-root .plan-item label {
+  color: #f6c779;
+  font-size: 12px;
+}
+#aura-root .modal-actions {
+  justify-content: flex-end;
+}
+#aura-root .backup-check {
+  align-items: flex-start;
+}
+#aura-root .spin {
+  animation: aura-spin 1s linear infinite;
+}
+@keyframes aura-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (max-width: 1100px) {
+  #aura-root .workspace {
+    flex-direction: column;
+    min-height: auto;
+    flex: none;
+  }
+  #aura-root .device-list {
+    min-height: 400px;
+    max-height: 65vh;
+  }
+  #aura-root .sidebar {
+    width: 100%;
+    overflow: hidden;
+  }
+}
 
-#aura-root ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+/* Compact icon layout retained from the original manager. */
+#aura-root .kpi {
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  min-width: 120px;
+  padding: 10px 12px;
 }
-#aura-root ::-webkit-scrollbar-track {
-  background: #0f172a; /* bgDark */
-  border-radius: 4px;
+#aura-root .kpi-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: 9px;
 }
-#aura-root ::-webkit-scrollbar-thumb {
-  background: #334155; /* slate-700 */
-  border-radius: 4px;
+#aura-root .kpi-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
 }
-#aura-root ::-webkit-scrollbar-thumb:hover {
-  background: #00d2ff; /* aura cyan */
+#aura-root .kpi-copy strong {
+  font-size: 23px;
+  line-height: 1.15;
+  color: #fff;
+}
+#aura-root .kpi-copy > span {
+  color: #94a3b8;
+  font-size: 10px;
+  margin-top: 4px;
+}
+#aura-root .sidebar {
+  width: 400px;
+  gap: 8px;
+  padding: 12px;
+  overflow: hidden;
+}
+#aura-root .sidebar > * {
+  flex-shrink: 0;
+}
+#aura-root .detail-heading {
+  min-height: 80px;
+  height: 80px;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 4px;
+}
+#aura-root .detail-heading img {
+  width: 80px;
+  height: 80px;
+  padding: 8px;
+  border: 1px solid #27364b;
+  border-radius: 16px;
+  background: linear-gradient(#1c2534, #0a1018);
+  box-shadow: 0 12px 22px -14px #00d4ff;
+}
+#aura-root .detail-heading h2 {
+  font-size: 20px;
+  line-height: 1.25;
+  margin: 4px 0 7px;
+}
+#aura-root .detail-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #0a0f18;
+  border: 1px solid #25324a;
+  border-radius: 12px;
+  padding: 7px 9px;
+}
+#aura-root .detail-toolbar button {
+  padding: 7px;
+  border: 0;
+  background: transparent;
+  color: #94a3b8;
+}
+#aura-root .detail-toolbar button:hover:not(:disabled) {
+  color: #00a3ff;
+  background: #19263b;
+}
+#aura-root .detail-toolbar .delete-icon:hover:not(:disabled) {
+  color: #ff5252;
+}
+#aura-root .detail-toolbar .on-icon {
+  color: #00c853;
+}
+#aura-root .detail-toolbar .off-icon {
+  color: #ff5252;
+}
+#aura-root .toolbar-divider {
+  height: 24px;
+  width: 1px;
+  background: #25324a;
+  margin: 0 3px;
+}
+#aura-root .detail-grid {
+  background: #0a0f18;
+  border: 1px solid #25324a;
+  border-radius: 12px;
+  padding: 10px 14px;
+  grid-template-columns: 108px minmax(0, 1fr);
+  gap: 4px;
+  font-size: 12px;
+}
+#aura-root .detail-id {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#aura-root .speech-panel {
+  border: 1px solid #25324a;
+  border-radius: 12px;
+  padding: 12px;
+  background: #0a0f18;
+}
+#aura-root .speech-panel label {
+  color: #00a3ff;
+  font-size: 11px;
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+#aura-root .speech-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+#aura-root .speech-row input {
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+}
+#aura-root .speech-row button {
+  font-size: 12px;
+  padding: 8px 10px;
+}
+#aura-root .sidebar .log {
+  flex: 1 1 0;
+  min-height: 74px;
+  overflow: hidden;
+}
+#aura-root .sidebar .log h3 {
+  flex: none;
+  height: 16px;
+  padding: 0 8px;
+  font-size: 10px;
+  gap: 4px;
+}
+#aura-root .sidebar .log h3 svg {
+  width: 10px;
+  height: 10px;
+}
+#aura-root .sidebar .log > div {
+  flex: 1 1 0;
+  min-height: 0;
+  max-height: none;
+  padding: 1px 8px;
+  font-size: 11px;
+  line-height: 18px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+#aura-root .sidebar .log p {
+  margin: 0;
+}
+#aura-root .detail-heading > div {
+  min-width: 0;
+  flex: 1;
+  height: 80px;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+#aura-root .detail-heading h2 {
+  margin: 0;
+  max-height: 50px;
+  overflow: hidden;
+}
+#aura-root .detail-heading > div > p {
+  position: absolute;
+  top: 55px;
+  left: 0;
+  right: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#aura-root .detail-grid dd {
+  overflow: hidden;
+}
+#aura-root .sidebar .speech-panel {
+  padding: 8px 12px;
+}
+#aura-root .sidebar form {
+  gap: 6px;
+}
+@media (max-width: 1100px) {
+  #aura-root .sidebar {
+    width: 100%;
+  }
+}
+#aura-root .device-art {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 80px;
+  width: 80px;
+  height: 80px;
+  color: #67c9ff;
+  border: 1px solid #27364b;
+  border-radius: 16px;
+  background: linear-gradient(#1c2534, #0a1018);
+  box-shadow: 0 12px 22px -14px #00d4ff;
 }

@@ -1,220 +1,79 @@
-## Alexa Device Manager
+# Aura Device Master
 
-<p>
-  <a href="https://www.buymeacoffee.com/stereodruid">
-    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" height="60" alt="Buy Me A Coffee" align="middle">
-  </a>
-  &nbsp;&nbsp;
-  <img src="assets/bmc_qr.png" height="60" alt="QR Code" align="middle">
-</p>
+Lokale Chrome-Erweiterung zur Verwaltung von Alexa-Geräten in deiner bestehenden Amazon-Sitzung. Die aktuelle React-Oberfläche ist deutschsprachig. Es gibt keinen eigenen Server und keine gespeicherten Zugangsdaten.
 
-*🇬🇧 [English version below](#english-version)*
+## Installation und Aktualisierung
 
-### 🇩🇪 Deutsch
+1. `chrome://extensions/` öffnen und den Entwicklermodus einschalten.
+2. **Entpackte Erweiterung laden** wählen und den Ordner `chrome-extension` auswählen.
+3. Bei einer bereits installierten lokalen Version auf das **Neu-laden-Symbol** der Erweiterung klicken.
+4. Alte Manager-Tabs schließen. Im Erweiterungspopup die passende Amazon-Region wählen und **Manager öffnen** klicken.
 
-Lokaler, zweisprachiger Chrome-Manager für Alexa-Smart-Home-Geräte. Er arbeitet ausschließlich in der bereits angemeldeten Amazon-Sitzung im Browser. Es gibt keinen eigenen Server, keinen Upload und keine gespeicherten Zugangsdaten.
+Der fertige Erweiterungsordner enthält Version **0.6.3**. Veröffentlichte ZIP-Dateien unter `releases/` sind historische Pakete und werden durch einen lokalen Build nicht aktualisiert.
 
-![Preview of the Alexa Device Manager](assets/preview_main.png)
+## Geräte laden und filtern
 
-#### Installation
+**Neu laden** ruft die sichtbare Geräteliste und die GraphQL-Endpoints ab. Erst nach vollständigem, validiertem Laden sind Aktionen möglich. Bei einem Fehler bleiben vorhandene Daten zur Einsicht erhalten, werden aber als möglicherweise veraltet gekennzeichnet.
 
-📥 **[Hier die aktuellste AlexaDeviceManager.zip herunterladen](https://github.com/stereodruid/Alexa-Device-Manager/releases/latest/download/AlexaDeviceManager.zip)** (oder auf der [Releases-Seite](https://github.com/stereodruid/Alexa-Device-Manager/releases) prüfen).
+- Suche nach Name, Beschreibung, Typ, Quelle oder einer der Geräte-IDs.
+- Filter für Typ, Quelle, Gruppe, Erreichbarkeit und Alexa-Aktivierungsstatus.
+- **Online**, **Offline** und **Unbekannt** sind getrennt. Fehlende Endpoint-IDs bedeuten nicht automatisch ein defektes Gerät.
+- Erreichbarkeit und **Aktiviert/Deaktiviert** werden separat angezeigt.
+- Quellen wie Home Assistant oder Amazon sind aus den Gerätedaten abgeleitete Schätzungen.
+- KPI-Karten setzen zunächst andere Filter zurück. Spalten und KPI-Karten lassen sich verschieben; die Reihenfolge bleibt lokal gespeichert.
+- Seitengrößen 10, 50 und 100. Die Kopf-Checkbox betrifft nur die aktuelle Seite. Auswahl außerhalb der aktuellen Seite wird ausdrücklich gezählt.
 
-1. Lade die `.zip`-Datei herunter und entpacke sie auf deinem Computer (es entsteht ein Ordner `chrome-extension`).
-2. Chrome öffnen und `chrome://extensions/` aufrufen.
-3. Rechts oben den `Entwicklermodus` einschalten.
-4. `Entpackte Erweiterung laden` klicken.
-5. Den entpackten Ordner `chrome-extension` auswählen.
-6. Oben rechts in Chrome auf das Erweiterungssymbol `Alexa Device Manager` klicken und `Manager öffnen` wählen.
+## Änderungen prüfen und ausführen
 
-Der Manager öffnet die normale Alexa-Webseite und blendet seine Bedienoberfläche darüber ein. F12, Copy/Paste und die rohe JSON-Ansicht sind nicht erforderlich.
+1. Aktuelle Daten laden und die gewünschten Geräte auswählen.
+2. **Trockenlauf / Vorschau**, **Aktivieren**, **Deaktivieren** oder **Löschen** wählen. Auch Einzelaktionen öffnen diese Vorschau.
+3. Alle angezeigten Zielnamen und IDs prüfen. Die Vorschau führt keine Änderung aus.
+4. Eine aktuelle **JSON-Sicherung herunterladen**, die gespeicherte Datei prüfen und dies bestätigen. Die JSON-Datei ist ein Datenexport; ein automatischer Wiederherstellungsimport ist nicht enthalten.
+5. Geschützte Gruppen und Echo-/Amazon-Geräte müssen in der Vorschau **einzeln für genau diese Aktion** freigegeben werden. Ausblenden ist keine Freigabe.
+6. Beim dauerhaften Löschen zusätzlich `DELETE` eingeben und **Jetzt ausführen** wählen.
 
-#### Sprache
+Löschen und Aktivieren/Deaktivieren prüfen die API-Antwort und anschließend den tatsächlichen Zielzustand durch erneutes Laden. Das Protokoll unterscheidet bestätigte und fehlgeschlagene beziehungsweise unbestätigte Ergebnisse. Während eines Vorgangs werden weitere Vorgänge gesperrt. Anfragelimits und Anmeldefehler stoppen den restlichen Stapel, ohne sofortige Wiederholungen.
 
-Oben rechts im Manager befindet sich die Auswahl `Deutsch` / `English`. Die Wahl wird lokal im Browser für den nächsten Start gespeichert. Die Sprache ändert nur Texte und Dialoge, niemals die ausgewählten Geräte oder Alexa-Daten.
+Geräte ohne geeignete Ziel-ID bleiben für die entsprechende Aktion gesperrt. Die alte Appliance-ID wird nur für den Legacy-Löschpfad und Ein-/Aus-Befehle verwendet; Entity-IDs werden nicht als Lösch-IDs eingesetzt.
 
-#### Sicherer Ablauf
+## Ein/Aus und Sprachausgabe
 
-1. `Geräte laden` drücken.
-2. Sofort `JSON sichern` verwenden. Diese Datei ist die lokale Sicherung der sichtbaren Liste.
-3. Nach Name, Typ, Quelle oder Gruppe filtern.
-4. Mit `Trockenlauf` die Auswahl prüfen. Die genaue Liste erscheint in der Browser-Konsole; es wird nichts verändert.
-5. Zuerst nur **ein** eindeutig identifiziertes Gerät testen.
-6. Erst nach erfolgreicher Nachkontrolle weitere, ausdrücklich gewählte Geräte bearbeiten.
+- Ein und Aus senden einen expliziten Befehl an die zugeordnete Appliance-ID. Die App zeigt keinen erfundenen Stromzustand; der tatsächliche Zustand wird nicht gemessen.
+- Sprachausgabe benötigt eine eindeutige Übereinstimmung mit der Echo-Geräteliste über Seriennummer oder Geräte-Account-ID. Ein gleicher Name reicht nicht. Fehlt diese Zuordnung, wird nichts gesendet.
+- Auch diese Befehle durchlaufen die Vorschau. Eine angeforderte Sprachausgabe bestätigt nicht, dass sie hörbar abgespielt wurde.
+- DND und eine angebliche letzte Geräteaktivität werden nicht angezeigt, da dafür keine verifizierte Implementierung beziehungsweise Datenquelle vorhanden ist.
 
-Der Manager lädt die Alexa-Liste nach jeder Änderung erneut und prüft den tatsächlichen Status. Ein HTTP-Erfolg allein gilt nicht als erfolgreicher Abschluss.
+## Entwicklung und Prüfungen
 
-### Funktionen
+```text
+npm ci
+npm test
+npm run check
+npm run build
+```
 
-| Funktion | Beschreibung |
+`npm run build` erzeugt `chrome-extension/content.js`. Diese Datei wird nicht von Hand bearbeitet.
+
+| Datei | Aufgabe |
 | --- | --- |
-| **Phantom-Sensoren** | Findet und löscht versteckte Skill-Geräte (z.B. OpenHAB), die in der Alexa-App hängen |
-| **Filtern** | Name, Beschreibung, Alexa-Typ, Gruppe und vermutete Quelle |
-| **Sortierung & Layout** | Spalten per Klick sortieren und per Drag & Drop verschieben |
-| **Live Status** | Echtzeit-Gerätestatus (Online/Offline) direkt von Alexa abfragen |
-| **Quellen** | Home Assistant, ioBroker, Homey, Alexa/Amazon oder Andere |
-| **Sicherung** | JSON und CSV herunterladen |
-| **Trockenlauf** | Auswahl ohne Änderung prüfen |
-| **Deaktivieren** | Reversibel aus Alexa ausblenden |
-| **Aktivieren** | Zuvor deaktivierte Geräte wieder freigeben |
-| **Löschen** | Dauerhaft aus Alexa entfernen |
-| **Länderauswahl** | Dynamische und manuelle Auswahl aller Amazon-Regionen (.com, .de, .co.uk, etc.) |
+| `src/alexa.js` | API-Requests, Datenzuordnung, Status, Filter und Nachkontrolle |
+| `src/hooks/useAlexa.js` | Ladezustand, Aktionssperre und Protokoll |
+| `src/App.jsx` | Oberfläche und gemeinsame Aktionsvorschau |
+| `src/index.css` | Auf den Manager begrenzte Darstellung |
+| `chrome-extension/background.js` | Region prüfen, Tab öffnen, Oberfläche laden |
+| `tests/*.test.js` | Regressionstests mit simulierten Antworten |
+| `scripts/test-ui.cjs` | Browserprüfung mit ausschließlich simulierten Daten |
 
-<p align="center"><img src="assets/preview_popup.png" alt="Country Selector Popup" width="300"></p>
+Die Browserprüfung benötigt Playwright und Chromium/Chrome. Optional `AURA_PLAYWRIGHT` auf das Playwright-Modul und `AURA_BROWSER` auf die Browserdatei setzen; anschließend `node scripts/test-ui.cjs` ausführen. Sie greift nicht auf echte Amazon-Geräte oder das bestehende Browserprofil zu.
 
-Die Quellenklassifikation ist eine Bedienhilfe. Alexa liefert kein verlässliches, einheitliches Herkunftsfeld; deshalb wertet der Manager Namen, Beschreibung und Herstellertext aus.
+Amazon nutzt private Web-Endpunkte. Ein bestandener lokaler Test ersetzt daher keinen gezielten Test eines ausdrücklich gewählten Geräts im eigenen Konto. Entfernte Geräte können durch ihre Herstellerintegration erneut angemeldet werden.
 
-### Deaktivieren oder löschen?
+## English
 
-**Auswahl deaktivieren**
-- Setzt den Alexa-Endpunkt auf `DISABLED_BY_CUSTOMER`.
-- Ist rückgängig zu machen: `Auswahl aktivieren`.
-- Der empfohlene erste Schritt für vermutete Geister- oder Altgeräte.
+Version 0.6.3 repairs the current German-language React app. Load or reload the unpacked `chrome-extension` folder in Chrome, close old manager tabs, and reopen the manager from the extension popup.
 
-**Auswahl löschen**
-- Entfernt den Alexa-Endpunkt dauerhaft.
-- Kann durch eine Hersteller-, ioBroker-, Homey- oder Home-Assistant-Integration erneut erscheinen, wenn diese Quelle das Gerät wieder meldet.
-- Erfordert die explizite Eingabe von `DELETE`.
+The app validates the complete device inventory, maps devices by IDs, distinguishes unknown reachability from offline status, and verifies delete/enable/disable operations against a fresh inventory. Every action opens a target preview; confirm a saved JSON snapshot and individually authorize protected targets. Deletion also requires typing `DELETE`.
 
-#### Schutzregeln
+Selections outside the current page are explicitly counted. Failed inventory refreshes block actions. Rate limits stop the remaining batch without immediate retries. Power and speech requests are identified as commands, not verified physical device states. Speech never chooses a device merely because its name matches.
 
-Gruppen sowie Echo-/Amazon-Geräte sind standardmäßig geschützt. Die beiden Schutzschalter im Manager müssen bewusst aktiviert werden, bevor solche Einträge bearbeitbar sind.
-
-Geräte ohne verknüpfte moderne Alexa-Endpunkt-ID werden ebenfalls gesperrt. Das verhindert, dass ein falscher Identifier für eine Änderung verwendet wird.
-
-#### Fehlerbehebung
-
-**Der Manager zeigt nur JSON oder startet nicht**
-1. In `chrome://extensions/` die Erweiterung mit dem Neu-laden-Symbol aktualisieren.
-2. Sicherstellen, dass `Alexa Device Manager` aktiviert ist.
-3. Bei `alexa.amazon.*` im richtigen Amazon-Konto angemeldet sein.
-4. Den Manager ausschließlich über das Erweiterungssymbol und `Manager öffnen` starten.
-
-**Ein gelöschtes Gerät erscheint wieder**
-Die ursprüngliche Quelle meldet es erneut an. Das Gerät zuerst dort entfernen oder deaktivieren, zum Beispiel in Home Assistant, ioBroker, Homey oder der Hersteller-Cloud.
-
-**Eine Aktion wird abgelehnt**
-Amazon verwendet nicht öffentlich stabil dokumentierte Web-Endpunkte. Nicht wiederholt auf große Mengen anwenden. Liste neu laden, einen einzelnen Eintrag prüfen und das Projektprotokoll beachten.
-
-### Dateien
-
-| Pfad | Zweck |
-| --- | --- |
-| `chrome-extension/` | Installierbare Chrome-Erweiterung |
-| `chrome-extension/content.js` | Interface, Übersetzung und Alexa-API-Aufrufe |
-| `chrome-extension/background.js` | Öffnet Alexa und injiziert den Manager |
-
-### Hinweis
-
-Dieses Projekt greift auf private Amazon-Web-Endpunkte zu, die sich jederzeit ändern können. Vor Änderungen an echten Alexa-Geräten immer eine Sicherung erstellen und nur die konkret gewünschte Auswahl bestätigen.
-
----
-
-<a name="english-version"></a>
-## 🇬🇧 English
-
-<p>
-  <a href="https://www.buymeacoffee.com/stereodruid">
-    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" height="60" alt="Buy Me A Coffee" align="middle">
-  </a>
-  &nbsp;&nbsp;
-  <img src="assets/bmc_qr.png" height="60" alt="QR Code" align="middle">
-</p>
-
-A local, bilingual Chrome manager for Alexa smart-home devices. It only uses the Amazon session already signed in to the browser. There is no separate server, upload, or stored credential.
-
-![Preview of the Alexa Device Manager](assets/preview_main.png)
-
-### Setup
-
-📥 **[Download the latest AlexaDeviceManager.zip here](https://github.com/stereodruid/Alexa-Device-Manager/releases/latest/download/AlexaDeviceManager.zip)** (or check the [Releases page](https://github.com/stereodruid/Alexa-Device-Manager/releases)).
-
-1. Download the `.zip` file and extract it on your computer (this creates a `chrome-extension` folder).
-2. Open Chrome and navigate to `chrome://extensions/`.
-3. Enable `Developer mode` in the top right.
-4. Click `Load unpacked`.
-5. Choose the extracted `chrome-extension` folder.
-6. Click the `Alexa Device Manager` extension icon in the top right of Chrome and select `Open manager`.
-
-The manager opens the normal Alexa website and overlays its interface. No developer tools, copy/paste, or raw JSON page are needed.
-
-### Language
-
-Use the `Deutsch` / `English` selector in the upper-right corner. The choice is saved locally in the browser for the next launch. It changes text and dialogs only, never selected devices or Alexa data.
-
-### Safe Workflow
-
-1. Click `Load devices`.
-2. Immediately use `Save JSON`. This file is the local backup of the visible list.
-3. Filter by name, type, source, or group.
-4. Use `Dry run` to check your selection. The exact list appears in the browser console; nothing is changed.
-5. First, test with only **one** clearly identified device.
-6. Only process further explicitly chosen devices after a successful follow-up check.
-
-After every change, the manager reloads the Alexa list and verifies the actual state. A successful HTTP status alone is not treated as success.
-
-### Features
-
-| Feature | Description |
-| --- | --- |
-| **Phantom Sensors** | Finds and deletes hidden skill devices (e.g., OpenHAB) stuck in the Alexa app |
-| **Filter** | Name, description, Alexa type, group, and inferred source |
-| **Sort & Order** | Click headers to sort data, drag & drop to reorder columns |
-| **Live Status** | Query real-time device reachability (Online/Offline) |
-| **Sources** | Home Assistant, ioBroker, Homey, Alexa/Amazon, or Other |
-| **Backup** | Download JSON and CSV |
-| **Dry run** | Check selection without making changes |
-| **Disable** | Reversibly hide from Alexa |
-| **Enable** | Re-enable previously disabled devices |
-| **Delete** | Permanently remove from Alexa |
-| **Region Selector** | Dynamic and manual selection of all Amazon regions (.com, .de, .co.uk, etc.) |
-
-<p align="center"><img src="assets/preview_popup.png" alt="Country Selector Popup" width="300"></p>
-
-Source classification is a convenience feature. Alexa does not provide one reliable source field, so the manager evaluates name, description, and manufacturer text.
-
-### Disable or Delete?
-
-**Disable selection**
-- Sets the Alexa endpoint to `DISABLED_BY_CUSTOMER`.
-- Can be reversed: `Enable selection`.
-- The recommended first step for suspected ghost or legacy devices.
-
-**Delete selection**
-- Permanently removes the Alexa endpoint.
-- Might return through a manufacturer, ioBroker, Homey, or Home Assistant integration if that source publishes the device again.
-- Requires explicit confirmation by typing `DELETE`.
-
-### Protection Rules
-
-Groups and Echo/Amazon devices are protected by default. The two protection switches must be intentionally enabled before those entries can be edited.
-
-Devices without a linked modern Alexa endpoint ID are also blocked. This prevents an incorrect identifier from being used for a change.
-
-### Troubleshooting
-
-**The manager only shows JSON or does not start**
-1. In `chrome://extensions/`, refresh the extension using the reload icon.
-2. Ensure `Alexa Device Manager` is enabled.
-3. Be signed into the correct Amazon account on `alexa.amazon.com` (or your local equivalent).
-4. Only start the manager using the extension icon and `Open manager`.
-
-**A deleted device returns**
-The original source is publishing it again. Remove or disable it at the source first, such as Home Assistant, ioBroker, Homey, or the manufacturer cloud.
-
-**An action is rejected**
-Amazon uses private web endpoints that are not publicly stable. Do not repeat actions across large selections. Reload the list, test one entry, and consult the project handover.
-
-### Files
-
-| Path | Purpose |
-| --- | --- |
-| `chrome-extension/` | Installable Chrome extension |
-| `chrome-extension/content.js` | UI, translations, and Alexa API calls |
-| `chrome-extension/background.js` | Opens Alexa and injects the manager |
-
-### Notice
-
-This project uses private Amazon web endpoints that can change at any time. Always create a backup before changing real Alexa devices and confirm only the specific intended selection.
-
-
+Run `npm test`, `npm run check`, and `npm run build` for local validation. The browser smoke test uses mocked responses only. Historical release ZIPs are not replaced by a local build.

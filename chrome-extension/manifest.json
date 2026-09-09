@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Aura Device Master",
-  "version": "0.6.2",
+  "version": "0.6.3",
   "description": "Lokaler Manager fuer Alexa Smart-Home-Geraete mit Backup, Filtern und kontrolliertem Loeschen.",
   "permissions": [
     "activeTab",
@@ -25,8 +25,29 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["icon128.png", "icon48.png", "icon32.png", "icon16.png", "*.jpg"],
-      "matches": ["*://alexa.amazon.de/*", "*://alexa.amazon.com/*", "*://alexa.amazon.co.uk/*"]
+      "resources": [
+        "icon128.png",
+        "icon48.png",
+        "icon32.png",
+        "icon16.png",
+        "*.jpg"
+      ],
+      "matches": [
+        "https://alexa.amazon.de/*",
+        "https://alexa.amazon.com/*",
+        "https://alexa.amazon.co.uk/*",
+        "https://alexa.amazon.fr/*",
+        "https://alexa.amazon.it/*",
+        "https://alexa.amazon.es/*",
+        "https://alexa.amazon.ca/*",
+        "https://alexa.amazon.com.au/*",
+        "https://alexa.amazon.co.jp/*",
+        "https://alexa.amazon.in/*",
+        "https://alexa.amazon.com.br/*",
+        "https://alexa.amazon.com.mx/*",
+        "https://pitangui.amazon.com/*",
+        "https://layla.amazon.com/*"
+      ]
     }
   ],
   "background": {
