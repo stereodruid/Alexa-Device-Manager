@@ -14,7 +14,7 @@
   },
   "keywords": [],
   "author": "stereodruid",
-  "license": "GPL-3.0-or-later",
+  "license": "AGPL-3.0-or-later",
   "type": "module",
   "bugs": {
     "url": "https://github.com/stereodruid/Alexa-Device-Manager/issues"

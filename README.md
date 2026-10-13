@@ -1,7 +1,7 @@
 # Aura Device Master
 
 [![Release](https://img.shields.io/badge/release-v0.7.0-00a3ff)](https://github.com/stereodruid/Alexa-Device-Manager/releases/tag/v0.7.0)
-[![License](https://img.shields.io/badge/license-GPL--3.0-00d48a)](LICENSE)
+[![License](https://img.shields.io/badge/license-AGPL--3.0-00d48a)](LICENSE)
 
 A free, local Chrome extension for viewing and safely managing Alexa smart-home devices through your existing Amazon browser session. No subscription, separate account, server or additional credentials are required.
 
