@@ -3,9 +3,18 @@
 [![Release](https://img.shields.io/badge/release-v0.7.1-00a3ff)](https://github.com/stereodruid/Aura-Device-Master/releases/tag/v0.7.1)
 [![License](https://img.shields.io/badge/license-AGPL--3.0-00d48a)](LICENSE)
 
-A free, local Chrome extension for viewing and safely managing Alexa smart-home devices through your existing Amazon browser session. No subscription, separate account, server or additional credentials are required.
+## Choose your language · Sprache wählen
 
-Deutschsprachige Anleitung: [weiter unten](#deutsch).
+[![Deutsche Anleitung](https://img.shields.io/badge/DEUTSCH-Deutsche_Anleitung-00a3ff?style=for-the-badge)](#deutsch)
+[![English documentation](https://img.shields.io/badge/ENGLISH-Documentation-00d48a?style=for-the-badge)](#english)
+
+**🇩🇪 Die vollständige deutsche Anleitung ist direkt über den blauen Button erreichbar.**
+
+<a id="english"></a>
+
+## English
+
+A free, local Chrome extension for viewing and safely managing Alexa smart-home devices through your existing Amazon browser session. No subscription, separate account, server or additional credentials are required.
 
 ![Aura Device Master](<assets/preview pics/FullView.png>)
 
@@ -87,7 +96,9 @@ Amazon uses private web interfaces that may change. Test destructive actions on 
 
 Aura Device Master communicates directly between the extension and Amazon using the session already open in the browser. It has no analytics, subscription service or separate backend. See the [privacy policy](PRIVACY_POLICY.md) for details.
 
-## Deutsch
+<a id="deutsch"></a>
+
+## 🇩🇪 Deutsch
 
 Aura Device Master ist eine kostenlose, lokale Chrome-Erweiterung zur Anzeige und sicheren Verwaltung von Alexa-Smart-Home-Geräten. Sie verwendet die bereits im Browser angemeldete Amazon-Sitzung. Es gibt kein Abo, kein separates Konto, keinen eigenen Server und keine zusätzlich gespeicherten Zugangsdaten.
 
