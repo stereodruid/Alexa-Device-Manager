@@ -1,6 +1,7 @@
 AGENTS.md
 AlexaDeviceManager.zip
 .research-alexactl/
+/node_modules/
 promo-video/node_modules/
 promo-video/out/
 /scratch/
