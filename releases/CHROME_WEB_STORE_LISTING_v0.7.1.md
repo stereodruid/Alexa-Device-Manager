@@ -79,7 +79,15 @@ No. All executable extension code is included in the submitted package.
 
 ### Data handling
 
-Device information is read from and actions are sent to Amazon within the user's current browser session. Aura Device Master has no separate backend, analytics or advertising service. JSON backups are downloaded only when the user requests them.
+Device information and user-entered Alexa speech or command text are processed locally. Requested actions are sent directly to Amazon within the user's current browser session. Aura Device Master has no separate backend, analytics or advertising service. Interface preferences remain in local browser storage, and JSON backups are downloaded only when the user requests them.
+
+### User-data disclosures
+
+- Website content: **Yes** — Alexa device names, identifiers, types, status and capabilities are processed locally to display and manage the user's devices.
+- User-generated content: **Yes** — text entered for speech, announcements or simulated commands is processed locally and sent directly to Amazon only when the user requests the action.
+- Authentication information: **No** — the extension uses the existing Amazon browser session but does not read, collect or store passwords or authentication cookies.
+- Web history: **No** — the extension does not read or collect browsing history.
+- Data sale, advertising, creditworthiness and unrelated use: **No**.
 
 ## Graphic assets
 
