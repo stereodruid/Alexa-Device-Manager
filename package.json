@@ -1,6 +1,6 @@
 {
   "name": "alexadevicemanager",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Local Chrome extension for safely managing Alexa smart-home devices in an existing Amazon session.",
   "main": "index.js",
   "scripts": {

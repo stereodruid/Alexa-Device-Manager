@@ -1,6 +1,6 @@
 # Aura Device Master
 
-[![Release](https://img.shields.io/badge/release-v0.7.0-00a3ff)](https://github.com/stereodruid/Alexa-Device-Manager/releases/tag/v0.7.0)
+[![Release](https://img.shields.io/badge/release-v0.7.1-00a3ff)](https://github.com/stereodruid/Alexa-Device-Manager/releases/tag/v0.7.1)
 [![License](https://img.shields.io/badge/license-AGPL--3.0-00d48a)](LICENSE)
 
 A free, local Chrome extension for viewing and safely managing Alexa smart-home devices through your existing Amazon browser session. No subscription, separate account, server or additional credentials are required.
@@ -20,9 +20,9 @@ Deutschsprachige Anleitung: [weiter unten](#deutsch).
 - Direct speech, announcements with a chime and simulated voice commands for unambiguously matched Echo devices.
 - Local operation inside the current Amazon session. Device data is not uploaded to a separate service.
 
-## Install v0.7.0
+## Install v0.7.1
 
-1. Download [Aura Device Master v0.7.0](https://github.com/stereodruid/Alexa-Device-Manager/releases/download/v0.7.0/Aura-Device-Master-v0.7.0.zip).
+1. Download [Aura Device Master v0.7.1](https://github.com/stereodruid/Alexa-Device-Manager/releases/download/v0.7.1/Aura-Device-Master-v0.7.1.zip).
 2. Extract the ZIP file to a permanent folder.
 3. Open `chrome://extensions/` in Chrome.
 4. Enable **Developer mode**.
@@ -35,10 +35,10 @@ The extension is planned for the Chrome Web Store. It remains completely free an
 
 ## Demo videos
 
-- [English · YouTube / 16:9](https://github.com/stereodruid/Alexa-Device-Manager/releases/download/v0.7.0/aura-device-master-youtube-en.mp4)
-- [English · vertical / 9:16](https://github.com/stereodruid/Alexa-Device-Manager/releases/download/v0.7.0/aura-device-master-vertical-en.mp4)
-- [Deutsch · YouTube / 16:9](https://github.com/stereodruid/Alexa-Device-Manager/releases/download/v0.7.0/aura-device-master-youtube-de.mp4)
-- [Deutsch · Hochformat / 9:16](https://github.com/stereodruid/Alexa-Device-Manager/releases/download/v0.7.0/aura-device-master-vertical-de.mp4)
+- [English · YouTube / 16:9](https://github.com/stereodruid/Alexa-Device-Manager/releases/download/v0.7.1/aura-device-master-youtube-en.mp4)
+- [English · vertical / 9:16](https://github.com/stereodruid/Alexa-Device-Manager/releases/download/v0.7.1/aura-device-master-vertical-en.mp4)
+- [Deutsch · YouTube / 16:9](https://github.com/stereodruid/Alexa-Device-Manager/releases/download/v0.7.1/aura-device-master-youtube-de.mp4)
+- [Deutsch · Hochformat / 9:16](https://github.com/stereodruid/Alexa-Device-Manager/releases/download/v0.7.1/aura-device-master-vertical-de.mp4)
 
 ## Safe operation
 
@@ -54,7 +54,7 @@ Before changing devices:
 
 The app reloads the inventory after delete, enable and disable operations. A successful HTTP response alone is not presented as confirmed success. Authentication failures and rate limits stop the remaining batch without automatic retry loops.
 
-If Amazon reports that an endpoint no longer exists, v0.7.0 uses the legacy appliance ID only when Amazon supplied one for the same mapped device. If no safe fallback ID exists, the log explains that the stale device must be removed from its source integration, such as ioBroker or Home Assistant.
+If Amazon reports that an endpoint no longer exists, Aura Device Master uses the legacy appliance ID only when Amazon supplied one for the same mapped device. If no safe fallback ID exists, the log explains that the stale device must be removed from its source integration, such as ioBroker or Home Assistant.
 
 ## Speech and device commands
 
@@ -93,7 +93,7 @@ Aura Device Master ist eine kostenlose, lokale Chrome-Erweiterung zur Anzeige un
 
 ### Installation
 
-1. [Aura Device Master v0.7.0 herunterladen](https://github.com/stereodruid/Alexa-Device-Manager/releases/download/v0.7.0/Aura-Device-Master-v0.7.0.zip).
+1. [Aura Device Master v0.7.1 herunterladen](https://github.com/stereodruid/Alexa-Device-Manager/releases/download/v0.7.1/Aura-Device-Master-v0.7.1.zip).
 2. ZIP-Datei dauerhaft entpacken.
 3. `chrome://extensions/` öffnen und den **Entwicklermodus** aktivieren.
 4. **Entpackte Erweiterung laden** wählen und den entpackten Ordner mit `manifest.json` auswählen.
