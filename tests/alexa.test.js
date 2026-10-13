@@ -11,6 +11,7 @@ import {
   toggleVisible,
   isProtected,
   isEcho,
+  isMissingResourceError,
 } from "../src/alexa.js";
 
 test("Echo recognition supports top-level types and GraphQL categories", () => {
@@ -116,6 +117,47 @@ test("delete checks returned ID and accepts successful legacy 204", async () => 
     { ...d, _admEndpointId: null },
     "delete",
   );
+});
+test("delete falls back to the legacy appliance only for a missing GraphQL resource", async () => {
+  const calls = [];
+  const client = createAlexaClient(async (url, options) => {
+    calls.push({ url, method: options.method });
+    return url.includes("graphql")
+      ? response({ errors: [{ message: "Resource does not exist" }] })
+      : response(null, 204);
+  });
+  await client.mutate(d, "delete");
+  assert.deepEqual(calls, [
+    { url: "/nexus/v1/graphql", method: "POST" },
+    { url: "/api/phoenix/appliance/legacy-1", method: "DELETE" },
+  ]);
+});
+test("delete never uses the legacy fallback for unrelated, auth or rate-limit errors", async () => {
+  for (const failure of [
+    response({ errors: [{ message: "Permission denied" }] }),
+    response({}, 401),
+    response({}, 403),
+    response({}, 429),
+  ]) {
+    let calls = 0;
+    const client = createAlexaClient(async () => {
+      calls++;
+      return failure;
+    });
+    await assert.rejects(client.mutate(d, "delete"));
+    assert.equal(calls, 1);
+  }
+});
+test("missing GraphQL resource without a legacy ID gives an actionable error", async () => {
+  const client = createAlexaClient(async () =>
+    response({ errors: [{ message: "Endpoint not found" }] }),
+  );
+  await assert.rejects(
+    client.mutate({ ...d, _admApplianceId: null }, "delete"),
+    /keine löschbare Ressource.*Legacy-ID/i,
+  );
+  assert.equal(isMissingResourceError(Error("Resource does not exist")), true);
+  assert.equal(isMissingResourceError(Error("Permission denied")), false);
 });
 test("batch cannot change protected devices without per-target authorization", async () => {
   let calls = 0;
@@ -226,19 +268,29 @@ test("select visible compares identities, retains explicit hidden selection", ()
     ["a", "b"],
   );
 });
-test("Echo matching prioritizes exact IDs and never guesses by name", () => {
+test("Echo matching prioritizes IDs and accepts only one exact account name", () => {
   const echoes = ["FIRST", "SECOND"].map((serialNumber) => ({
     serialNumber,
     deviceType: "TYPE",
     deviceOwnerCustomerId: "CUSTOMER",
-    accountName: "Echo",
+    accountName: `${serialNumber} Echo`,
   }));
   assert.equal(
     resolveEcho({ id: "SECOND", displayName: "Echo" }, echoes).serialNumber,
     "SECOND",
   );
+  assert.equal(
+    resolveEcho({ id: "endpoint-id", displayName: "FIRST Echo" }, echoes).serialNumber,
+    "FIRST",
+  );
   assert.throws(() =>
-    resolveEcho({ id: "unrelated", displayName: "Echo" }, echoes),
+    resolveEcho({ id: "unrelated", displayName: "Missing" }, echoes),
+  );
+  assert.throws(() =>
+    resolveEcho(
+      { id: "endpoint-id", displayName: "FIRST Echo" },
+      [...echoes, { ...echoes[0], serialNumber: "THIRD" }],
+    ),
   );
 });
 test("TTS sends one request and stops on HTTP 429 without fallback attempts", async () => {
@@ -259,6 +311,32 @@ test("TTS sends one request and stops on HTTP 429 without fallback attempts", as
   });
   await assert.rejects(client.speak({ id: "SECOND" }, "Test"));
   assert.equal(previews, 1);
+});
+test("Alexa actions use the current serial sequence payload for all three modes", async () => {
+  for (const [mode, expectedType] of [
+    ["speak", "Alexa.Speak"],
+    ["announce", "AlexaAnnouncement.Announcement"],
+    ["command", "Alexa.TextCommand"],
+  ]) {
+    let preview;
+    const client = createAlexaClient(async (url, options) => {
+      if (url.includes("devices-v2"))
+        return response({
+          devices: [{ serialNumber: "SERIAL", deviceType: "TYPE", deviceOwnerCustomerId: "CUSTOMER" }],
+        });
+      preview = JSON.parse(options.body);
+      return response({});
+    });
+    await client.sendAlexaAction({ id: "SERIAL" }, " Test ", mode, "de-DE");
+    const sequence = JSON.parse(preview.sequenceJson);
+    assert.equal(sequence["@type"], "com.amazon.alexa.behaviors.model.Sequence");
+    assert.equal(sequence.startNode["@type"], "com.amazon.alexa.behaviors.model.SerialNode");
+    const operation = sequence.startNode.nodesToExecute[0];
+    assert.equal(operation.type, expectedType);
+    assert.equal(operation.operationPayload.deviceSerialNumber, "SERIAL");
+    assert.equal(operation.operationPayload.deviceType, "TYPE");
+    assert.equal(operation.operationPayload.locale, "de-DE");
+  }
 });
 test("power rejects guessed endpoint IDs", async () => {
   let calls = 0;

@@ -3,16 +3,21 @@
   "version": "1.0.0",
   "scripts": {
     "start": "remotion studio src/index.ts",
-    "build": "remotion render src/index.ts Promo out/video.mp4"
+    "build": "npm run render:de:landscape && npm run render:de:portrait && npm run render:en:landscape && npm run render:en:portrait",
+    "render:de:landscape": "remotion render src/index.ts PromoLandscapeDE out/aura-device-master-youtube-de.mp4",
+    "render:de:portrait": "remotion render src/index.ts PromoPortraitDE out/aura-device-master-vertical-de.mp4",
+    "render:en:landscape": "remotion render src/index.ts PromoLandscapeEN out/aura-device-master-youtube-en.mp4",
+    "render:en:portrait": "remotion render src/index.ts PromoPortraitEN out/aura-device-master-vertical-en.mp4"
   },
   "dependencies": {
+    "@remotion/media": "^4.0.513",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "remotion": "^4.0.0"
   },
   "devDependencies": {
-    "@types/react": "^18.0.0",
     "@remotion/cli": "^4.0.0",
+    "@types/react": "^18.0.0",
     "typescript": "^5.0.0"
   }
 }

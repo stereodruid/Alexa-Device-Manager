@@ -16,6 +16,8 @@ const { chromium } = require(process.env.AURA_PLAYWRIGHT || "playwright");
     const errors = [];
     page.on("pageerror", (e) => errors.push(e.message));
     let mutations = 0,
+      loadRequests = 0,
+      voiceRequests = 0,
       failLoad = false;
     const entities = Array.from({ length: 65 }, (_, i) => ({
       id: `entity-${i}`,
@@ -49,12 +51,20 @@ const { chromium } = require(process.env.AURA_PLAYWRIGHT || "playwright");
       const url = new URL(route.request().url());
       if (url.pathname === "/api/behaviors/entities")
         return route.fulfill({ json: entities });
+      if (url.pathname === "/api/devices-v2/device")
+        return route.fulfill({ json: { devices: [{ accountName: "Echo Test", serialNumber: "ECHO-SERIAL", deviceType: "ECHO-TYPE", deviceOwnerCustomerId: "CUSTOMER" }] } });
+      if (url.pathname === "/api/behaviors/preview") {
+        voiceRequests++;
+        return route.fulfill({ status: 400, json: {} });
+      }
       if (url.pathname === "/nexus/v1/graphql") {
         const body = route.request().postDataJSON();
-        if (body.operationName === "getDevicesBaseData")
+        if (body.operationName === "getDevicesBaseData") {
+          loadRequests++;
           return failLoad
             ? route.fulfill({ status: 403, json: {} })
             : route.fulfill({ json: { data: { allDevices: { endpoints } } } });
+        }
         mutations++;
         if (body.operationName === "setEndpointEnablement") {
           const d = endpoints.find(
@@ -112,16 +122,36 @@ const { chromium } = require(process.env.AURA_PLAYWRIGHT || "playwright");
     await page.getByRole("button", { name: /Echos/ }).click();
     assert.equal(await page.locator("tbody tr").count(), 1);
     await page.getByRole("button", { name: /Echo Test/ }).click();
-    await page.getByLabel("Alexa Sprachausgabe").fill("Hallo Alexa");
+    assert.equal(await page.locator(".speech-panel select").count(), 0);
+    await page.getByRole("textbox", { name: "Alexa-Aktion" }).fill("Hallo Alexa");
     await page
       .locator(".speech-row")
       .getByRole("button", { name: "Senden", exact: true })
       .click();
     await page
-      .getByRole("heading", { name: "Sprachausgabe – Vorschau" })
+      .getByRole("heading", { name: "Direkt sprechen – Vorschau" })
       .waitFor();
     assert.equal(await page.locator("blockquote").innerText(), "Hallo Alexa");
+    assert.equal(await page.getByLabel("Ich habe die aktuelle JSON-Sicherung gespeichert und die Ziele geprüft.").count(), 0);
+    assert.equal(await page.getByLabel("Dieses geschützte Ziel für diese Aktion freigeben").count(), 0);
+    assert(await page.getByRole("button", { name: "Jetzt ausführen" }).isEnabled());
+    await page.getByRole("button", { name: "Jetzt ausführen" }).click();
+    await page.locator(".log-error").getByText(/HTTP 400/).waitFor();
+    assert.equal(await page.getByRole("alert").count(), 0);
+    assert.equal(voiceRequests, 1);
+    await page.getByRole("button", { name: "Mit Hinweiston ankündigen" }).click();
+    await page.locator(".speech-row").getByRole("button", { name: "Senden", exact: true }).click();
+    await page.getByRole("heading", { name: "Mit Hinweiston ankündigen – Vorschau" }).waitFor();
     await page.getByRole("button", { name: "Abbrechen" }).click();
+    await page.getByRole("button", { name: "Sprachbefehl simulieren" }).click();
+    await page.locator(".speech-row").getByRole("button", { name: "Senden", exact: true }).click();
+    await page.getByRole("heading", { name: "Sprachbefehl simulieren – Vorschau" }).waitFor();
+    await page.getByRole("button", { name: "Abbrechen" }).click();
+    await page.getByLabel("Sprache").selectOption("en");
+    await page.getByText("Manage Alexa devices · locally in your Amazon session").waitFor();
+    assert.equal(await page.evaluate(() => localStorage.getItem("admLanguage")), "en");
+    await page.getByLabel("Language").selectOption("de");
+    assert.equal(loadRequests, 1);
     assert.equal(await page.locator(".detail-toolbar button svg").count(), 6);
     assert.equal(await page.locator(".detail-toolbar").innerText(), "");
     await page.setViewportSize({ width: 1600, height: 900 });
@@ -132,16 +162,22 @@ const { chromium } = require(process.env.AURA_PLAYWRIGHT || "playwright");
       const picture = sidebar.querySelector('.detail-heading img').getBoundingClientRect();
       const before = sidebar.getBoundingClientRect().height; const originalCount = log.children.length;
       for(let i=0;i<30;i++) { const p=document.createElement('p'); p.textContent='Layout-Test '+i; log.appendChild(p); }
+      const footer = document.querySelector('.action-footer');
+      const footerActions = footer.querySelector('.footer-actions').getBoundingClientRect();
+      const summary = footer.querySelector('.selection-summary').getBoundingClientRect();
+      const footerBox = footer.getBoundingClientRect();
       const result = { noSidebarScroll: sidebar.scrollHeight <= sidebar.clientHeight,
         fixedSidebar: sidebar.getBoundingClientRect().height === before,
         logScrolls: log.scrollHeight > log.clientHeight,
         logFillsSpace: Math.abs(sidebar.getBoundingClientRect().bottom - sidebar.querySelector('.log').getBoundingClientRect().bottom - 13) < 2,
         centeredName: Math.abs(name.y + name.height / 2 - picture.y - picture.height / 2) < 2,
-        filterBelow: document.querySelector('.filters').getBoundingClientRect().top >= document.querySelector('.device-list').getBoundingClientRect().bottom };
+        filterBelow: document.querySelector('.filters').getBoundingClientRect().top >= document.querySelector('.device-list').getBoundingClientRect().bottom,
+        actionsLeft: Math.abs(footerActions.left - footerBox.left - 18) < 2,
+        summaryRight: Math.abs(document.querySelector('.device-list').getBoundingClientRect().right - summary.right - 18) < 2 };
       while(log.children.length > originalCount) log.lastChild.remove();
       return result;
     });
-    assert.deepEqual(layout, { noSidebarScroll:true, fixedSidebar:true, logScrolls:true, logFillsSpace:true, centeredName:true, filterBelow:true });
+    assert.deepEqual(layout, { noSidebarScroll:true, fixedSidebar:true, logScrolls:true, logFillsSpace:true, centeredName:true, filterBelow:true, actionsLeft:true, summaryRight:true });
     await page.screenshot({
       path: path.join(process.env.TEMP || ".", "aura-restored-echo.png"),
     });
@@ -172,6 +208,10 @@ const { chromium } = require(process.env.AURA_PLAYWRIGHT || "playwright");
     assert(
       await page.getByText("2 Geräte ausgewählt", { exact: true }).isVisible(),
     );
+    await page.getByRole("button", { name: "Trockenlauf / Vorschau" }).click();
+    await page.getByText("Trockenlauf: 2 Geräte ausgewählt. Es wurde nichts verändert.", { exact: false }).waitFor();
+    assert.equal(await page.locator('[role="dialog"]').count(), 0);
+    assert.equal(mutations, 0);
     await page
       .locator(".action-footer")
       .getByRole("button", { name: "Deaktivieren", exact: true })

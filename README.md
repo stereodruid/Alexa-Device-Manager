@@ -1,49 +1,66 @@
 # Aura Device Master
 
-Lokale Chrome-Erweiterung zur Verwaltung von Alexa-Geräten in deiner bestehenden Amazon-Sitzung. Die aktuelle React-Oberfläche ist deutschsprachig. Es gibt keinen eigenen Server und keine gespeicherten Zugangsdaten.
+[![Release](https://img.shields.io/badge/release-v0.7.0-00a3ff)](https://github.com/stereodruid/Alexa-Device-Manager/releases/tag/v0.7.0)
+[![License](https://img.shields.io/badge/license-GPL--3.0-00d48a)](LICENSE)
 
-## Installation und Aktualisierung
+A free, local Chrome extension for viewing and safely managing Alexa smart-home devices through your existing Amazon browser session. No subscription, separate account, server or additional credentials are required.
 
-1. `chrome://extensions/` öffnen und den Entwicklermodus einschalten.
-2. **Entpackte Erweiterung laden** wählen und den Ordner `chrome-extension` auswählen.
-3. Bei einer bereits installierten lokalen Version auf das **Neu-laden-Symbol** der Erweiterung klicken.
-4. Alte Manager-Tabs schließen. Im Erweiterungspopup die passende Amazon-Region wählen und **Manager öffnen** klicken.
+Deutschsprachige Anleitung: [weiter unten](#deutsch).
 
-Der fertige Erweiterungsordner enthält Version **0.6.3**. Veröffentlichte ZIP-Dateien unter `releases/` sind historische Pakete und werden durch einen lokalen Build nicht aktualisiert.
+![Aura Device Master](<assets/preview pics/FullView.png>)
 
-## Geräte laden und filtern
+## Highlights
 
-**Neu laden** ruft die sichtbare Geräteliste und die GraphQL-Endpoints ab. Erst nach vollständigem, validiertem Laden sind Aktionen möglich. Bei einem Fehler bleiben vorhandene Daten zur Einsicht erhalten, werden aber als möglicherweise veraltet gekennzeichnet.
+- German and English interface with a persistent language selector.
+- Search, filters, groups, pagination and draggable table/KPI layouts.
+- Clear device details with category-specific visuals instead of misleading product images.
+- Enable, disable and permanently remove supported Alexa endpoints.
+- Safe deletion preview, JSON backup requirement and per-device protection controls.
+- Automatic legacy deletion fallback when Amazon still lists an old endpoint but GraphQL reports `Resource does not exist`.
+- Direct speech, announcements with a chime and simulated voice commands for unambiguously matched Echo devices.
+- Local operation inside the current Amazon session. Device data is not uploaded to a separate service.
 
-- Suche nach Name, Beschreibung, Typ, Quelle oder einer der Geräte-IDs.
-- Filter für Typ, Quelle, Gruppe, Erreichbarkeit und Alexa-Aktivierungsstatus.
-- **Online**, **Offline** und **Unbekannt** sind getrennt. Fehlende Endpoint-IDs bedeuten nicht automatisch ein defektes Gerät.
-- Erreichbarkeit und **Aktiviert/Deaktiviert** werden separat angezeigt.
-- Quellen wie Home Assistant oder Amazon sind aus den Gerätedaten abgeleitete Schätzungen.
-- KPI-Karten setzen zunächst andere Filter zurück. Spalten und KPI-Karten lassen sich verschieben; die Reihenfolge bleibt lokal gespeichert.
-- Seitengrößen 10, 50 und 100. Die Kopf-Checkbox betrifft nur die aktuelle Seite. Auswahl außerhalb der aktuellen Seite wird ausdrücklich gezählt.
+## Install v0.7.0
 
-## Änderungen prüfen und ausführen
+1. Download [Aura Device Master v0.7.0](https://github.com/stereodruid/Alexa-Device-Manager/releases/download/v0.7.0/Aura-Device-Master-v0.7.0.zip).
+2. Extract the ZIP file to a permanent folder.
+3. Open `chrome://extensions/` in Chrome.
+4. Enable **Developer mode**.
+5. Select **Load unpacked** and choose the extracted folder containing `manifest.json`.
+6. Open the extension, select your Amazon region and choose **Open manager**.
 
-1. Aktuelle Daten laden und die gewünschten Geräte auswählen.
-2. **Trockenlauf / Vorschau**, **Aktivieren**, **Deaktivieren** oder **Löschen** wählen. Auch Einzelaktionen öffnen diese Vorschau.
-3. Alle angezeigten Zielnamen und IDs prüfen. Die Vorschau führt keine Änderung aus.
-4. Eine aktuelle **JSON-Sicherung herunterladen**, die gespeicherte Datei prüfen und dies bestätigen. Die JSON-Datei ist ein Datenexport; ein automatischer Wiederherstellungsimport ist nicht enthalten.
-5. Geschützte Gruppen und Echo-/Amazon-Geräte müssen in der Vorschau **einzeln für genau diese Aktion** freigegeben werden. Ausblenden ist keine Freigabe.
-6. Beim dauerhaften Löschen zusätzlich `DELETE` eingeben und **Jetzt ausführen** wählen.
+For an update, replace the extracted files and select **Reload** for the extension on `chrome://extensions/`. Close older manager tabs before reopening it.
 
-Löschen und Aktivieren/Deaktivieren prüfen die API-Antwort und anschließend den tatsächlichen Zielzustand durch erneutes Laden. Das Protokoll unterscheidet bestätigte und fehlgeschlagene beziehungsweise unbestätigte Ergebnisse. Während eines Vorgangs werden weitere Vorgänge gesperrt. Anfragelimits und Anmeldefehler stoppen den restlichen Stapel, ohne sofortige Wiederholungen.
+The extension is planned for the Chrome Web Store. It remains completely free and has no subscriptions.
 
-Geräte ohne geeignete Ziel-ID bleiben für die entsprechende Aktion gesperrt. Die alte Appliance-ID wird nur für den Legacy-Löschpfad und Ein-/Aus-Befehle verwendet; Entity-IDs werden nicht als Lösch-IDs eingesetzt.
+## Demo videos
 
-## Ein/Aus und Sprachausgabe
+- [English · YouTube / 16:9](https://github.com/stereodruid/Alexa-Device-Manager/releases/download/v0.7.0/aura-device-master-youtube-en.mp4)
+- [English · vertical / 9:16](https://github.com/stereodruid/Alexa-Device-Manager/releases/download/v0.7.0/aura-device-master-vertical-en.mp4)
+- [Deutsch · YouTube / 16:9](https://github.com/stereodruid/Alexa-Device-Manager/releases/download/v0.7.0/aura-device-master-youtube-de.mp4)
+- [Deutsch · Hochformat / 9:16](https://github.com/stereodruid/Alexa-Device-Manager/releases/download/v0.7.0/aura-device-master-vertical-de.mp4)
 
-- Ein und Aus senden einen expliziten Befehl an die zugeordnete Appliance-ID. Die App zeigt keinen erfundenen Stromzustand; der tatsächliche Zustand wird nicht gemessen.
-- Sprachausgabe benötigt eine eindeutige Übereinstimmung mit der Echo-Geräteliste über Seriennummer oder Geräte-Account-ID. Ein gleicher Name reicht nicht. Fehlt diese Zuordnung, wird nichts gesendet.
-- Auch diese Befehle durchlaufen die Vorschau. Eine angeforderte Sprachausgabe bestätigt nicht, dass sie hörbar abgespielt wurde.
-- DND und eine angebliche letzte Geräteaktivität werden nicht angezeigt, da dafür keine verifizierte Implementierung beziehungsweise Datenquelle vorhanden ist.
+## Safe operation
 
-## Entwicklung und Prüfungen
+The visible device list and the actionable Alexa endpoints come from separate Amazon interfaces. Aura Device Master maps them through stable IDs and does not use a displayed name as authorization for destructive actions.
+
+Before changing devices:
+
+1. Reload the inventory.
+2. Select the intended devices and review the preview.
+3. Download and inspect the JSON snapshot.
+4. Approve protected targets individually.
+5. For permanent deletion, type `DELETE` and execute the action.
+
+The app reloads the inventory after delete, enable and disable operations. A successful HTTP response alone is not presented as confirmed success. Authentication failures and rate limits stop the remaining batch without automatic retry loops.
+
+If Amazon reports that an endpoint no longer exists, v0.7.0 uses the legacy appliance ID only when Amazon supplied one for the same mapped device. If no safe fallback ID exists, the log explains that the stale device must be removed from its source integration, such as ioBroker or Home Assistant.
+
+## Speech and device commands
+
+Speech actions require one unique Echo match. The manager first uses serial/account identifiers and permits an exact device-name fallback only when that name identifies one and only one Echo. The log reports a requested command; it does not claim that physical playback or switching was observed.
+
+## Development
 
 ```text
 npm ci
@@ -52,28 +69,57 @@ npm run check
 npm run build
 ```
 
-`npm run build` erzeugt `chrome-extension/content.js`. Diese Datei wird nicht von Hand bearbeitet.
+`npm run build` generates `chrome-extension/content.js`. The browser smoke test in `scripts/test-ui.cjs` uses mocked responses and never changes real Alexa devices.
 
-| Datei | Aufgabe |
+| Path | Purpose |
 | --- | --- |
-| `src/alexa.js` | API-Requests, Datenzuordnung, Status, Filter und Nachkontrolle |
-| `src/hooks/useAlexa.js` | Ladezustand, Aktionssperre und Protokoll |
-| `src/App.jsx` | Oberfläche und gemeinsame Aktionsvorschau |
-| `src/index.css` | Auf den Manager begrenzte Darstellung |
-| `chrome-extension/background.js` | Region prüfen, Tab öffnen, Oberfläche laden |
-| `tests/*.test.js` | Regressionstests mit simulierten Antworten |
-| `scripts/test-ui.cjs` | Browserprüfung mit ausschließlich simulierten Daten |
+| `src/alexa.js` | Requests, device mapping, actions and verification |
+| `src/hooks/useAlexa.js` | Loading, locking and activity log |
+| `src/App.jsx` | React user interface |
+| `src/deviceVisual.js` | Device category and icon selection |
+| `chrome-extension/` | Ready-to-load Chrome extension |
+| `promo-video/` | Remotion source for the German and English demos |
+| `tests/` | Automated regression tests with simulated responses |
 
-Die Browserprüfung benötigt Playwright und Chromium/Chrome. Optional `AURA_PLAYWRIGHT` auf das Playwright-Modul und `AURA_BROWSER` auf die Browserdatei setzen; anschließend `node scripts/test-ui.cjs` ausführen. Sie greift nicht auf echte Amazon-Geräte oder das bestehende Browserprofil zu.
+Amazon uses private web interfaces that may change. Test destructive actions on one explicitly selected device first. Removed devices may be rediscovered by their manufacturer or smart-home integration.
 
-Amazon nutzt private Web-Endpunkte. Ein bestandener lokaler Test ersetzt daher keinen gezielten Test eines ausdrücklich gewählten Geräts im eigenen Konto. Entfernte Geräte können durch ihre Herstellerintegration erneut angemeldet werden.
+## Privacy
 
-## English
+Aura Device Master communicates directly between the extension and Amazon using the session already open in the browser. It has no analytics, subscription service or separate backend. See the [privacy policy](PRIVACY_POLICY.md) for details.
 
-Version 0.6.3 repairs the current German-language React app. Load or reload the unpacked `chrome-extension` folder in Chrome, close old manager tabs, and reopen the manager from the extension popup.
+## Deutsch
 
-The app validates the complete device inventory, maps devices by IDs, distinguishes unknown reachability from offline status, and verifies delete/enable/disable operations against a fresh inventory. Every action opens a target preview; confirm a saved JSON snapshot and individually authorize protected targets. Deletion also requires typing `DELETE`.
+Aura Device Master ist eine kostenlose, lokale Chrome-Erweiterung zur Anzeige und sicheren Verwaltung von Alexa-Smart-Home-Geräten. Sie verwendet die bereits im Browser angemeldete Amazon-Sitzung. Es gibt kein Abo, kein separates Konto, keinen eigenen Server und keine zusätzlich gespeicherten Zugangsdaten.
 
-Selections outside the current page are explicitly counted. Failed inventory refreshes block actions. Rate limits stop the remaining batch without immediate retries. Power and speech requests are identified as commands, not verified physical device states. Speech never chooses a device merely because its name matches.
+### Installation
 
-Run `npm test`, `npm run check`, and `npm run build` for local validation. The browser smoke test uses mocked responses only. Historical release ZIPs are not replaced by a local build.
+1. [Aura Device Master v0.7.0 herunterladen](https://github.com/stereodruid/Alexa-Device-Manager/releases/download/v0.7.0/Aura-Device-Master-v0.7.0.zip).
+2. ZIP-Datei dauerhaft entpacken.
+3. `chrome://extensions/` öffnen und den **Entwicklermodus** aktivieren.
+4. **Entpackte Erweiterung laden** wählen und den entpackten Ordner mit `manifest.json` auswählen.
+5. Im Erweiterungspopup die passende Amazon-Region wählen und **Manager öffnen** anklicken.
+
+Beim Aktualisieren die Dateien ersetzen, die Erweiterung unter `chrome://extensions/` neu laden und alte Manager-Tabs schließen.
+
+### Bedienung und Sicherheit
+
+- Die Oberfläche lässt sich vollständig zwischen Deutsch und Englisch umschalten.
+- Suche, Filter, Gruppen und Status helfen beim Prüfen großer Gerätelisten.
+- Für die Gerätetypen werden eindeutige Symbole statt möglicherweise falscher Produktbilder verwendet.
+- Vor Änderungen zeigt die App alle Ziele in einer Vorschau.
+- Aktivieren, Deaktivieren und Löschen verlangen eine aktuelle JSON-Sicherung.
+- Geschützte Ziele müssen einzeln für die konkrete Aktion freigegeben werden.
+- Dauerhaftes Löschen verlangt zusätzlich die Eingabe `DELETE`.
+- Nach der Aktion lädt die App neu und kontrolliert den tatsächlichen Zielzustand.
+- Veraltete ioBroker-/Integrationsgeräte erhalten bei Amazons Meldung `Resource does not exist` einen eng begrenzten Legacy-Löschversuch, sofern eine sichere Appliance-ID vorhanden ist.
+- Echo-Geräte unterstützen direktes Sprechen, Ankündigungen mit Hinweiston und simulierte Sprachbefehle.
+
+Die Videos stehen oben im Abschnitt [Demo videos](#demo-videos) in Deutsch und Englisch sowie in 16:9 und 9:16 bereit.
+
+## Support
+
+Problems and feature requests: [GitHub Issues](https://github.com/stereodruid/Alexa-Device-Manager/issues)
+
+If this project helps you, you can support its development:
+
+<a href="https://www.buymeacoffee.com/stereodruid"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" height="48" alt="Buy Me A Coffee"></a>

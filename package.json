@@ -1,7 +1,7 @@
 {
   "name": "alexadevicemanager",
-  "version": "1.0.0",
-  "description": "<p>\r   <a href=\"https://www.buymeacoffee.com/stereodruid\">\r     <img src=\"https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png\" height=\"60\" alt=\"Buy Me A Coffee\" align=\"middle\">\r   </a>\r   &nbsp;&nbsp;\r   <img src=\"assets/bmc_qr.png\" height=\"60\" alt=\"QR Code\" align=\"middle\">\r </p>",
+  "version": "0.7.0",
+  "description": "Local Chrome extension for safely managing Alexa smart-home devices in an existing Amazon session.",
   "main": "index.js",
   "scripts": {
     "test": "node --test tests/*.test.js",
@@ -13,8 +13,8 @@
     "url": "git+https://github.com/stereodruid/Alexa-Device-Manager.git"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "stereodruid",
+  "license": "GPL-3.0-or-later",
   "type": "module",
   "bugs": {
     "url": "https://github.com/stereodruid/Alexa-Device-Manager/issues"

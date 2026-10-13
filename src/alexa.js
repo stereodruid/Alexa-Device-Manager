@@ -134,6 +134,17 @@ export const ENABLE_QUERY = `mutation setEndpointEnablement($input: SetEndpointE
 const DELETE_QUERY =
   "mutation forgetEndpoint($input: ForgetEndpointInput!) { forgetEndpoint(forgetEndpointInput: $input) { endpointId } }";
 
+const missingResourcePattern =
+  /\b(resource|endpoint)\b.*\b(does not exist|not found|no longer exists)\b/i;
+
+export const isMissingResourceError = (error) =>
+  Boolean(
+    missingResourcePattern.test(String(error?.message || "")) ||
+      error?.graphQLErrors?.some((entry) =>
+        missingResourcePattern.test(String(entry?.message || "")),
+      ),
+  );
+
 export function mergeDevices(entities, endpoints) {
   if (!Array.isArray(entities) || !Array.isArray(endpoints))
     throw new Error("Unvollständige Gerätedaten.");
@@ -202,13 +213,28 @@ export function mergeDevices(entities, endpoints) {
 
 export function resolveEcho(d, devices) {
   if (!Array.isArray(devices)) throw new Error("Echo-Geräteliste fehlt.");
-  const exact = devices.filter(
-    (x) =>
-      (d.serialNumber && x.serialNumber === d.serialNumber) ||
-      x.serialNumber === d.id ||
-      (d.deviceAccountId && x.deviceAccountId === d.deviceAccountId),
+  const identifiers = new Set(
+    [
+      d.serialNumber,
+      d.providerData?.serialNumber,
+      d.deviceAccountId,
+      d.providerData?.deviceAccountId,
+      d.id,
+      d._admEndpointId,
+    ].filter(Boolean),
   );
-  // A display name alone cannot authorize a command to a physical device.
+  let exact = devices.filter(
+    (x) =>
+      identifiers.has(x.serialNumber) || identifiers.has(x.deviceAccountId),
+  );
+  // Amazon's smart-home endpoint IDs are often unrelated to the Echo serial.
+  // A unique, exact account name is the only safe fallback available here.
+  if (exact.length === 0) {
+    const name = deviceName(d).trim().toLocaleLowerCase();
+    exact = devices.filter(
+      (x) => String(x.accountName || "").trim().toLocaleLowerCase() === name,
+    );
+  }
   if (exact.length !== 1)
     throw new Error(
       "Echo nicht eindeutig über eine Geräte-ID zugeordnet. Keine Sprachausgabe gesendet.",
@@ -248,8 +274,20 @@ export function createAlexaClient(fetchImpl = (...args) => fetch(...args)) {
     } catch {
       throw new Error("Amazon lieferte kein JSON. Anmeldung prüfen.");
     }
-    if (body?.errors?.length || body?.error || body?.errorMessage)
-      throw new Error("Amazon hat die Anfrage abgelehnt.");
+    if (body?.errors?.length || body?.error || body?.errorMessage) {
+      const graphQLErrors = Array.isArray(body?.errors) ? body.errors : [];
+      const message =
+        graphQLErrors.find((entry) => entry?.message)?.message ||
+        body?.errorMessage ||
+        (typeof body?.error === "string" ? body.error : body?.error?.message) ||
+        "Amazon hat die Anfrage abgelehnt.";
+      const error = new Error(message);
+      error.graphQLErrors = graphQLErrors;
+      error.code =
+        graphQLErrors.find((entry) => entry?.extensions?.code)?.extensions?.code ||
+        body?.error?.code;
+      throw error;
+    }
     return body;
   }
   const gql = (query, operationName, input) =>
@@ -274,11 +312,24 @@ export function createAlexaClient(fetchImpl = (...args) => fetch(...args)) {
         throw new Error("Keine geeignete Ziel-ID vorhanden.");
       if (action === "delete") {
         if (d._admEndpointId) {
-          const body = await gql(DELETE_QUERY, "forgetEndpoint", {
-            endpointId: d._admEndpointId,
-          });
-          if (body?.data?.forgetEndpoint?.endpointId !== d._admEndpointId)
-            throw new Error("Löschung von Amazon nicht bestätigt.");
+          try {
+            const body = await gql(DELETE_QUERY, "forgetEndpoint", {
+              endpointId: d._admEndpointId,
+            });
+            if (body?.data?.forgetEndpoint?.endpointId !== d._admEndpointId)
+              throw new Error("Löschung von Amazon nicht bestätigt.");
+          } catch (error) {
+            if (!isMissingResourceError(error)) throw error;
+            if (!d._admApplianceId)
+              throw new Error(
+                "Amazon listet diesen Endpoint noch auf, findet aber keine löschbare Ressource. Keine sichere Legacy-ID für einen Rückfall vorhanden.",
+              );
+            await request(
+              "/api/phoenix/appliance/" +
+                encodeURIComponent(d._admApplianceId),
+              { method: "DELETE" },
+            );
+          }
         } else
           await request(
             "/api/phoenix/appliance/" + encodeURIComponent(d._admApplianceId),
@@ -317,8 +368,10 @@ export function createAlexaClient(fetchImpl = (...args) => fetch(...args)) {
       if (body?.controlResponses?.some((r) => r.code && r.code !== "SUCCESS"))
         throw new Error("Amazon hat den Schaltbefehl nicht bestätigt.");
     },
-    async speak(d, text, locale = "de-DE") {
+    async sendAlexaAction(d, text, mode = "speak", locale = "de-DE") {
       if (!text.trim()) throw new Error("Bitte einen Text eingeben.");
+      if (!["speak", "announce", "command"].includes(mode))
+        throw new Error("Unbekannte Alexa-Aktion.");
       const csrf =
         typeof document === "undefined"
           ? ""
@@ -327,6 +380,56 @@ export function createAlexaClient(fetchImpl = (...args) => fetch(...args)) {
         headers: { csrf },
       });
       const target = resolveEcho(d, data?.devices);
+      const base = {
+        deviceType: target.deviceType,
+        deviceSerialNumber: target.serialNumber,
+        locale,
+        customerId: target.deviceOwnerCustomerId,
+      };
+      const targetPayload = {
+        customerId: target.deviceOwnerCustomerId,
+        devices: [
+          {
+            deviceSerialNumber: target.serialNumber,
+            deviceTypeId: target.deviceType,
+          },
+        ],
+      };
+      const operations = {
+        speak: {
+          type: "Alexa.Speak",
+          operationPayload: {
+            ...base,
+            textToSpeak: text.trim(),
+            target: targetPayload,
+            skillId: "amzn1.ask.1p.saysomething",
+          },
+        },
+        announce: {
+          type: "AlexaAnnouncement.Announcement",
+          operationPayload: {
+            ...base,
+            expireAfter: "PT5S",
+            content: [
+              {
+                locale,
+                display: { title: "Aura Device Master", body: text.trim() },
+                speak: { type: "text", value: text.trim() },
+              },
+            ],
+            target: targetPayload,
+            skillId: "amzn1.ask.1p.routines.messaging",
+          },
+        },
+        command: {
+          type: "Alexa.TextCommand",
+          operationPayload: {
+            ...base,
+            text: text.trim(),
+            skillId: "amzn1.ask.1p.tellalexa",
+          },
+        },
+      };
       await request("/api/behaviors/preview", {
         method: "POST",
         headers: { csrf },
@@ -334,22 +437,24 @@ export function createAlexaClient(fetchImpl = (...args) => fetch(...args)) {
           behaviorId: "PREVIEW",
           status: "ENABLED",
           sequenceJson: JSON.stringify({
-            "@type": "com.amazon.alexa.behavior.model.Sequence",
+            "@type": "com.amazon.alexa.behaviors.model.Sequence",
             startNode: {
               "@type":
-                "com.amazon.alexa.behavior.model.OpaquePayloadOperationNode",
-              type: "Alexa.SynthesizeSpeech",
-              operationPayload: {
-                deviceType: target.deviceType,
-                deviceSerialNumber: target.serialNumber,
-                customerId: target.deviceOwnerCustomerId,
-                locale: locale,
-                textToSpeak: text.trim(),
-              },
+                "com.amazon.alexa.behaviors.model.SerialNode",
+              nodesToExecute: [
+                {
+                  "@type":
+                    "com.amazon.alexa.behaviors.model.OpaquePayloadOperationNode",
+                  ...operations[mode],
+                },
+              ],
             },
           }),
         }),
       });
+    },
+    async speak(d, text, locale = "de-DE") {
+      return this.sendAlexaAction(d, text, "speak", locale);
     },
   };
 }
@@ -394,7 +499,7 @@ export async function runBatch(
       logger(`${deviceName(d)}: Nachkontrolle ausstehend.`);
     } catch (error) {
       results.push({ device: d, error: error.message });
-      logger(`${deviceName(d)}: ${error.message}`);
+      logger(`${deviceName(d)}: ${error.message}`, "error");
       stopped = [429, 401, 403].includes(error.status);
     }
     if (!stopped) await delay(800);

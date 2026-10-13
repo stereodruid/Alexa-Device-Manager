@@ -27,9 +27,47 @@ import {
   LockKeyhole,
   Fan,
   Box,
+  BellRing,
+  ThermometerSun,
+  Activity,
+  DoorOpen,
+  Warehouse,
+  Snowflake,
+  AirVent,
+  Droplets,
+  Heater,
+  Bot,
+  WashingMachine,
+  Wind,
+  Utensils,
+  Refrigerator,
+  Microwave,
+  CookingPot,
+  Coffee,
+  Router,
+  ToggleLeft,
+  Lightbulb,
+  PlugZap,
+  Camera,
+  Blinds,
+  Printer,
+  WandSparkles,
+  Monitor,
+  Gamepad2,
+  ShieldCheck,
+  Headphones,
+  RadioTower,
+  Tablet,
+  Car,
+  Laptop,
+  Network,
+  DoorClosed,
+  TreePine,
+  AudioLines,
 } from "lucide-react";
 import { useAlexa } from "./hooks/useAlexa";
 import { deviceVisual } from "./deviceVisual";
+import { displayValue, tr } from "./i18n";
 import {
   deviceName,
   deviceType,
@@ -53,15 +91,6 @@ const defaultColumns = [
   "id",
   "actions",
 ];
-const columnLabels = {
-  name: "Name",
-  description: "Beschreibung",
-  type: "Typ",
-  status: "Status",
-  source: "Quelle",
-  id: "ID",
-  actions: "Aktionen",
-};
 const defaultKpis = [
   "gesamt",
   "online",
@@ -106,14 +135,7 @@ const emptyFilters = {
   hideProtected: false,
   onlyDeletable: false,
 };
-const actions = {
-  delete: "Dauerhaft löschen",
-  enable: "Aktivieren",
-  disable: "Deaktivieren",
-  on: "Einschalten",
-  off: "Ausschalten",
-  speak: "Sprachausgabe",
-};
+const isVoiceAction = (action) => ["speak", "announce", "command"].includes(action);
 function readOrder(key, fallback) {
   try {
     const saved = JSON.parse(localStorage.getItem(key));
@@ -142,52 +164,108 @@ function asset(name) {
   return globalThis.chrome?.runtime?.getURL?.(name) || "";
 }
 const visualIcons = {
+  echo: Speaker,
+  plug: PlugZap,
+  light: Lightbulb,
+  camera: Camera,
+  blind: Blinds,
+  scene: WandSparkles,
+  printer: Printer,
   projector: Projector,
   tv: Tv,
+  computer: Monitor,
+  laptop: Laptop,
+  screen: Monitor,
+  "game-console": Gamepad2,
+  "security-panel": ShieldCheck,
+  headphones: Headphones,
+  "streaming-device": RadioTower,
+  "music-system": AudioLines,
+  tablet: Tablet,
+  phone: Smartphone,
+  hub: Network,
+  door: DoorClosed,
+  "christmas-tree": TreePine,
+  vehicle: Car,
   thermostat: Thermometer,
   sensor: Radio,
+  "temperature-sensor": ThermometerSun,
+  "motion-sensor": Activity,
+  "contact-sensor": DoorOpen,
   lock: LockKeyhole,
+  doorbell: BellRing,
+  garage: Warehouse,
+  "air-conditioner": Snowflake,
+  "air-freshener": Wind,
+  "air-purifier": AirVent,
+  humidifier: Droplets,
+  dehumidifier: Droplets,
+  heater: Heater,
+  "water-heater": Heater,
   fan: Fan,
+  vacuum: Bot,
+  washer: WashingMachine,
+  dryer: Wind,
+  dishwasher: Utensils,
+  refrigerator: Refrigerator,
+  microwave: Microwave,
+  oven: CookingPot,
+  "coffee-maker": Coffee,
+  router: Router,
+  switch: ToggleLeft,
   group: Layers,
   speaker: Speaker,
   device: Box,
 };
 const visualLabels = {
-  projector: "Beamer",
-  tv: "Fernseher",
-  thermostat: "Thermostat",
-  sensor: "Sensor",
-  lock: "Schloss",
-  fan: "Ventilator",
-  group: "Gruppe",
-  speaker: "Lautsprecher",
-  device: "Gerät",
-  echo: "Echo",
-  plug: "Steckdose",
-  light: "Leuchte",
-  camera: "Kamera",
-  blind: "Jalousie",
-  switch: "Schalter",
+  de: {
+    scene: "Szene", printer: "Drucker", projector: "Beamer", tv: "Fernseher",
+    computer: "Computer", laptop: "Laptop", screen: "Bildschirm", "game-console": "Spielkonsole",
+    "security-panel": "Sicherheitsanlage", headphones: "Kopfhörer", "streaming-device": "Streaming-Gerät",
+    "music-system": "Musikanlage", tablet: "Tablet", phone: "Telefon", hub: "Smart-Home-Hub",
+    door: "Tür", "christmas-tree": "Weihnachtsbaum", vehicle: "Fahrzeug",
+    thermostat: "Thermostat", sensor: "Sensor",
+    "temperature-sensor": "Temperatursensor", "motion-sensor": "Bewegungssensor",
+    "contact-sensor": "Kontaktsensor", lock: "Schloss", doorbell: "Türklingel",
+    garage: "Garagentor", "air-conditioner": "Klimaanlage", "air-freshener": "Lufterfrischer", "air-purifier": "Luftreiniger",
+    humidifier: "Luftbefeuchter", dehumidifier: "Luftentfeuchter", heater: "Heizung",
+    "water-heater": "Warmwasserbereiter", fan: "Ventilator", vacuum: "Staubsauger",
+    washer: "Waschmaschine", dryer: "Trockner", dishwasher: "Geschirrspüler",
+    refrigerator: "Kühlschrank", microwave: "Mikrowelle", oven: "Ofen",
+    "coffee-maker": "Kaffeemaschine", router: "Router", group: "Gruppe",
+    speaker: "Lautsprecher", device: "Gerät", echo: "Echo", plug: "Steckdose",
+    light: "Leuchte", camera: "Kamera", blind: "Jalousie", switch: "Schalter",
+  },
+  en: {
+    scene: "Scene", printer: "Printer", projector: "Projector", tv: "Television",
+    computer: "Computer", laptop: "Laptop", screen: "Screen", "game-console": "Game console",
+    "security-panel": "Security panel", headphones: "Headphones", "streaming-device": "Streaming device",
+    "music-system": "Music system", tablet: "Tablet", phone: "Phone", hub: "Smart home hub",
+    door: "Door", "christmas-tree": "Christmas tree", vehicle: "Vehicle",
+    thermostat: "Thermostat", sensor: "Sensor",
+    "temperature-sensor": "Temperature sensor", "motion-sensor": "Motion sensor",
+    "contact-sensor": "Contact sensor", lock: "Lock", doorbell: "Doorbell",
+    garage: "Garage door", "air-conditioner": "Air conditioner", "air-freshener": "Air freshener", "air-purifier": "Air purifier",
+    humidifier: "Humidifier", dehumidifier: "Dehumidifier", heater: "Heater",
+    "water-heater": "Water heater", fan: "Fan", vacuum: "Vacuum cleaner",
+    washer: "Washing machine", dryer: "Dryer", dishwasher: "Dishwasher",
+    refrigerator: "Refrigerator", microwave: "Microwave", oven: "Oven",
+    "coffee-maker": "Coffee maker", router: "Router", group: "Group",
+    speaker: "Speaker", device: "Device", echo: "Echo", plug: "Plug",
+    light: "Light", camera: "Camera", blind: "Blind", switch: "Switch",
+  },
 };
-function DeviceImage({ device }) {
+function DeviceImage({ device, language }) {
   const kind = deviceVisual(device);
-  const [failed, setFailed] = useState(false);
   const Icon = visualIcons[kind] || Box;
-  if (!visualIcons[kind] && !failed)
-    return (
-      <img
-        src={asset(`${kind}.jpg`)}
-        alt={visualLabels[kind]}
-        onError={() => setFailed(true)}
-      />
-    );
+  const label = visualLabels[language]?.[kind] || visualLabels.en[kind] || kind;
   return (
-    <span className="device-art" role="img" aria-label={visualLabels[kind]}>
+    <span className={`device-art device-art-${kind}`} role="img" aria-label={label} title={label}>
       <Icon size={48} strokeWidth={1.5} />
     </span>
   );
 }
-function Status({ device }) {
+function Status({ device, language }) {
   const status = reachability(device);
   return (
     <div>
@@ -200,32 +278,23 @@ function Status({ device }) {
               : "muted"
         }
       >
-        {status}
+        {displayValue(language, status)}
       </span>
-      <small className="block muted">Alexa: {enablement(device)}</small>
+      <small className="block muted">Alexa: {displayValue(language, enablement(device))}</small>
     </div>
   );
 }
 
 
-function getAutoLocale() {
-  if (typeof window === 'undefined') return 'de-DE';
-  const host = window.location.hostname || '';
-  if (host.includes('.de')) return 'de-DE';
-  if (host.includes('.co.uk')) return 'en-GB';
-  if (host.includes('.it')) return 'it-IT';
-  if (host.includes('.es')) return 'es-ES';
-  if (host.includes('.fr')) return 'fr-FR';
-  if (host.includes('.co.jp')) return 'ja-JP';
-  if (host.includes('.ca')) return 'en-CA';
-  if (host.includes('.com.au')) return 'en-AU';
-  if (host.includes('.com.mx')) return 'es-MX';
-  if (host.includes('.com.br')) return 'pt-BR';
-  if (host.includes('.in')) return 'en-IN';
-  return 'en-US';
-}
-
 export default function App() {
+  const [language, setLanguage] = useState(() => {
+    try {
+      return localStorage.getItem("admLanguage") === "en" ? "en" : "de";
+    } catch {
+      return "de";
+    }
+  });
+  const t = (key, values) => tr(language, key, values);
   const {
     devices,
     busy,
@@ -236,7 +305,7 @@ export default function App() {
     logger,
     fetchDevices,
     execute,
-  } = useAlexa();
+  } = useAlexa(language);
   const [filters, setFilters] = useState({
     ...emptyFilters,
     hideProtected: true,
@@ -257,8 +326,9 @@ export default function App() {
   const [protectedIds, setProtectedIds] = useState(new Set());
   const [confirmation, setConfirmation] = useState("");
   const [speech, setSpeech] = useState("");
-  const [ttsLocale, setTtsLocale] = useState(getAutoLocale());
+  const [speechMode, setSpeechMode] = useState("speak");
   const logRef = useRef(null);
+  const initialLoad = useRef(false);
   useEffect(() => {
     if (!plan) return;
     const previous = document.activeElement;
@@ -288,6 +358,8 @@ export default function App() {
     };
   }, [plan, busy]);
   useEffect(() => {
+    if (initialLoad.current) return;
+    initialLoad.current = true;
     fetchDevices();
   }, [fetchDevices]);
   useEffect(() => {
@@ -296,6 +368,13 @@ export default function App() {
   useEffect(() => {
     saveOrder("aura_kpi_order", kpiOrder);
   }, [kpiOrder]);
+  useEffect(() => {
+    try {
+      localStorage.setItem("admLanguage", language);
+    } catch {
+      /* Storage may be unavailable on the host page. */
+    }
+  }, [language]);
   useEffect(() => {
     setCheckedIds(new Set());
     setPlan(null);
@@ -340,41 +419,41 @@ export default function App() {
     visible.length > 0 && visible.every((d) => checkedIds.has(d.id));
   const count = (fn) => devices.filter(fn).length;
   const kpis = {
-    gesamt: ["Gesamt", devices.length, {}],
+    gesamt: [t("total"), devices.length, {}],
     online: [
-      "Online",
+      t("online"),
       count((d) => reachability(d) === "Online"),
       { status: "Online" },
     ],
     offline: [
-      "Offline",
+      t("offline"),
       count((d) => reachability(d) === "Offline"),
       { status: "Offline" },
     ],
     unbekannt: [
-      "Unbekannt",
+      t("unknown"),
       count((d) => reachability(d) === "Unbekannt"),
       { status: "Unbekannt" },
     ],
     ohne: [
-      "Ohne Endpoint",
+      t("noEndpoint"),
       count((d) => !d._admEndpointId),
       { status: "Ohne Endpoint" },
     ],
-    echos: ["Echos", count(isEcho), { status: "Echos" }],
+    echos: [t("echoes"), count(isEcho), { status: "Echos" }],
     ha: [
       "Home Assistant",
       count((d) => source(d) === "Home Assistant"),
       { origin: "Home Assistant" },
     ],
-    gruppen: ["Gruppen", count(isGroup), { status: "Gruppen" }],
+    gruppen: [t("groups"), count(isGroup), { status: "Gruppen" }],
     loeschbar: [
-      "Löschbar",
+      t("deletable"),
       count((d) => canAct(d, "delete") && !isProtected(d)),
       { onlyDeletable: true },
     ],
     geschuetzt: [
-      "Geschützt",
+      t("protected"),
       count((d) => isProtected(d) || !canAct(d, "delete")),
       { status: "Geschützt" },
     ],
@@ -400,46 +479,65 @@ export default function App() {
       a.click();
       a.remove();
       setTimeout(() => URL.revokeObjectURL(url), 5000);
-      logger("JSON-Download gestartet. Bitte die gespeicherte Datei prüfen.");
+      logger(t("backupStarted"));
     } catch {
-      logger("JSON-Sicherung konnte nicht gestartet werden.");
+      logger(t("backupFailed"));
     }
   }
   function preview(action, list = checked) {
     if (busy || !ready || !list.length) return;
-    setPlan({ action, list: [...list], text: speech, locale: ttsLocale });
+    setPlan({ action, list: [...list], text: speech, locale: language === "de" ? "de-DE" : "en-US" });
     setBackedUp(false);
     setProtectedIds(new Set());
     setConfirmation("");
+  }
+  function dryRun() {
+    if (blocked || !checked.length) return;
+    const rows = checked.map((d) => ({
+      name: deviceName(d),
+      type: deviceType(d),
+      status: displayValue(language, reachability(d)),
+      source: displayValue(language, source(d)),
+      id: d._admEndpointId || d._admApplianceId || d.id,
+    }));
+    console.table(rows);
+    logger(t("dryRunLog", { count: rows.length }));
   }
   async function submit() {
     if (
       !plan ||
       !ready ||
       busy ||
-      !backedUp ||
+      (!isVoiceAction(plan.action) && !backedUp) ||
       plan.list.some(
-        (d) => plan.action !== "speak" && !canAct(d, plan.action),
+        (d) => !isVoiceAction(plan.action) && !canAct(d, plan.action),
       ) ||
-      plan.list.some((d) => isProtected(d) && !protectedIds.has(d.id)) ||
+      (!isVoiceAction(plan.action) && plan.list.some((d) => isProtected(d) && !protectedIds.has(d.id))) ||
       (plan.action === "delete" && confirmation !== "DELETE")
     )
       return;
     const ok = await execute(plan.list, plan.action, {
-      backup: backedUp,
+      backup: isVoiceAction(plan.action) || backedUp,
       preview: true,
       allowProtectedIds: [...protectedIds],
       text: plan.text,
+      locale: plan.locale,
     });
     setPlan(null);
     if (ok) {
       setCheckedIds(new Set());
-      if (plan.action === "speak") setSpeech("");
+      if (isVoiceAction(plan.action)) setSpeech("");
     }
   }
   const filter = (key, value) =>
     setFilters((prev) => ({ ...prev, [key]: value }));
   const blocked = busy || !ready;
+  const columnLabels = Object.fromEntries(defaultColumns.map((key) => [key, t(key)]));
+  const actionLabels = {
+    delete: t("permanentDelete"), enable: t("enable"), disable: t("disable"),
+    on: t("powerOn"), off: t("powerOff"), speak: t("speak"),
+    announce: t("announce"), command: t("command"),
+  };
   return (
     <div className="aura-app">
       <header className="panel app-header">
@@ -448,13 +546,20 @@ export default function App() {
           <div>
             <h1>Aura Device Master</h1>
             <p className="muted">
-              Alexa-Geräte verwalten · lokal in deiner Amazon-Sitzung
+              {t("subtitle")}
             </p>
           </div>
         </div>
         <div className="toolbar">
+          <label className="language-select">
+            <span>{t("language")}</span>
+            <select aria-label={t("language")} value={language} onChange={(e) => setLanguage(e.target.value)}>
+              <option value="de">Deutsch</option>
+              <option value="en">English</option>
+            </select>
+          </label>
           <button onClick={exportJson} disabled={!devices.length}>
-            <Download size={16} /> JSON sichern
+            <Download size={16} /> {t("backup")}
           </button>
           <button
             className="primary"
@@ -462,10 +567,10 @@ export default function App() {
             onClick={fetchDevices}
           >
             <RefreshCw size={16} className={busy ? "spin" : ""} />
-            {busy ? "Bitte warten …" : "Neu laden"}
+            {busy ? t("waiting") : t("reload")}
           </button>
           <button
-            aria-label="Manager schließen"
+            aria-label={t("close")}
             disabled={busy}
             onClick={() => window.dispatchEvent(new Event("aura-close"))}
           >
@@ -510,7 +615,7 @@ export default function App() {
                 <tr>
                   <th>
                     <input
-                      aria-label="Alle auf dieser Seite auswählen"
+                      aria-label={t("selectPage")}
                       type="checkbox"
                       checked={allVisible}
                       disabled={!visible.length || busy}
@@ -564,7 +669,7 @@ export default function App() {
                     <td>
                       <input
                         type="checkbox"
-                        aria-label={`${deviceName(d)} auswählen`}
+                        aria-label={t("selectDevice", { name: deviceName(d) })}
                         checked={checkedIds.has(d.id)}
                         disabled={busy}
                         onClick={(e) => e.stopPropagation()}
@@ -580,7 +685,7 @@ export default function App() {
                           >
                             {deviceName(d)}
                             {isProtected(d) && (
-                              <Shield size={13} aria-label="Geschützt" />
+                              <Shield size={13} aria-label={t("protected")} />
                             )}
                           </button>
                         ) : col === "description" ? (
@@ -590,9 +695,9 @@ export default function App() {
                         ) : col === "type" ? (
                           <span className="tag">{deviceType(d)}</span>
                         ) : col === "status" ? (
-                          <Status device={d} />
+                          <Status device={d} language={language} />
                         ) : col === "source" ? (
-                          source(d)
+                          displayValue(language, source(d))
                         ) : col === "id" ? (
                           <span
                             className="id"
@@ -608,8 +713,8 @@ export default function App() {
                               disabled={blocked || !canAct(d, "disable")}
                               title={
                                 d._admEnablement === "DISABLED_BY_CUSTOMER"
-                                  ? "Aktivieren"
-                                  : "Deaktivieren"
+                                  ? t("enable")
+                                  : t("disable")
                               }
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -625,7 +730,7 @@ export default function App() {
                             </button>
                             <button
                               disabled={blocked || !canAct(d, "delete")}
-                              title="Löschen prüfen"
+                              title={t("checkDelete")}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 preview("delete", [d]);
@@ -643,10 +748,10 @@ export default function App() {
                   <tr>
                     <td colSpan={columns.length + 1} className="empty">
                       {busy
-                        ? "Geräte werden geladen …"
+                        ? t("loadingDevices")
                         : ready
-                          ? "Keine Geräte für diese Filter."
-                          : "Keine vollständigen Gerätedaten verfügbar. Bitte neu laden."}
+                          ? t("noFiltered")
+                          : t("noData")}
                     </td>
                   </tr>
                 )}
@@ -655,14 +760,14 @@ export default function App() {
           </div>
           <footer className="table-footer">
             <span>
-              {filtered.length} Treffer · {checked.length} ausgewählt
-              {hiddenCount > 0 && ` (${hiddenCount} außerhalb dieser Seite)`}
+              {t("hitsSelected", { hits: filtered.length, selected: checked.length })}
+              {hiddenCount > 0 && t("outsidePage", { count: hiddenCount })}
             </span>
             <div className="toolbar">
               <label>
-                Pro Seite{" "}
+                {t("perPage")}{" "}
                 <select
-                  aria-label="Einträge pro Seite"
+                  aria-label={t("entriesPerPage")}
                   value={pageSize}
                   onChange={(e) => setPageSize(Number(e.target.value))}
                 >
@@ -672,7 +777,7 @@ export default function App() {
                 </select>
               </label>
               <button
-                aria-label="Vorherige Seite"
+                aria-label={t("previousPage")}
                 disabled={currentPage === 0}
                 onClick={() => setPage(currentPage - 1)}
               >
@@ -682,7 +787,7 @@ export default function App() {
                 {currentPage + 1} / {pages}
               </span>
               <button
-                aria-label="Nächste Seite"
+                aria-label={t("nextPage")}
                 disabled={currentPage >= pages - 1}
                 onClick={() => setPage(currentPage + 1)}
               >
@@ -698,18 +803,19 @@ export default function App() {
                 <DeviceImage
                   key={selected.id + deviceVisual(selected)}
                   device={selected}
+                  language={language}
                 />
                 <div>
                   <h2>{deviceName(selected)}</h2>
                   <p className="muted">
-                    {selected.description || "Keine Beschreibung"}
+                    {selected.description || t("noDescription")}
                   </p>
                 </div>
               </div>
-              <div className="detail-toolbar" aria-label="Geräteaktionen">
+              <div className="detail-toolbar" aria-label={t("deviceActions")}>
                 <button
-                  title="JSON sichern"
-                  aria-label="JSON sichern"
+                  title={t("backup")}
+                  aria-label={t("backup")}
                   onClick={exportJson}
                 >
                   <Download size={20} />
@@ -717,13 +823,13 @@ export default function App() {
                 <button
                   title={
                     selected._admEnablement === "DISABLED_BY_CUSTOMER"
-                      ? "Aktivieren"
-                      : "Deaktivieren"
+                      ? t("enable")
+                      : t("disable")
                   }
                   aria-label={
                     selected._admEnablement === "DISABLED_BY_CUSTOMER"
-                      ? "Aktivieren"
-                      : "Deaktivieren"
+                      ? t("enable")
+                      : t("disable")
                   }
                   disabled={blocked || !canAct(selected, "enable")}
                   onClick={() =>
@@ -739,8 +845,8 @@ export default function App() {
                 </button>
                 <button
                   className="delete-icon"
-                  title="Löschen"
-                  aria-label="Löschen"
+                  title={t("delete")}
+                  aria-label={t("delete")}
                   disabled={blocked || !canAct(selected, "delete")}
                   onClick={() => preview("delete", [selected])}
                 >
@@ -749,8 +855,8 @@ export default function App() {
                 <span className="toolbar-divider" />
                 <button
                   className="on-icon"
-                  title="Einschalten – Zustand unbekannt"
-                  aria-label="Einschalten"
+                  title={t("turnOnUnknown")}
+                  aria-label={t("turnOn")}
                   disabled={blocked || !canAct(selected, "on")}
                   onClick={() => preview("on", [selected])}
                 >
@@ -758,31 +864,31 @@ export default function App() {
                 </button>
                 <button
                   className="off-icon"
-                  title="Ausschalten – Zustand unbekannt"
-                  aria-label="Ausschalten"
+                  title={t("turnOffUnknown")}
+                  aria-label={t("turnOff")}
                   disabled={blocked || !canAct(selected, "off")}
                   onClick={() => preview("off", [selected])}
                 >
                   <PowerOff size={20} />
                 </button>
                 <button
-                  title="Bitte nicht stören – noch nicht verfügbar"
-                  aria-label="Bitte nicht stören – noch nicht verfügbar"
+                  title={t("dndUnavailable")}
+                  aria-label={t("dndUnavailable")}
                   disabled
                 >
                   <Moon size={20} />
                 </button>
               </div>
               <dl className="detail-grid">
-                <dt>Typ</dt>
+                <dt>{t("type")}</dt>
                 <dd>{deviceType(selected)}</dd>
-                <dt>Status</dt>
+                <dt>{t("status")}</dt>
                 <dd>
-                  <Status device={selected} />
+                  <Status device={selected} language={language} />
                 </dd>
-                <dt>Quelle¹</dt>
-                <dd>{source(selected)}</dd>
-                <dt>Geräte-ID</dt>
+                <dt>{t("source")}¹</dt>
+                <dd>{displayValue(language, source(selected))}</dd>
+                <dt>{t("deviceId")}</dt>
                 <dd
                   className="detail-id"
                   title={
@@ -795,121 +901,114 @@ export default function App() {
                     selected._admApplianceId ||
                     selected.id}
                 </dd>
-                <dt>Beschreibung</dt>
+                <dt>{t("description")}</dt>
                 <dd className="detail-id" title={selected.description || ""}>
                   {selected.description || "–"}
                 </dd>
-                <dt>Löschbar</dt>
+                <dt>{t("deletable")}</dt>
                 <dd
                   className={
                     canAct(selected, "delete") ? "status-online" : "muted"
                   }
                 >
-                  {canAct(selected, "delete") ? "Ja" : "Nein"}
+                  {canAct(selected, "delete") ? t("yes") : t("no")}
                 </dd>
-                <dt>Geschützt</dt>
+                <dt>{t("protected")}</dt>
                 <dd>
                   {isProtected(selected)
-                    ? "Ja"
+                    ? t("yes")
                     : !canAct(selected, "delete")
-                      ? "Keine sichere Ziel-ID"
-                      : "Nein"}
+                      ? t("noSafeId")
+                      : t("no")}
                 </dd>
-                <dt>Datenstand</dt>
-                <dd>{loadedAt?.toLocaleTimeString("de-DE") || "Unbekannt"}</dd>
+                <dt>{t("dataAsOf")}</dt>
+                <dd>{loadedAt?.toLocaleTimeString(language === "de" ? "de-DE" : "en-US") || t("unknown")}</dd>
               </dl>
               {isEcho(selected) ? (
                 <form
                   className="speech-panel"
                   onSubmit={(e) => {
                     e.preventDefault();
-                    preview("speak", [selected]);
+                    preview(speechMode, [selected]);
                   }}
                 >
-                  <label htmlFor="aura-speech">
-                    <Speaker size={14} /> Alexa Sprachausgabe
-                  </label>
-                  <div className="speech-row" style={{ display: 'flex', gap: '8px' }}>
-                      <select 
-                        value={ttsLocale} 
-                        onChange={(e) => setTtsLocale(e.target.value)}
-                        className="dropdown"
-                        style={{ padding: '0 8px', borderRadius: '6px', backgroundColor: '#0A0F18', color: 'white', border: '1px solid #1E293B', flex: '0 0 auto', outline: 'none' }}
-                      >
-                        <option value="de-DE">🇩🇪 DE</option>
-                        <option value="en-US">🇺🇸 EN</option>
-                        <option value="en-GB">🇬🇧 UK</option>
-                        <option value="es-ES">🇪🇸 ES</option>
-                        <option value="fr-FR">🇫🇷 FR</option>
-                        <option value="it-IT">🇮🇹 IT</option>
-                      </select>
-                      <input
+                  <div className="speech-heading">
+                    <label htmlFor="aura-speech">{t("alexaAction")}</label>
+                    <div className="speech-modes" role="group" aria-label={t("alexaAction")}>
+                      <button type="button" className={speechMode === "speak" ? "active" : ""} aria-pressed={speechMode === "speak"} title={t("speak")} aria-label={t("speak")} onClick={() => setSpeechMode("speak")}><Speaker size={15} /></button>
+                      <button type="button" className={speechMode === "announce" ? "active" : ""} aria-pressed={speechMode === "announce"} title={t("announce")} aria-label={t("announce")} onClick={() => setSpeechMode("announce")}><Send size={15} /></button>
+                      <button type="button" className={speechMode === "command" ? "active" : ""} aria-pressed={speechMode === "command"} title={t("command")} aria-label={t("command")} onClick={() => setSpeechMode("command")}><Terminal size={15} /></button>
+                    </div>
+                  </div>
+                  <div className="speech-row">
+                    <input
                       id="aura-speech"
                       value={speech}
                       maxLength={500}
                       onChange={(e) => setSpeech(e.target.value)}
-                      placeholder="Was soll Alexa sagen?"
+                      aria-label={t("alexaAction")}
+                      placeholder={t("speechPlaceholder")}
                     />
                     <button
                       className="primary"
-                      title="Text an Alexa senden"
+                      title={t("sendAlexa")}
                       disabled={blocked || !speech.trim()}
                     >
-                      <Send size={16} /> Senden
+                      <Send size={16} /> {t("send")}
                     </button>
                   </div>
                 </form>
               ) : (
                 <div className="speech-panel muted">
-                  Für dieses Gerät ist keine Alexa-Sprachausgabe erkannt.
+                  {t("noAlexa")}
                 </div>
               )}
             </>
           ) : (
             <div className="empty">
               <Shield size={36} />
-              <h2>Gerät auswählen</h2>
-              <p>Wähle einen Eintrag für Details und Aktionen.</p>
+              <h2>{t("chooseDevice")}</h2>
+              <p>{t("chooseHint")}</p>
             </div>
           )}
           <section className="log">
             <h3>
               <Terminal size={15} /> CLI Terminal
             </h3>
-            <div ref={logRef} role="log" aria-label="Aktionsprotokoll">
+            <div ref={logRef} role="log" aria-label={t("activityLog")}>
               {logs.map((line, i) => (
-                <p key={i}>{line}</p>
+                <p key={i} className={line.level === "error" ? "log-error" : ""}>{line.text}</p>
               ))}
             </div>
           </section>
         </aside>
       </main>
-      <section className="panel filters" aria-label="Gerätefilter">
+      <section className="panel filters" aria-label={t("filters")}>
         <label className="search">
           <Search size={16} />
           <input
-            aria-label="Geräte suchen"
-            placeholder="Name, Typ, Quelle oder ID suchen"
+            aria-label={t("search")}
+            placeholder={t("searchPlaceholder")}
             value={filters.search}
             onChange={(e) => filter("search", e.target.value)}
           />
         </label>
         <select
-          aria-label="Gerätetyp"
+          aria-label={t("deviceType")}
           value={filters.type}
           onChange={(e) => filter("type", e.target.value)}
         >
-          <option value="">Alle Gerätetypen</option>
+          <option value="">{t("allTypes")}</option>
           {[...new Set(devices.map(deviceType))].sort().map((t) => (
             <option key={t}>{t}</option>
           ))}
         </select>
         <select
-          aria-label="Statusfilter"
+          aria-label={t("statusFilter")}
           value={filters.status}
           onChange={(e) => filter("status", e.target.value)}
         >
-          <option value="">Alle Status</option>
+          <option value="">{t("allStatuses")}</option>
           {[
             "Online",
             "Offline",
@@ -921,25 +1020,25 @@ export default function App() {
             "Echos",
             "Gruppen",
           ].map((s) => (
-            <option key={s}>{s}</option>
+            <option key={s} value={s}>{displayValue(language, s)}</option>
           ))}
         </select>
         <select
-          aria-label="Quelle"
+          aria-label={t("origin")}
           value={filters.origin}
           onChange={(e) => filter("origin", e.target.value)}
         >
-          <option value="">Alle Quellen</option>
+          <option value="">{t("allSources")}</option>
           {[...new Set(devices.map(source))].sort().map((s) => (
-            <option key={s}>{s}</option>
+            <option key={s} value={s}>{displayValue(language, s)}</option>
           ))}
         </select>
         <select
-          aria-label="Gruppe"
+          aria-label={t("group")}
           value={filters.group}
           onChange={(e) => filter("group", e.target.value)}
         >
-          <option value="">Alle Gruppen</option>
+          <option value="">{t("allGroups")}</option>
           {devices.filter(isGroup).map((d) => (
             <option key={d.id} value={d.id}>
               {deviceName(d)}
@@ -952,7 +1051,7 @@ export default function App() {
             checked={filters.hideProtected}
             onChange={(e) => filter("hideProtected", e.target.checked)}
           />{" "}
-          Geschützte ausblenden
+          {t("hideProtected")}
         </label>
         <label>
           <input
@@ -960,53 +1059,51 @@ export default function App() {
             checked={filters.onlyDeletable}
             onChange={(e) => filter("onlyDeletable", e.target.checked)}
           />{" "}
-          Nur ungeschützte löschbare
+          {t("onlyDeletable")}
         </label>
         <button onClick={() => setFilters({ ...emptyFilters })}>
-          Zurücksetzen
+          {t("reset")}
         </button>
       </section>
       <footer className="panel action-footer">
-        <div>
-          <strong>{checked.length} Geräte ausgewählt</strong>
-          <small className="block muted">
-            Datenstand:{" "}
-            {loadedAt ? loadedAt.toLocaleString("de-DE") : "Noch nicht geladen"}{" "}
-            · ¹ Quelle ist eine Schätzung.
-          </small>
-        </div>
-        <div className="toolbar wrap">
+        <div className="toolbar wrap footer-actions">
           <button
             disabled={!checked.length || busy}
             onClick={() => setCheckedIds(new Set())}
           >
-            Auswahl leeren
+            {t("clearSelection")}
           </button>
           <button
             disabled={blocked || !checked.length}
-            onClick={() => preview("disable")}
+            onClick={dryRun}
           >
-            Trockenlauf / Vorschau
+            {t("dryRun")}
           </button>
           <button
             disabled={blocked || !checked.length}
             onClick={() => preview("enable")}
           >
-            Aktivieren
+            {t("enable")}
           </button>
           <button
             disabled={blocked || !checked.length}
             onClick={() => preview("disable")}
           >
-            Deaktivieren
+            {t("disable")}
           </button>
           <button
             className="danger"
             disabled={blocked || !checked.length}
             onClick={() => preview("delete")}
           >
-            <Trash2 size={16} /> Löschen
+            <Trash2 size={16} /> {t("delete")}
           </button>
+        </div>
+        <div className="selection-summary">
+          <strong>{t("selectedCount", { count: checked.length })}</strong>
+          <small className="block muted">
+            {t("dataAsOf")}: {loadedAt ? loadedAt.toLocaleString(language === "de" ? "de-DE" : "en-US") : t("notLoaded")} · {t("sourceEstimate")}
+          </small>
         </div>
       </footer>
       {plan && (
@@ -1017,23 +1114,22 @@ export default function App() {
             aria-modal="true"
             aria-labelledby="aura-plan-title"
           >
-            <h2 id="aura-plan-title">{actions[plan.action]} – Vorschau</h2>
+            <h2 id="aura-plan-title">{actionLabels[plan.action]} – {t("preview")}</h2>
             <p>
-              Diese {plan.list.length} Ziele sind ausgewählt. Bis zur Ausführung
-              wird nichts verändert.
+              {t("targetsPreview", { count: plan.list.length })}
             </p>
-            {plan.action === "speak" && <blockquote>{plan.text}</blockquote>}
+            {isVoiceAction(plan.action) && <blockquote>{plan.text}</blockquote>}
             <div className="plan-list">
               {plan.list.map((d) => (
                 <div className="plan-item" key={d.id}>
                   <strong>{deviceName(d)}</strong>
                   <code>{d._admEndpointId || d._admApplianceId || d.id}</code>
-                  {plan.action !== "speak" && !canAct(d, plan.action) && (
+                  {!isVoiceAction(plan.action) && !canAct(d, plan.action) && (
                     <p className="status-offline">
-                      Keine geeignete Ziel-ID. Bitte Auswahl korrigieren.
+                      {t("unsuitable")}
                     </p>
                   )}
-                  {isProtected(d) && (
+                  {!isVoiceAction(plan.action) && isProtected(d) && (
                     <label>
                       <input
                         type="checkbox"
@@ -1048,30 +1144,33 @@ export default function App() {
                           })
                         }
                       />{" "}
-                      Dieses geschützte Ziel für diese Aktion freigeben
+                      {t("allowProtected")}
                     </label>
                   )}
                 </div>
               ))}
             </div>
-            <button onClick={exportJson}>
-              <Download size={16} /> JSON-Sicherung herunterladen
-            </button>
-            <label className="backup-check">
-              <input
-                type="checkbox"
-                checked={backedUp}
-                onChange={(e) => setBackedUp(e.target.checked)}
-              />{" "}
-              Ich habe die aktuelle JSON-Sicherung gespeichert und die Ziele
-              geprüft.
-            </label>
+            {!isVoiceAction(plan.action) && (
+              <>
+                <button onClick={exportJson}>
+                  <Download size={16} /> {t("downloadBackup")}
+                </button>
+                <label className="backup-check">
+                  <input
+                    type="checkbox"
+                    checked={backedUp}
+                    onChange={(e) => setBackedUp(e.target.checked)}
+                  />{" "}
+                  {t("backupChecked")}
+                </label>
+              </>
+            )}
             {plan.action === "delete" && (
               <label>
-                Dauerhaftes Löschen bestätigen:{" "}
+                {t("confirmDelete")}{" "}
                 <input
-                  aria-label="DELETE bestätigen"
-                  placeholder="DELETE eingeben"
+                  aria-label={t("confirmDeleteLabel")}
+                  placeholder={t("enterDelete")}
                   value={confirmation}
                   onChange={(e) => setConfirmation(e.target.value)}
                 />
@@ -1079,24 +1178,24 @@ export default function App() {
             )}
             <div className="toolbar modal-actions">
               <button autoFocus disabled={busy} onClick={() => setPlan(null)}>
-                Abbrechen
+                {t("cancel")}
               </button>
               <button
                 className={plan.action === "delete" ? "danger" : "primary"}
                 disabled={
                   blocked ||
-                  !backedUp ||
+                  (!isVoiceAction(plan.action) && !backedUp) ||
                   plan.list.some(
-                    (d) => plan.action !== "speak" && !canAct(d, plan.action),
+                    (d) => !isVoiceAction(plan.action) && !canAct(d, plan.action),
                   ) ||
-                  plan.list.some(
+                  (!isVoiceAction(plan.action) && plan.list.some(
                     (d) => isProtected(d) && !protectedIds.has(d.id),
-                  ) ||
+                  )) ||
                   (plan.action === "delete" && confirmation !== "DELETE")
                 }
                 onClick={submit}
               >
-                {busy ? "Wird ausgeführt …" : "Jetzt ausführen"}
+                {busy ? t("executing") : t("executeNow")}
               </button>
             </div>
           </section>

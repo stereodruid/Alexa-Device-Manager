@@ -107,6 +107,12 @@
 #aura-root .brand {
   gap: 14px;
 }
+#aura-root .language-select {
+  font-size: 12px;
+}
+#aura-root .language-select select {
+  padding: 7px 9px;
+}
 #aura-root .brand img {
   height: 44px;
   width: 44px;
@@ -561,6 +567,37 @@
   font-size: 12px;
   padding: 8px 10px;
 }
+#aura-root .speech-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 20px;
+}
+#aura-root .speech-modes {
+  display: flex;
+  gap: 4px;
+}
+#aura-root .speech-modes button {
+  width: 24px;
+  height: 20px;
+  padding: 2px 4px;
+  border-radius: 6px;
+  color: #94a3b8;
+}
+#aura-root .speech-modes button.active {
+  color: #fff;
+  border-color: #398be0;
+  background: #0963bc;
+}
+#aura-root .selection-summary {
+  margin-left: auto;
+  margin-right: 414px;
+  text-align: right;
+}
+#aura-root .footer-actions {
+  justify-content: flex-start;
+}
 #aura-root .sidebar .log {
   flex: 1 1 0;
   min-height: 74px;
@@ -590,6 +627,10 @@
 #aura-root .sidebar .log p {
   margin: 0;
 }
+#aura-root .sidebar .log p.log-error {
+  color: #ff6b72;
+  font-weight: 650;
+}
 #aura-root .detail-heading > div {
   min-width: 0;
   flex: 1;
@@ -616,14 +657,22 @@
   overflow: hidden;
 }
 #aura-root .sidebar .speech-panel {
-  padding: 8px 12px;
+  padding: 6px 10px;
 }
 #aura-root .sidebar form {
-  gap: 6px;
+  gap: 4px;
+}
+#aura-root .sidebar .speech-row input,
+#aura-root .sidebar .speech-row > button {
+  padding-top: 6px;
+  padding-bottom: 6px;
 }
 @media (max-width: 1100px) {
   #aura-root .sidebar {
     width: 100%;
+  }
+  #aura-root .selection-summary {
+    margin-right: 0;
   }
 }
 #aura-root .device-art {
