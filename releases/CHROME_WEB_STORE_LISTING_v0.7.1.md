@@ -84,8 +84,8 @@ Device information and user-entered Alexa speech or command text are processed l
 ### User-data disclosures
 
 - Website content: **Yes** — Alexa device names, identifiers, types, status and capabilities are processed locally to display and manage the user's devices.
-- User-generated content: **Yes** — text entered for speech, announcements or simulated commands is processed locally and sent directly to Amazon only when the user requests the action.
-- Authentication information: **No** — the extension uses the existing Amazon browser session but does not read, collect or store passwords or authentication cookies.
+- Personal communications: **Yes** — text entered for speech, announcements or simulated commands is processed locally and sent directly to Amazon only when the user requests the action.
+- Authentication information: **Yes** — Amazon's CSRF session token is processed transiently when required to authenticate a user-requested Alexa action. It is sent only to Amazon and is not stored by the extension.
 - Web history: **No** — the extension does not read or collect browsing history.
 - Data sale, advertising, creditworthiness and unrelated use: **No**.
 

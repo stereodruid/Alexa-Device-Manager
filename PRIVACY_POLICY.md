@@ -12,7 +12,8 @@ To provide its features, the extension processes:
 
 - Alexa device information returned by Amazon, such as device names, identifiers, types, status, groups, and capabilities;
 - actions selected by the user, such as enable, disable, power, or removal requests; and
-- text entered for direct speech, announcements, or simulated Alexa commands.
+- text entered for direct speech, announcements, or simulated Alexa commands; and
+- Amazon's CSRF session token, processed transiently when required to authenticate a user-requested Alexa action.
 
 This information is used only to display the manager interface and perform the action requested by the user. It is not sent to the developer or sold, shared, or used for advertising. Requests are sent directly to Amazon's regional Alexa endpoints using the user's existing authenticated Amazon browser session.
 
@@ -29,7 +30,7 @@ The extension does not request the `tabs` or `activeTab` permission and does not
 
 ## Data retention and deletion
 
-The developer does not receive or retain Alexa device information, entered text, Amazon account details, authentication cookies, or backups. Locally stored interface preferences can be removed by uninstalling the extension or clearing the extension's site data. Downloaded JSON backups remain under the user's control and can be deleted like any other local file.
+The developer does not receive or retain Alexa device information, entered text, Amazon account details, authentication tokens, or backups. The Amazon CSRF token is used only for the direct request to Amazon and is not stored by the extension or sent anywhere else. Locally stored interface preferences can be removed by uninstalling the extension or clearing the extension's site data. Downloaded JSON backups remain under the user's control and can be deleted like any other local file.
 
 ## Security and limited use
 
