@@ -1,8 +1,8 @@
-# Privacy Policy for Device Manager for Alexa
+# Privacy Policy for Aura Device Master
 
 **Effective Date:** September 2026
 
-Thank you for using "Device Manager for Alexa". Your privacy is extremely important to us. This policy outlines how your data is handled.
+Thank you for using "Aura Device Master". Your privacy is extremely important to us. This policy outlines how your data is handled.
 
 ## 1. Local Processing Only
 This extension operates **100% locally** within your browser. 

@@ -1,5 +1,5 @@
 {
-  "name": "alexadevicemanager",
+  "name": "aura-device-master",
   "version": "0.7.1",
   "description": "Local Chrome extension for safely managing Alexa smart-home devices in an existing Amazon session.",
   "main": "index.js",
@@ -10,16 +10,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/stereodruid/Alexa-Device-Manager.git"
+    "url": "git+https://github.com/stereodruid/Aura-Device-Master.git"
   },
   "keywords": [],
   "author": "stereodruid",
   "license": "AGPL-3.0-or-later",
   "type": "module",
   "bugs": {
-    "url": "https://github.com/stereodruid/Alexa-Device-Manager/issues"
+    "url": "https://github.com/stereodruid/Aura-Device-Master/issues"
   },
-  "homepage": "https://github.com/stereodruid/Alexa-Device-Manager#readme",
+  "homepage": "https://github.com/stereodruid/Aura-Device-Master#readme",
   "dependencies": {
     "lucide-react": "^1.43.0",
     "react": "^19.2.8",

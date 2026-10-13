@@ -1,6 +1,6 @@
 # Aura Device Master
 
-[![Release](https://img.shields.io/badge/release-v0.7.1-00a3ff)](https://github.com/stereodruid/Alexa-Device-Manager/releases/tag/v0.7.1)
+[![Release](https://img.shields.io/badge/release-v0.7.1-00a3ff)](https://github.com/stereodruid/Aura-Device-Master/releases/tag/v0.7.1)
 [![License](https://img.shields.io/badge/license-AGPL--3.0-00d48a)](LICENSE)
 
 A free, local Chrome extension for viewing and safely managing Alexa smart-home devices through your existing Amazon browser session. No subscription, separate account, server or additional credentials are required.
@@ -22,7 +22,7 @@ Deutschsprachige Anleitung: [weiter unten](#deutsch).
 
 ## Install v0.7.1
 
-1. Download [Aura Device Master v0.7.1](https://github.com/stereodruid/Alexa-Device-Manager/releases/download/v0.7.1/Aura-Device-Master-v0.7.1.zip).
+1. Download [Aura Device Master v0.7.1](https://github.com/stereodruid/Aura-Device-Master/releases/download/v0.7.1/Aura-Device-Master-v0.7.1.zip).
 2. Extract the ZIP file to a permanent folder.
 3. Open `chrome://extensions/` in Chrome.
 4. Enable **Developer mode**.
@@ -35,10 +35,10 @@ The extension is planned for the Chrome Web Store. It remains completely free an
 
 ## Demo videos
 
-- [English · YouTube / 16:9](https://github.com/stereodruid/Alexa-Device-Manager/releases/download/v0.7.1/aura-device-master-youtube-en.mp4)
-- [English · vertical / 9:16](https://github.com/stereodruid/Alexa-Device-Manager/releases/download/v0.7.1/aura-device-master-vertical-en.mp4)
-- [Deutsch · YouTube / 16:9](https://github.com/stereodruid/Alexa-Device-Manager/releases/download/v0.7.1/aura-device-master-youtube-de.mp4)
-- [Deutsch · Hochformat / 9:16](https://github.com/stereodruid/Alexa-Device-Manager/releases/download/v0.7.1/aura-device-master-vertical-de.mp4)
+- [English · YouTube / 16:9](https://github.com/stereodruid/Aura-Device-Master/releases/download/v0.7.1/aura-device-master-youtube-en.mp4)
+- [English · vertical / 9:16](https://github.com/stereodruid/Aura-Device-Master/releases/download/v0.7.1/aura-device-master-vertical-en.mp4)
+- [Deutsch · YouTube / 16:9](https://github.com/stereodruid/Aura-Device-Master/releases/download/v0.7.1/aura-device-master-youtube-de.mp4)
+- [Deutsch · Hochformat / 9:16](https://github.com/stereodruid/Aura-Device-Master/releases/download/v0.7.1/aura-device-master-vertical-de.mp4)
 
 ## Safe operation
 
@@ -93,7 +93,7 @@ Aura Device Master ist eine kostenlose, lokale Chrome-Erweiterung zur Anzeige un
 
 ### Installation
 
-1. [Aura Device Master v0.7.1 herunterladen](https://github.com/stereodruid/Alexa-Device-Manager/releases/download/v0.7.1/Aura-Device-Master-v0.7.1.zip).
+1. [Aura Device Master v0.7.1 herunterladen](https://github.com/stereodruid/Aura-Device-Master/releases/download/v0.7.1/Aura-Device-Master-v0.7.1.zip).
 2. ZIP-Datei dauerhaft entpacken.
 3. `chrome://extensions/` öffnen und den **Entwicklermodus** aktivieren.
 4. **Entpackte Erweiterung laden** wählen und den entpackten Ordner mit `manifest.json` auswählen.
@@ -118,7 +118,7 @@ Die Videos stehen oben im Abschnitt [Demo videos](#demo-videos) in Deutsch und E
 
 ## Support
 
-Problems and feature requests: [GitHub Issues](https://github.com/stereodruid/Alexa-Device-Manager/issues)
+Problems and feature requests: [GitHub Issues](https://github.com/stereodruid/Aura-Device-Master/issues)
 
 If this project helps you, you can support its development:
 

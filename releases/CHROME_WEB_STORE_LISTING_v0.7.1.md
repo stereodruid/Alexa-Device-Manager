@@ -55,9 +55,9 @@ Die Erweiterung hat kein Abo, kein separates Konto, keinen Analysedienst und kei
 ## Category and URLs
 
 - Category: Productivity
-- Homepage: https://github.com/stereodruid/Alexa-Device-Manager
-- Support: https://github.com/stereodruid/Alexa-Device-Manager/issues
-- Privacy policy: https://github.com/stereodruid/Alexa-Device-Manager/blob/main/PRIVACY_POLICY.md
+- Homepage: https://github.com/stereodruid/Aura-Device-Master
+- Support: https://github.com/stereodruid/Aura-Device-Master/issues
+- Privacy policy: https://github.com/stereodruid/Aura-Device-Master/blob/main/PRIVACY_POLICY.md
 
 ## Privacy and permission declarations
 

@@ -15,7 +15,7 @@ export const Outro: React.FC<{duration: number; language: Language}> = ({duratio
       <Reveal delay={22}><div style={{fontSize: lineSize, fontWeight: 850, color: colors.green}}>{c.free}</div></Reveal>
       <Reveal delay={30}><div style={{fontSize: lineSize, color: "#c5d7e9"}}>{c.local}<br/>{c.session}</div></Reveal>
       <Reveal delay={40}><div style={{fontSize: lineSize, color: colors.cyan, fontWeight: 800}}>{c.store}</div></Reveal>
-      <Reveal delay={50}><div style={{marginTop: 8, padding: "16px 28px", borderRadius: 18, background: `linear-gradient(135deg,${colors.blue},#0aa9e8)`, fontSize: width * (portrait ? .027 : .017), fontWeight: 900, boxShadow: "0 18px 50px #0878df55"}}>github.com/stereodruid/Alexa-Device-Manager</div></Reveal>
+      <Reveal delay={50}><div style={{marginTop: 8, padding: "16px 28px", borderRadius: 18, background: `linear-gradient(135deg,${colors.blue},#0aa9e8)`, fontSize: width * (portrait ? .027 : .017), fontWeight: 900, boxShadow: "0 18px 50px #0878df55"}}>github.com/stereodruid/Aura-Device-Master</div></Reveal>
     </div>
   </SceneShell>;
 };
