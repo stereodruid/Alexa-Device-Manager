@@ -5,7 +5,7 @@
 
 ## Choose your language · Sprache wählen
 
-[![Deutsche Anleitung](https://img.shields.io/badge/DEUTSCH-Deutsche_Anleitung-00a3ff?style=for-the-badge)](#deutsch)
+🇩🇪 [![Deutsche Anleitung](https://img.shields.io/badge/DEUTSCH-Deutsche_Anleitung-00a3ff?style=for-the-badge)](#deutsch)
 [![English documentation](https://img.shields.io/badge/ENGLISH-Documentation-00d48a?style=for-the-badge)](#english)
 
 **🇩🇪 Die vollständige deutsche Anleitung ist direkt über den blauen Button erreichbar.**
